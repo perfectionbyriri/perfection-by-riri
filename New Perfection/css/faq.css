@@ -1,0 +1,472 @@
+/* ==========================================================================
+   FAQ PAGE Â· Perfection by Riri
+
+   Loaded AFTER css/styles.css, which stays the design-system authority: this
+   file reuses its tokens (--ivory, --card, --ink, --dark, --gold, --muted,
+   --line), its Cormorant / Jost pairing, its button set and its motion tokens.
+   Scope: body.faq-page only. Nothing here is Home- or service-specific and
+   nothing here re-declares the shared stylesheet.
+
+   ARCHITECTURE
+   - Full-bleed photographic hero: the eye/brow collage fills the band
+     edge-to-edge behind the overlaid copy (service-page treatment).
+   - Four service columns on desktop; each service is an H2 followed by native
+     <details> question rows (answers stay available without JavaScript).
+   - Two columns on tablet, a single service-level accordion on mobile.
+   - General Safety section, then a restrained "Still have a question?" close.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   HEADER · the FAQ page adopts the same approved dark header treatment as
+   every other route: the announcement, header and first band read as one
+   continuous dark surface. Structure and behaviour are shared; only colour is
+   scoped here.
+   -------------------------------------------------------------------------- */
+.faq-page .header-shell { background: var(--dark) }
+.faq-page .site-header { color: #f4eee5 }
+.faq-page .menu-toggle { border-color: rgba(244,238,229,.34); background: transparent }
+.faq-page .menu-toggle span { background: #f4eee5 }
+@media (max-width:800px) {
+  .faq-page .enhanced .main-navigation a,
+  .faq-page .main-navigation.is-open a { color: #f5ede0 }
+}
+
+/* Shared editorial eyebrow for this page. */
+.faq-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 1.9px;
+  text-transform: uppercase;
+  color: var(--muted)
+}
+.faq-eyebrow:before {
+  content: '';
+  flex: 0 0 auto;
+  width: 32px;
+  height: 1px;
+  background: currentColor;
+  opacity: .5
+}
+
+/* --------------------------------------------------------------------------
+   HERO · full-bleed photographic band. The 1672x941 eye/brow collage fills the
+   section edge-to-edge behind the copy, which sits on top with a dark scrim for
+   legibility. Same layering technique as .le-hero / .le-hero-photo on the
+   service pages: the photo covers the whole section and the text is raised with
+   z-index. #content, aria-labelledby and the reveal targets are unchanged.
+   -------------------------------------------------------------------------- */
+.faq-hero {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: minmax(0,1fr);
+  min-height: 650px;
+  padding: 0;
+  background: var(--dark);
+  color: var(--ivory);
+  overflow: hidden
+}
+.faq-hero-inner {
+  /* .container keeps the copy aligned to the page grid; the row is pushed to
+     the bottom so the text sits over the lower part of the scene. */
+  display: grid;
+  grid-template-columns: minmax(0,1fr);
+  align-content: end
+}
+/* Full-bleed background layer behind the copy. */
+.faq-hero-media {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  overflow: hidden
+}
+.faq-hero-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* Wide collage: hold the brows/eye line clear of the top edge and the
+     bottom-aligned copy at every hero ratio. */
+  object-position: 50% 30%
+}
+/* Scrim, darkest at the top (blends into the dark header) and bottom (behind
+   the copy) and across the left where the text sits. Same values as the
+   service-page mobile scenes. */
+.faq-hero-media:after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg,rgba(20,20,19,.5) 0%,rgba(20,20,19,.08) 38%,rgba(20,20,19,.82) 100%),
+    linear-gradient(90deg,rgba(20,20,19,.62) 0%,rgba(20,20,19,.18) 82%)
+}
+.faq-hero-copy {
+  position: relative;
+  z-index: 1;
+  padding-bottom: 64px
+}
+.faq-hero-copy .faq-eyebrow { color: var(--gold) }
+.faq-hero-title {
+  font-size: 70px;
+  line-height: 1.02;
+  letter-spacing: -1.4px;
+  margin-top: 18px
+}
+.faq-hero-support {
+  font-size: 14px;
+  letter-spacing: 1.2px;
+  line-height: 1.9;
+  color: rgba(245,242,239,.84);
+  margin-top: 22px
+}
+.faq-hero-statement {
+  font-size: 12.5px;
+  letter-spacing: 1.1px;
+  line-height: 1.95;
+  color: rgba(245,242,239,.78);
+  margin-top: 16px;
+  max-width: 52ch
+}
+
+/* --------------------------------------------------------------------------
+   SERVICE QUESTIONS Â· editorial section head, then the four columns.
+   -------------------------------------------------------------------------- */
+.faq-services { padding: 78px 0 84px }
+.faq-services-head { margin-bottom: 44px; max-width: 760px }
+.faq-services-title {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: 54px;
+  line-height: 1;
+  letter-spacing: -.8px;
+  margin-top: 16px
+}
+.faq-services-note {
+  margin-top: 16px;
+  font-size: 14px;
+  letter-spacing: 1.5px;
+  color: var(--muted)
+}
+
+/* Four balanced columns (desktop). Hairline dividers, no cards, no shadows. */
+.faq-columns {
+  display: grid;
+  grid-template-columns: repeat(4,minmax(0,1fr));
+  column-gap: 0;
+  align-items: start;
+  border-top: 1px solid var(--line)
+}
+.faq-service { padding: 40px 30px 26px; min-width: 0 }
+.faq-service + .faq-service { border-left: 1px solid var(--line) }
+.faq-service:first-child { padding-left: 0 }
+.faq-service:last-child { padding-right: 0 }
+
+/* Service heading. On desktop this is a plain H2; the toggle stays hidden. */
+.faq-service-head { position: relative; margin-bottom: 20px }
+.faq-service-title {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: 26px;
+  line-height: 1.12;
+  letter-spacing: -.2px
+}
+.faq-service-title-lg { font-size: 46px; letter-spacing: -.6px }
+
+/* Mobile-only service accordion control (shown only when JS is running). */
+.faq-service-toggle { display: none }
+
+/* --------------------------------------------------------------------------
+   QUESTION ROWS Â· native <details>. Uppercase question, readable answer,
+   hairline dividers and a restrained + / âˆ’ indicator.
+   -------------------------------------------------------------------------- */
+.faq-list { border-top: 1px solid var(--line) }
+.faq-item { border-bottom: 1px solid var(--line) }
+.faq-question {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  min-height: 56px;
+  padding: 19px 0;
+  list-style: none;
+  cursor: pointer;
+  touch-action: manipulation
+}
+.faq-question::-webkit-details-marker { display: none }
+.faq-question:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px }
+.faq-question-text {
+  font-size: 12.5px;
+  font-weight: 500;
+  letter-spacing: 1.1px;
+  line-height: 1.55;
+  text-transform: uppercase;
+  color: var(--ink)
+}
+.faq-answer { padding: 0 0 24px }
+.faq-answer p {
+  font-size: 14px;
+  line-height: 1.85;
+  letter-spacing: .2px;
+  text-transform: none;
+  color: var(--muted);
+  max-width: 70ch
+}
+
+/* + / âˆ’ indicator, shared by questions and the mobile service control. */
+.faq-more {
+  position: relative;
+  flex: 0 0 auto;
+  width: 13px;
+  height: 13px;
+  margin-top: 4px;
+  color: #a9987d
+}
+.faq-more:before,
+.faq-more:after {
+  content: '';
+  position: absolute;
+  background: currentColor;
+  transition: transform var(--duration-normal) var(--ease-premium), opacity var(--duration-normal) var(--ease-premium)
+}
+.faq-more:before { left: 0; top: 50%; width: 100%; height: 1px; transform: translateY(-50%) }
+.faq-more:after { top: 0; left: 50%; width: 1px; height: 100%; transform: translateX(-50%) }
+.faq-item[open] > .faq-question .faq-more:after,
+.faq-service.is-open .faq-service-toggle .faq-more:after {
+  transform: translateX(-50%) scaleY(0);
+  opacity: 0
+}
+@media (hover:hover) and (pointer:fine) {
+  .faq-question:hover .faq-more { color: #7a5e3a }
+  .faq-question:hover .faq-question-text { color: #6e4e28 }
+}
+
+/* --------------------------------------------------------------------------
+   LIP BLUSHING SUBSECTION Â· visually noticeable but calm: a warm tinted ground
+   and a single champagne rule. No alarm styling.
+   -------------------------------------------------------------------------- */
+.faq-subsection {
+  margin-top: 30px;
+  padding: 18px 20px 6px;
+  background: #ece4d8;
+  border-left: 2px solid var(--gold)
+}
+.faq-subsection-title {
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+  color: var(--ink);
+  margin-bottom: 4px
+}
+
+/* --------------------------------------------------------------------------
+   GENERAL SAFETY Â· full-width section after the four columns. Two question
+   columns on wide screens, one below.
+   -------------------------------------------------------------------------- */
+.faq-safety { padding: 12px 0 88px }
+.faq-service-safety { padding: 0 }
+.faq-list-wide { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); column-gap: 56px }
+.faq-list-wide .faq-item { min-width: 0 }
+.faq-list-wide .faq-answer p { max-width: 60ch }
+
+/* Restrained education note. Visually quiet, still readable. */
+.faq-disclaimer {
+  margin-top: 30px;
+  padding-top: 22px;
+  border-top: 1px solid var(--line);
+  max-width: 82ch;
+  font-size: 11.5px;
+  line-height: 1.85;
+  letter-spacing: .2px;
+  text-transform: none;
+  color: var(--muted)
+}
+
+/* --------------------------------------------------------------------------
+   STILL HAVE A QUESTION Â· simple dark close reusing the studio's existing
+   contact destination and appointment dialog.
+   -------------------------------------------------------------------------- */
+.faq-cta { padding: 84px 0 }
+.faq-cta-inner { max-width: 760px; margin-inline: auto; text-align: center }
+.faq-cta h2 {
+  font-size: 46px;
+  line-height: 1.04;
+  letter-spacing: -.6px;
+  color: #f4eee5;
+  margin-top: 16px
+}
+.faq-cta-support {
+  margin-top: 20px;
+  font-size: 14px;
+  line-height: 1.85;
+  color: #ddd4c4
+}
+.faq-cta-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 18px;
+  margin-top: 34px
+}
+
+/* --------------------------------------------------------------------------
+   Reveal start state for this route. Only ever set when JS runs and reduced
+   motion is not requested; opacity only, no geometry change. Targets match the
+   shared page-entry reveal list in js/faq.js exactly. Nothing is hidden before
+   JavaScript, and the pre-paint timeout unhides content if the script fails.
+   -------------------------------------------------------------------------- */
+html.motion-armed .faq-page .site-header,
+html.motion-armed .faq-hero-copy,
+html.motion-armed .faq-hero-media,
+html.motion-armed .faq-services-head,
+html.motion-armed .faq-columns,
+html.motion-armed .faq-cta-inner { opacity: 0 }
+
+/* --------------------------------------------------------------------------
+   Responsive Â· compact desktop and mobile are art-directed, not a stack.
+   -------------------------------------------------------------------------- */
+@media (max-width:1300px) {
+  .faq-hero-title { font-size: 64px }
+  .faq-services-title { font-size: 48px }
+  .faq-service-title-lg { font-size: 42px }
+}
+
+@media (max-width:1050px) {
+  .faq-hero { min-height: 585px }
+  .faq-hero-title { font-size: 54px }
+}
+
+@media (max-width:1080px) {
+  .faq-columns { grid-template-columns: repeat(2,minmax(0,1fr)) }
+  .faq-service { padding: 38px 34px 24px }
+  .faq-service + .faq-service { border-left: 0 }
+  .faq-service:nth-child(odd) { border-left: 0; padding-left: 0 }
+  .faq-service:nth-child(even) { border-left: 1px solid var(--line); padding-right: 0 }
+  .faq-service:nth-child(n+3) { border-top: 1px solid var(--line) }
+  .faq-list-wide { column-gap: 44px }
+}
+
+@media (max-width:800px) {
+  /* Hero · the base rules already render the hero as a full-bleed photographic
+     band, so mobile only tightens the scene height and the copy rhythm. The
+     safety statement stays a compact ivory band flush under the scene (the
+     scene is ≈ 750px tall at 390x844). #content, aria-labelledby and the
+     html.motion-armed targets are unchanged. */
+  .faq-hero {
+    min-height: clamp(620px, calc(100svh - 144px), 700px)
+  }
+  .faq-hero-inner {
+    width: 100%;
+    max-width: none
+  }
+  /* Wide 4-panel collage under a tall full-bleed frame: cover crops the sides,
+     never the top/bottom, so the eye line stays fully visible. 62% centres one
+     complete eye panel. */
+  .faq-hero-media img { object-position: 62% 50% }
+  .faq-hero-copy {
+    padding: 118px 5.9% 0
+  }
+  .faq-hero-copy .faq-eyebrow { color: var(--gold) }
+  .faq-hero-title {
+    font-size: clamp(42px,12vw,54px);
+    line-height: .96;
+    letter-spacing: -1.1px;
+    margin-top: 17px
+  }
+  .faq-hero-support {
+    margin-top: 20px;
+    font-size: 14px;
+    letter-spacing: .8px;
+    color: var(--ivory);
+    max-width: 48ch
+  }
+  /* Compact ivory band directly under the scene — same words, no seam. */
+  .faq-hero-statement {
+    margin: 26px -5.9% 0;
+    padding: 24px 5.9% 28px;
+    background: var(--ivory);
+    font-size: 14px;
+    letter-spacing: .8px;
+    line-height: 1.8;
+    color: var(--muted);
+    max-width: none
+  }
+
+  .faq-services { padding: 52px 0 40px }
+  .faq-services-head { margin-bottom: 30px }
+  .faq-services-title { font-size: 36px }
+  .faq-services-note { margin-top: 12px }
+
+  /* Service-level accordion: one column, hairline-separated rows. */
+  .faq-columns { grid-template-columns: minmax(0,1fr) }
+  .faq-service,
+  .faq-service:nth-child(odd),
+  .faq-service:nth-child(even),
+  .faq-service:nth-child(n+3) {
+    padding: 0;
+    border-left: 0;
+    border-top: 1px solid var(--line)
+  }
+  .faq-service:first-child { border-top: 0 }
+  .faq-service-head {
+    min-height: 68px;
+    display: flex;
+    align-items: center;
+    padding-right: 54px;
+    margin-bottom: 0
+  }
+  .faq-service-title { font-size: 24px }
+  .faq-service-title-lg { font-size: 30px }
+  html.enhanced .faq-service-toggle {
+    display: block;
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+    color: inherit
+  }
+  html.enhanced .faq-service-toggle .faq-more { position: absolute; right: 4px; top: 50%; margin-top: 0; transform: translateY(-50%) }
+  html.enhanced .faq-service.is-open .faq-service-toggle .faq-more { transform: translateY(-50%) }
+  .faq-service-body { padding-bottom: 18px }
+
+  .faq-question { padding: 17px 0; min-height: 60px }
+
+  .faq-subsection { padding: 16px 16px 4px }
+
+  .faq-safety { padding: 4px 0 62px }
+  .faq-safety .faq-service-body { padding-bottom: 0 }
+  .faq-list-wide { grid-template-columns: minmax(0,1fr); column-gap: 0 }
+  .faq-disclaimer { margin-top: 26px }
+
+  .faq-cta { padding: 62px 0 }
+  .faq-cta h2 { font-size: 36px }
+  .faq-cta-actions { gap: 14px }
+  .faq-cta-actions .button { width: 100%; max-width: 360px }
+}
+
+@media (max-width:540px) {
+  /* Scene refinement · matches PMU's ≤540 rhythm; the title keeps the
+     clamp(42px,12vw,54px) sizing from the ≤800 block. */
+  .faq-hero-copy { padding-top: 108px }
+  .faq-services-title { font-size: 32px }
+  .faq-service-title { font-size: 22px }
+  .faq-service-title-lg { font-size: 27px }
+  .faq-question { padding: 16px 0 }
+  .faq-question-text { font-size: 12px; letter-spacing: 1px }
+  .faq-answer p { font-size: 14px }
+  .faq-subsection { padding: 14px 13px 2px }
+  .faq-cta h2 { font-size: 32px }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .faq-more:before,
+  .faq-more:after { transition: none }
+}

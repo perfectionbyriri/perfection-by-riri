@@ -1,0 +1,1787 @@
+/* ==========================================================================
+   SERVICE PAGES Â· reusable layer for the Perfection by Riri service routes.
+   Loaded AFTER css/styles.css, which stays the design-system authority: this
+   file reuses its tokens (--ivory, --card, --ink, --dark, --gold, --muted,
+   --line), its Cormorant / Jost pairing, its button set, its image-frame
+   convention (object-fit:cover, warm ground colours) and its motion tokens.
+   Nothing here is Home-specific and nothing here re-declares the Home
+   stylesheet.
+   Scope: body.svc-page only. The lash route additionally carries body.svc-lash
+   and retains its dark header. Its main content lives in lash-extensions.css.
+
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   HEADER Â· the service page keeps the header in normal flow over the ivory
+   page rather than overlaying a dark hero, so the header ink flips to the
+   page's text colour. Structure, sizing and the mobile panel are unchanged.
+   -------------------------------------------------------------------------- */
+.svc-page .site-header { color: var(--ink) }
+.svc-page .menu-toggle { border-color: rgba(38,38,32,.24); background: transparent }
+.svc-page .menu-toggle span { background: var(--ink) }
+@media (max-width:800px) {
+  /* The mobile panel is dark in the shared stylesheet, so its links stay light. */
+  .svc-page .enhanced .main-navigation a,
+  .svc-page .main-navigation.is-open a { color: #f5ede0 }
+}
+
+/* The lash route opens on a dark editorial band: the header shares that ground
+   so the announcement, header and hero read as one continuous dark surface. */
+.svc-lash .header-shell { background: var(--dark) }
+.svc-lash .site-header { color: #f4eee5 }
+.svc-lash .menu-toggle { border-color: rgba(244,238,229,.34); background: transparent }
+.svc-lash .menu-toggle span { background: #f4eee5 }
+
+/* The brow route reuses the exact same approved dark header treatment. The
+   announcement bar is already dark, so the header extends it into one clean
+   dark band that ends at the first ivory brow section. */
+.svc-brow .header-shell { background: var(--dark) }
+.svc-brow .site-header { color: #f4eee5 }
+.svc-brow .menu-toggle { border-color: rgba(244,238,229,.34); background: transparent }
+.svc-brow .menu-toggle span { background: #f4eee5 }
+
+/* --------------------------------------------------------------------------
+   SHARED EDITORIAL HEAD Â· a serif title with a hairline rule running to the
+   right and a tracked note pinned to the far right. Used by every remainder
+   section so the pacing stays consistent.
+   -------------------------------------------------------------------------- */
+.svc-rule {
+  flex: 1 1 auto;
+  align-self: center;
+  height: 1px;
+  min-width: 40px;
+  background: var(--line)
+}
+.svc-head-row {
+  display: flex;
+  align-items: center;
+  gap: 30px
+}
+.svc-head-row h2 {
+  flex: 0 1 auto;
+  min-width: 0;
+  font-size: 46px;
+  line-height: 1;
+  letter-spacing: -.6px
+}
+.svc-head-note {
+  flex: 0 1 auto;
+  max-width: 40ch;
+  text-align: right;
+  font-size: 11px;
+  letter-spacing: 1.6px;
+  line-height: 1.75;
+  color: var(--muted)
+}
+
+/* --------------------------------------------------------------------------
+   THE EXPERIENCE Â· light three-part editorial band. Title + rule + note,
+   then three equal columns divided by 1px hairlines.
+   -------------------------------------------------------------------------- */
+.svc-experience { padding: 88px 0 }
+.svc-exp-head { margin-bottom: 54px }
+.svc-exp-grid {
+  display: grid;
+  grid-template-columns: repeat(3,minmax(0,1fr));
+  border-top: 1px solid var(--line);
+  padding-top: 46px
+}
+.svc-exp-item {
+  display: grid;
+  grid-template-columns: auto minmax(0,1fr);
+  column-gap: 18px;
+  row-gap: 4px;
+  align-content: start;
+  padding: 0 40px
+}
+.svc-exp-item:first-child { padding-left: 0 }
+.svc-exp-item:last-child { padding-right: 0 }
+.svc-exp-item + .svc-exp-item { border-left: 1px solid var(--line) }
+.svc-exp-icon {
+  grid-column: 1;
+  grid-row: 1 / span 2;
+  align-self: center;
+  width: 34px;
+  height: 34px;
+  stroke-width: 1.1;
+  color: #7a5e3a
+}
+.svc-exp-title {
+  grid-column: 2;
+  grid-row: 1;
+  font-family: var(--sans);
+  font-size: 12.5px;
+  font-weight: 500;
+  letter-spacing: 1.8px;
+  line-height: 1.5;
+  text-transform: uppercase;
+  color: var(--ink)
+}
+.svc-exp-note {
+  grid-column: 2;
+  grid-row: 2;
+  font-size: 11.5px;
+  letter-spacing: 1.3px;
+  line-height: 1.9;
+  color: var(--muted);
+  margin-top: 14px;
+  max-width: 30ch
+}
+
+/* --------------------------------------------------------------------------
+   REAL RESULTS Â· restrained horizontal gallery. A wide landscape stage
+   on the approved #ac886e ground with circular outline nav pinned to the
+   image edges, a compact progress / caption row and a uniform strip of four
+   landscape tiles.
+   -------------------------------------------------------------------------- */
+.svc-results { padding: 80px 0 88px }
+.svc-results-head { margin-bottom: 40px }
+.svc-results-layout {
+  display: grid;
+  grid-template-columns: minmax(0,1.5fr) minmax(0,1fr);
+  column-gap: 56px;
+  align-items: end
+}
+.svc-results-stage {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 1.85;
+  background: #ac886e
+}
+.svc-results-stage img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 45%
+}
+.svc-results-nav { position: absolute; inset: 0; pointer-events: none }
+.svc-results-nav button {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 46px;
+  height: 46px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border: 1px solid #c4b29580;
+  border-radius: 50%;
+  background: var(--ivory);
+  color: #4d463c;
+  pointer-events: auto
+}
+.svc-results-prev { left: 16px }
+.svc-results-next { right: 16px }
+.svc-results-nav .icon { width: 18px; height: 18px; stroke-width: 1.4 }
+.svc-results-prev .icon { transform: rotate(180deg) }
+.svc-results-progress {
+  color: var(--muted);
+  margin-bottom: 14px
+}
+.svc-results-copy {
+  font-size: 12px;
+  letter-spacing: 1.5px;
+  line-height: 1.85;
+  color: var(--muted);
+  min-height: calc(2 * 1.85em)
+}
+.svc-results-thumbs {
+  display: flex;
+  gap: 10px;
+  margin-top: 24px
+}
+.svc-results-thumb {
+  flex: 1 1 0;
+  min-width: 0;
+  aspect-ratio: 1.6;
+  padding: 0;
+  border: 1px solid var(--line);
+  background: #ac886e;
+  overflow: hidden
+}
+.svc-results-thumb img { width: 100%; height: 100%; object-fit: cover }
+.svc-results-thumb[aria-current] { border-color: var(--ink) }
+@media (hover:hover) and (pointer:fine) {
+  .svc-results-thumb:hover { border-color: #a9987d }
+  .svc-results-nav button:hover { background: #ece5da }
+}
+
+/* --------------------------------------------------------------------------
+   FAQ Â· borderless accordion rows on hairlines. Minimal plus control on
+   the left, uppercase question, generous spacing.
+   -------------------------------------------------------------------------- */
+.svc-faq { padding: 80px 0 96px }
+.svc-faq-head { margin-bottom: 44px }
+.svc-faq-list { border-top: 1px solid var(--line) }
+.svc-faq-item { border-bottom: 1px solid var(--line) }
+.svc-faq-heading {
+  margin: 0;
+  font-family: var(--sans);
+  font-size: 13.5px;
+  font-weight: 500;
+  letter-spacing: 1.7px;
+  line-height: 1.5
+}
+/* --------------------------------------------------------------------------
+   FINAL BOOKING CTA Â· dark editorial close. Left-aligned serif headline,
+   one subline and the solid gold action; the photograph bleeds to the right
+   edge of the band.
+   -------------------------------------------------------------------------- */
+.svc-cta { position: relative; overflow: hidden; padding: 0 }
+.svc-cta-inner {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) minmax(0,.82fr);
+  align-items: stretch;
+  column-gap: 64px;
+  padding-left: max(5.9%, calc((100% - 1272px) / 2))
+}
+.svc-cta-copy {
+  max-width: 560px;
+  padding: 96px 0
+}
+.svc-cta h2 {
+  font-size: 50px;
+  line-height: 1.03;
+  letter-spacing: -.9px;
+  color: #f4eee5
+}
+.svc-cta-support {
+  font-size: 14px;
+  line-height: 1.7;
+  color: #ddd4c4;
+  margin-top: 22px;
+  max-width: 40ch
+}
+.svc-cta .button { margin-top: 34px }
+.svc-cta-media {
+  margin: 0;
+  position: relative;
+  overflow: hidden;
+  min-height: 340px
+}
+.svc-cta-media img {
+  width: 100%;
+  height: 100%;
+  min-height: 340px;
+  object-fit: cover;
+  /* Cropped onto the lash line of the warm lash portrait. */
+  object-position: 56% 34%;
+  -webkit-mask-image: linear-gradient(to right,transparent,#000 38%);
+  mask-image: linear-gradient(to right,transparent,#000 38%)
+}
+
+/* --------------------------------------------------------------------------
+   DIALOG Â· reuses the shared .detail-dialog shell with a page-local content
+   id, so the Home-only #dialog-content rules are mirrored here.
+   -------------------------------------------------------------------------- */
+#svc-dialog-content > .eyebrow:first-child,
+#svc-dialog-content > h2:first-child { padding-right: 58px }
+
+/* --------------------------------------------------------------------------
+   Reveal start state for this route. Only ever set when JS runs and reduced
+   motion is not requested; opacity only, no geometry change. Targets match
+   the service-page reveal list in js/service-page.js exactly.
+   -------------------------------------------------------------------------- */
+html.motion-armed .svc-page .site-header,
+html.motion-armed .svc-page .le-hero-lead,
+html.motion-armed .svc-page .le-hero-photo,
+html.motion-armed .svc-page .le-hero-body,
+html.motion-armed .svc-page .le-hero-caption,
+html.motion-armed .svc-exp-head,
+html.motion-armed .svc-exp-item,
+html.motion-armed .svc-results-head,
+html.motion-armed .svc-results-gallery,
+html.motion-armed .svc-faq-head,
+html.motion-armed .svc-faq-item,
+html.motion-armed .svc-cta-inner { opacity: 0 }
+
+/* --------------------------------------------------------------------------
+   Responsive Â· compact desktop and mobile are art-directed, not a stack.
+   -------------------------------------------------------------------------- */
+@media (max-width:1300px) {
+  .svc-head-row h2 { font-size: 42px }
+  .svc-exp-item { padding: 0 30px }
+  .svc-results-layout { column-gap: 44px }
+  .svc-cta-inner { column-gap: 48px }
+  .svc-cta h2 { font-size: 46px }
+}
+@media (max-width:1050px) {
+  .svc-experience { padding: 72px 0 }
+  .svc-exp-item { padding: 0 24px }
+  .svc-exp-grid { padding-top: 40px }
+  .svc-results { padding: 68px 0 74px }
+  .svc-results-layout { column-gap: 36px }
+  .svc-faq { padding: 68px 0 80px }
+  .svc-cta-copy { padding: 80px 0 }
+  .svc-cta h2 { font-size: 42px }
+}
+@media (max-width:800px) {
+  /* Shared section heads stack their title and note on phones. */
+  .svc-head-row { flex-wrap: wrap; gap: 10px 18px }
+  .svc-head-row .svc-rule { display: none }
+  .svc-head-row h2 { font-size: 36px }
+  .svc-head-note { flex-basis: 100%; max-width: 62ch; text-align: left; margin-top: 2px }
+
+
+  .svc-experience { padding: 58px 0 }
+  .svc-exp-head { margin-bottom: 34px }
+  .svc-exp-grid {
+    grid-template-columns: minmax(0,1fr);
+    border-top: 0;
+    padding-top: 0
+  }
+  .svc-exp-item,
+  .svc-exp-item:first-child,
+  .svc-exp-item:last-child { padding: 26px 0 }
+  .svc-exp-item + .svc-exp-item { border-left: 0; border-top: 1px solid var(--line) }
+  .svc-exp-note { max-width: 46ch }
+
+  .svc-results { padding: 58px 0 64px }
+  .svc-results-layout { grid-template-columns: minmax(0,1fr); column-gap: 0; row-gap: 24px }
+  .svc-results-stage { aspect-ratio: 1.6 }
+  .svc-results-prev { left: 12px }
+  .svc-results-next { right: 12px }
+  .svc-results-copy { min-height: 0 }
+  .svc-results-thumbs { margin-top: 20px; overflow-x: auto; scrollbar-width: none }
+  .svc-results-thumbs::-webkit-scrollbar { display: none }
+
+  .svc-faq { padding: 58px 0 66px }
+  .svc-faq-head { margin-bottom: 30px }
+
+  .svc-cta-inner {
+    grid-template-columns: minmax(0,1fr);
+    column-gap: 0;
+    padding-left: 0
+  }
+  .svc-cta-copy { max-width: none; padding: 64px 5.9% 40px }
+  .svc-cta h2 { font-size: 38px }
+  .svc-cta .button { width: 100%; max-width: 360px }
+  .svc-cta-media,
+  .svc-cta-media img { min-height: 260px }
+  .svc-cta-media img {
+    -webkit-mask-image: linear-gradient(to bottom,transparent,#000 42%);
+    mask-image: linear-gradient(to bottom,transparent,#000 42%)
+  }
+}
+@media (max-width:540px) {
+  .svc-rule { min-width: 20px }
+  .svc-head-row h2 { font-size: 32px }
+  .svc-exp-icon { width: 30px; height: 30px }
+  .svc-results-stage { aspect-ratio: 1.5 }
+  .svc-cta h2 { font-size: 34px }
+}
+
+/* ==========================================================================
+   PERMANENT MAKEUP ROUTE Â· body.svc-pmu.
+
+   Route-specific editorial redesign: split dark hero â†’ concise promise â†’
+   always-visible initial and touch-up pricing â†’ compact standards rail â†’ dark
+   process chapter with both videos â†’ art-directed results â†’ photographic CTA.
+   All rules stay PMU-scoped so the other service routes remain untouched.
+   ========================================================================== */
+
+.svc-pmu .pmu-kicker {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 2px;
+  line-height: 1.65;
+  text-transform: uppercase;
+  color: var(--muted)
+}
+.svc-pmu .pmu-text-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 40px;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+  color: var(--ink)
+}
+.svc-pmu .pmu-text-link svg {
+  width: 17px;
+  height: 17px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.25;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform var(--duration-normal) var(--ease-premium)
+}
+.svc-pmu .pmu-text-link-light { color: #f4eee5 }
+@media (hover:hover) and (pointer:fine) {
+  .svc-pmu .pmu-text-link:hover svg { transform: translateX(4px) }
+}
+
+/* Motion is opacity-only and uses the shared page-entry controller. The
+   2-second head fallback in the document still reveals everything if JS fails. */
+html.motion-armed .svc-pmu .pmu-hero-lead,
+html.motion-armed .svc-pmu .pmu-hero-media,
+html.motion-armed .svc-pmu .pmu-hero-body,
+html.motion-armed .svc-pmu .pmu-intro-grid,
+html.motion-armed .svc-pmu .pmu-pricing-head,
+html.motion-armed .svc-pmu .pmu-initial-pricing,
+html.motion-armed .svc-pmu .pmu-touchups,
+html.motion-armed .svc-pmu .pmu-standard-head,
+html.motion-armed .svc-pmu .pmu-standard-list,
+html.motion-armed .svc-pmu .pmu-process-head,
+html.motion-armed .svc-pmu .pmu-process-item,
+html.motion-armed .svc-pmu .pmu-results-head,
+html.motion-armed .svc-pmu .pmu-results-carousel,
+html.motion-armed .svc-pmu .pmu-results-quote,
+html.motion-armed .svc-pmu .pmu-cta-copy { opacity: 0 }
+
+/* --------------------------------------------------------------------------
+   HERO Â· the existing portrait fills the entire section while a layered
+   gradient creates a quiet, readable field for the editorial copy.
+   -------------------------------------------------------------------------- */
+.svc-pmu .pmu-hero {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: minmax(0,1fr);
+  grid-template-rows: minmax(0,1fr) auto;
+  min-height: 680px;
+  overflow: hidden;
+  background: var(--dark);
+  color: #f4eee5
+}
+.svc-pmu .pmu-hero-lead {
+  position: relative;
+  z-index: 2;
+  grid-area: 1 / 1;
+  align-self: end;
+  width: min(760px,58vw);
+  padding: clamp(78px,8vw,120px) 6vw 28px 5.9vw
+}
+.svc-pmu .pmu-hero .pmu-kicker { margin-bottom: 24px; color: var(--gold) }
+.svc-pmu .pmu-hero h1 {
+  font-family: var(--serif);
+  font-size: clamp(68px,6.2vw,96px);
+  font-weight: 400;
+  line-height: .94;
+  letter-spacing: -2.5px;
+  white-space: nowrap
+}
+.svc-pmu .pmu-hero-media {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  min-width: 0;
+  min-height: 0;
+  margin: 0
+}
+.svc-pmu .pmu-hero-media:after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    linear-gradient(180deg,rgba(20,20,19,.16) 0%,rgba(20,20,19,.02) 48%,rgba(20,20,19,.34) 100%),
+    linear-gradient(90deg,rgba(20,20,19,.92) 0%,rgba(20,20,19,.78) 34%,rgba(20,20,19,.34) 62%,rgba(20,20,19,.08) 100%);
+  pointer-events: none
+}
+.svc-pmu .pmu-hero-media img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 66% 45%
+}
+.svc-pmu .pmu-hero-media figcaption {
+  position: absolute;
+  z-index: 2;
+  right: 5.9vw;
+  bottom: 27px;
+  text-align: right;
+  font-size: 10px;
+  letter-spacing: 1.8px;
+  line-height: 1.85;
+  text-transform: uppercase
+}
+.svc-pmu .pmu-hero-body {
+  position: relative;
+  z-index: 2;
+  grid-area: 2 / 1;
+  width: min(760px,58vw);
+  padding: 0 6vw 62px 5.9vw
+}
+.svc-pmu .pmu-hero-body > p {
+  max-width: 31ch;
+  font-size: 14px;
+  line-height: 1.9;
+  letter-spacing: 1.05px
+}
+.svc-pmu .pmu-hero-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 29px
+}
+.svc-pmu .pmu-hero-actions .button { min-width: 220px }
+
+/* --------------------------------------------------------------------------
+   EDITORIAL BRIDGE Â· a single, quiet promise between hero and price catalog.
+   -------------------------------------------------------------------------- */
+.svc-pmu .pmu-intro { padding: 118px 0 108px }
+.svc-pmu .pmu-intro-grid {
+  display: grid;
+  grid-template-columns: .72fr 1.78fr .9fr;
+  align-items: start;
+  column-gap: 6%
+}
+.svc-pmu .pmu-intro .pmu-kicker { padding-top: 13px }
+.svc-pmu .pmu-intro h2 {
+  font-size: clamp(58px,5.8vw,84px);
+  line-height: .95;
+  letter-spacing: -2px
+}
+.svc-pmu .pmu-intro h2 em { font-weight: 400 }
+.svc-pmu .pmu-intro-copy {
+  padding-top: 11px;
+  font-size: 14px;
+  line-height: 1.95;
+  letter-spacing: .75px;
+  color: var(--muted)
+}
+.svc-pmu .pmu-intro-signature {
+  margin-top: 29px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--ink)
+}
+
+/* --------------------------------------------------------------------------
+   SERVICES & PRICING Â· every price is visible with no disclosure dependency.
+   -------------------------------------------------------------------------- */
+.svc-pmu .pmu-pricing { padding: 105px 0 116px; border-top: 1px solid var(--line) }
+.svc-pmu .pmu-pricing-head {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 50px;
+  margin-bottom: 58px
+}
+.svc-pmu .pmu-pricing-head .pmu-kicker { margin-bottom: 20px }
+.svc-pmu .pmu-pricing-head h2 {
+  font-size: clamp(52px,5vw,72px);
+  line-height: .98;
+  letter-spacing: -1.6px
+}
+.svc-pmu .pmu-pricing-head > p {
+  max-width: 390px;
+  padding-bottom: 5px;
+  font-size: 14px;
+  line-height: 1.9;
+  letter-spacing: .9px;
+  color: var(--muted)
+}
+.svc-pmu .pmu-pricing-layout {
+  display: grid;
+  grid-template-columns: minmax(0,1.58fr) minmax(310px,.82fr);
+  align-items: start;
+  gap: clamp(44px,6vw,84px)
+}
+.svc-pmu .pmu-initial-pricing > h3,
+.svc-pmu .pmu-touchups > h3 {
+  font-family: var(--serif);
+  font-size: 31px;
+  font-weight: 400;
+  line-height: 1.1
+}
+.svc-pmu .pmu-price-list {
+  list-style: none;
+  margin: 25px 0 0;
+  padding: 0;
+  border-top: 1px solid var(--ink)
+}
+.svc-pmu .pmu-price-list li {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) auto;
+  align-items: start;
+  column-gap: 20px;
+  min-height: 100px;
+  padding: 23px 0 20px;
+  border-bottom: 1px solid var(--line)
+}
+.svc-pmu .pmu-price-copy strong {
+  display: block;
+  font-family: var(--serif);
+  font-size: 27px;
+  font-weight: 400;
+  line-height: 1.08;
+  letter-spacing: -.25px;
+  transition: color 250ms ease
+}
+@media (hover:hover) and (pointer:fine) {
+  .svc-pmu .pmu-price-list li:hover .pmu-price-copy strong { color: var(--gold) }
+}
+.svc-pmu .pmu-price-copy small {
+  display: block;
+  max-width: 49ch;
+  margin-top: 8px;
+  font-size: 10px;
+  line-height: 1.75;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--muted)
+}
+.svc-pmu .pmu-price-amount {
+  padding-left: 20px;
+  font-family: var(--price-font);
+  font-weight: var(--price-weight);
+  font-variant-numeric: var(--price-numeric);
+  font-size: 23px;
+  line-height: 1.1;
+  letter-spacing: 0;
+  white-space: nowrap
+}
+.svc-pmu .pmu-pricing-action {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-top: 35px
+}
+.svc-pmu .pmu-pricing-action > p {
+  max-width: 330px;
+  font-size: 10px;
+  line-height: 1.7;
+  letter-spacing: .85px;
+  color: var(--muted)
+}
+.svc-pmu .pmu-touchups {
+  padding: 42px 38px 28px;
+  background: var(--card)
+}
+.svc-pmu .pmu-touchups .pmu-kicker { margin-bottom: 17px; color: #917650 }
+.svc-pmu .pmu-touchups > h3 { font-size: 42px }
+.svc-pmu .pmu-touchups-intro {
+  max-width: 31ch;
+  margin-top: 15px;
+  font-size: 10px;
+  line-height: 1.85;
+  letter-spacing: .8px;
+  color: var(--muted)
+}
+.svc-pmu .pmu-touchup-list { margin: 29px 0 0 }
+.svc-pmu .pmu-touchup-list > div {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) auto;
+  align-items: baseline;
+  gap: 18px;
+  padding: 17px 0;
+  border-top: 1px solid #d4ccc3
+}
+.svc-pmu .pmu-touchup-list dt {
+  font-size: 10px;
+  line-height: 1.55;
+  letter-spacing: 1px;
+  text-transform: uppercase
+}
+.svc-pmu .pmu-touchup-list dd {
+  margin: 0;
+  font-family: var(--price-font);
+  font-weight: var(--price-weight);
+  font-variant-numeric: var(--price-numeric);
+  font-size: 21px;
+  line-height: 1;
+  letter-spacing: 0;
+  white-space: nowrap
+}
+
+/* --------------------------------------------------------------------------
+   THE RIRI STANDARD Â· compact proof rail separating pricing from process.
+   -------------------------------------------------------------------------- */
+.svc-pmu .pmu-standard { padding: 50px 0 54px; background: #ebe4dc }
+.svc-pmu .pmu-standard-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 30px;
+  margin-bottom: 29px
+}
+.svc-pmu .pmu-standard-head h2 {
+  font-family: var(--serif);
+  font-size: 31px;
+  font-weight: 400;
+  line-height: 1
+}
+.svc-pmu .pmu-standard-list {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(4,minmax(0,1fr));
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid #cfc4b7
+}
+.svc-pmu .pmu-standard-list li {
+  display: grid;
+  grid-template-columns: minmax(0,1fr);
+  gap: 6px 0;
+  padding: 23px 25px 0;
+  border-left: 1px solid #cfc4b7
+}
+.svc-pmu .pmu-standard-list li:first-child { border-left: 0; padding-left: 0 }
+.svc-pmu .pmu-standard-list li:last-child { padding-right: 0 }
+.svc-pmu .pmu-standard-list strong {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 1.35px;
+  line-height: 1.5;
+  text-transform: uppercase
+}
+.svc-pmu .pmu-standard-list small {
+  font-size: 10px;
+  line-height: 1.6;
+  letter-spacing: .55px;
+  color: var(--muted)
+}
+
+/* --------------------------------------------------------------------------
+   PROCESS Â· dark editorial chapter with both 4:5 videos always present.
+   -------------------------------------------------------------------------- */
+.svc-pmu .pmu-process { padding: 108px 0 112px }
+.svc-pmu .pmu-process-layout {
+  display: grid;
+  grid-template-columns: minmax(235px,.72fr) repeat(2,minmax(0,1fr));
+  align-items: start;
+  gap: clamp(24px,3.2vw,50px)
+}
+.svc-pmu .pmu-process-head { padding: 41px 7% 0 0 }
+.svc-pmu .pmu-process .pmu-kicker { margin-bottom: 24px; color: var(--gold) }
+.svc-pmu .pmu-process-head h2 {
+  font-size: clamp(46px,4.4vw,64px);
+  line-height: .98;
+  letter-spacing: -1.2px;
+  color: #f4eee5
+}
+.svc-pmu .pmu-process-head h2 em { font-weight: 400 }
+.svc-pmu .pmu-process-head > p:last-child {
+  max-width: 31ch;
+  margin-top: 28px;
+  font-size: 10px;
+  line-height: 1.9;
+  letter-spacing: .85px;
+  color: #aaa397
+}
+.svc-pmu .pmu-process-item { min-width: 0; margin: 0 }
+.svc-pmu .pmu-process-video {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  object-position: 50% 50%;
+  background: #292622
+}
+.svc-pmu .pmu-process-item figcaption {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  margin-top: 17px;
+  padding-top: 16px;
+  border-top: 1px solid #45413a
+}
+.svc-pmu .pmu-process-item figcaption span {
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1.55;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: #f4eee5
+}
+.svc-pmu .pmu-process-item figcaption small {
+  max-width: 22ch;
+  text-align: right;
+  font-size: 10px;
+  line-height: 1.6;
+  letter-spacing: .65px;
+  color: #958f84
+}
+
+/* --------------------------------------------------------------------------
+   REAL RESULTS Â· all eight results in one horizontal scroll-snap carousel.
+   Every slide shares ONE controlled height (--pmu-slide-h) and its width
+   follows the photograph's native aspect ratio (the img keeps its
+   width/height attributes and is sized height:100% / width:auto), so no
+   before/after frame is ever cropped. The track starts at the container's
+   left edge and bleeds to the right screen edge, so the next slide always
+   peeks in. --pmu-gutter mirrors .container's side gutter (88.2% /
+   --page-width). Without JS this is a plain native scroller.
+   -------------------------------------------------------------------------- */
+.svc-pmu .pmu-results { padding: 108px 0 112px }
+.svc-pmu .pmu-results {
+  --pmu-gutter: max(5.9vw, calc((100vw - var(--page-width)) / 2));
+  --pmu-slide-h: 500px
+}
+.svc-pmu .pmu-results-head {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 38px;
+  margin-bottom: 48px
+}
+.svc-pmu .pmu-results-head .pmu-kicker { margin-bottom: 18px }
+.svc-pmu .pmu-results-head h2 {
+  font-size: clamp(54px,5vw,72px);
+  line-height: .95;
+  letter-spacing: -1.3px
+}
+.svc-pmu .pmu-results-head-side {
+  display: flex;
+  align-items: center;
+  gap: 40px
+}
+/* Round prev/next arrows · hairline circle, gold on hover, disabled at the
+   ends. Hidden on touch widths where swiping is the natural gesture. */
+.svc-pmu .pmu-results-arrows { display: flex; gap: 12px }
+.svc-pmu .pmu-results-arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  transition: color 200ms var(--ease-premium), border-color 200ms var(--ease-premium), opacity 200ms var(--ease-premium)
+}
+.svc-pmu .pmu-results-arrow svg { width: 18px; height: 18px }
+.svc-pmu .pmu-results-arrow:disabled { opacity: .32; cursor: default }
+.svc-pmu .pmu-results-arrow:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px }
+/* The carousel wrapper is the single scroll-reveal target: slides inside a
+   horizontal scroller may never intersect the viewport on their own, so they
+   must not carry individual start states. */
+.svc-pmu .pmu-results-track {
+  list-style: none;
+  position: relative;
+  display: flex;
+  gap: 22px;
+  margin: 0;
+  padding: 0 var(--pmu-gutter);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: var(--pmu-gutter);
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none
+}
+.svc-pmu .pmu-results-track::-webkit-scrollbar { display: none }
+.svc-pmu .pmu-results-track:focus-visible { outline: 2px solid var(--gold); outline-offset: -2px }
+.svc-pmu .pmu-result { flex: 0 0 auto; scroll-snap-align: start }
+.svc-pmu .pmu-result figure { display: flex; flex-direction: column; margin: 0 }
+.svc-pmu .pmu-result-media {
+  height: var(--pmu-slide-h);
+  overflow: hidden;
+  background: #cbb9a5
+}
+/* height follows the shared slide height, width the native ratio — object-fit
+   stays only as a safety net, never as a crop. */
+.svc-pmu .pmu-result-media img {
+  display: block;
+  width: auto;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--duration-slow) var(--ease-premium)
+}
+.svc-pmu .pmu-result figcaption {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  margin-top: 13px;
+  font-size: 14px;
+  line-height: 1.55;
+  letter-spacing: 1.25px;
+  text-transform: uppercase
+}
+.svc-pmu .pmu-result figcaption small { color: var(--muted) }
+/* Counter + hairline progress bar, aligned to the container gutter. The gold
+   fill scales with scroll position (transform only — no layout work). */
+.svc-pmu .pmu-results-status {
+  display: flex;
+  align-items: center;
+  gap: 26px;
+  padding: 24px var(--pmu-gutter) 0
+}
+.svc-pmu .pmu-results-counter {
+  flex: 0 0 auto;
+  margin: 0;
+  font-family: var(--sans);
+  font-size: 11px;
+  letter-spacing: 2.4px;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted)
+}
+.svc-pmu .pmu-results-progress {
+  flex: 1 1 auto;
+  height: 2px;
+  overflow: hidden;
+  background: var(--line)
+}
+.svc-pmu .pmu-results-progress span {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--gold);
+  transform: scaleX(0);
+  transform-origin: left center
+}
+.svc-pmu .pmu-results-quote {
+  margin-top: 70px;
+  padding-top: 42px;
+  border-top: 1px solid var(--line);
+  text-align: center;
+  font-family: var(--serif);
+  font-size: 32px;
+  font-style: italic;
+  line-height: 1.3;
+  letter-spacing: .2px
+}
+@media (hover:hover) and (pointer:fine) {
+  .svc-pmu .pmu-result:hover .pmu-result-media img { transform: scale(1.018) }
+  .svc-pmu .pmu-results-arrow:hover:not(:disabled) { color: var(--gold); border-color: var(--gold) }
+}
+
+/* --------------------------------------------------------------------------
+   FINAL CTA Â· photographic dark close with a left-aligned editorial message.
+   -------------------------------------------------------------------------- */
+.svc-pmu .pmu-cta {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: 520px;
+  isolation: isolate;
+  overflow: hidden;
+  text-align: left
+}
+.svc-pmu .pmu-cta-copy {
+  width: 88.2%;
+  max-width: var(--page-width);
+  margin-inline: auto;
+  padding: 88px 0
+}
+.svc-pmu .pmu-cta .pmu-kicker { margin-bottom: 24px; color: var(--gold) }
+.svc-pmu .pmu-cta h2 {
+  max-width: 650px;
+  font-size: clamp(58px,6vw,86px);
+  line-height: .92;
+  letter-spacing: -2px;
+  color: #f4eee5
+}
+.svc-pmu .pmu-cta h2 em { font-weight: 400 }
+.svc-pmu .pmu-cta-copy > p:not(.pmu-kicker) {
+  max-width: 43ch;
+  margin-top: 25px;
+  font-size: 14px;
+  line-height: 1.9;
+  letter-spacing: .85px;
+  color: #c4bdb1
+}
+.svc-pmu .pmu-cta .button { margin-top: 31px }
+
+/* --------------------------------------------------------------------------
+   RESPONSIVE ART DIRECTION
+   -------------------------------------------------------------------------- */
+@media (max-width:1050px) {
+  .svc-pmu .pmu-hero {
+    min-height: 620px
+  }
+  .svc-pmu .pmu-hero h1 { font-size: 66px }
+  .svc-pmu .pmu-hero-lead { padding-top: 65px }
+  .svc-pmu .pmu-intro { padding: 96px 0 90px }
+  .svc-pmu .pmu-intro-grid { grid-template-columns: .62fr 1.55fr .9fr; column-gap: 4.5% }
+  .svc-pmu .pmu-intro h2 { font-size: 58px }
+  .svc-pmu .pmu-pricing { padding: 88px 0 96px }
+  .svc-pmu .pmu-pricing-head { margin-bottom: 46px }
+  .svc-pmu .pmu-pricing-layout {
+    grid-template-columns: minmax(0,1.4fr) minmax(285px,.9fr);
+    gap: 42px
+  }
+  .svc-pmu .pmu-price-copy strong { font-size: 24px }
+  .svc-pmu .pmu-price-list li { column-gap: 15px }
+  .svc-pmu .pmu-pricing-action { align-items: flex-start; flex-direction: column }
+  .svc-pmu .pmu-touchups { padding: 36px 29px 24px }
+  .svc-pmu .pmu-standard-list li { padding-inline: 17px }
+  .svc-pmu .pmu-process-layout { grid-template-columns: minmax(210px,.7fr) repeat(2,minmax(0,1fr)); gap: 28px }
+  .svc-pmu .pmu-process-head h2 { font-size: 48px }
+  .svc-pmu .pmu-results { --pmu-slide-h: 440px }
+}
+
+@media (max-width:800px) {
+  .svc-pmu .header-shell:has(.main-navigation.is-open) { z-index: 20 }
+  .svc-pmu .main-navigation.is-open { background: var(--dark) }
+  .svc-pmu .pmu-hero {
+    grid-template-columns: minmax(0,1fr);
+    grid-template-rows: minmax(0,1fr) auto;
+    min-height: 700px
+  }
+  .svc-pmu .pmu-hero-lead {
+    grid-area: 1 / 1;
+    align-self: end;
+    width: 100%;
+    padding: 118px 5.9% 24px
+  }
+  .svc-pmu .pmu-hero .pmu-kicker { margin-bottom: 17px; font-size: 10px }
+  .svc-pmu .pmu-hero h1 {
+    font-size: clamp(50px,9vw,70px);
+    line-height: .96;
+    letter-spacing: -1.7px
+  }
+  .svc-pmu .pmu-hero-media {
+    inset: 0;
+    height: auto
+  }
+  .svc-pmu .pmu-hero-media:after {
+    background:
+      linear-gradient(180deg,rgba(20,20,19,.5) 0%,rgba(20,20,19,.08) 38%,rgba(20,20,19,.82) 100%),
+      linear-gradient(90deg,rgba(20,20,19,.62) 0%,rgba(20,20,19,.18) 82%)
+  }
+  .svc-pmu .pmu-hero-media img { object-position: 66% 45% }
+  .svc-pmu .pmu-hero-media figcaption { display: none }
+  .svc-pmu .pmu-hero-body {
+    grid-area: 2 / 1;
+    width: 100%;
+    padding: 0 5.9% 34px
+  }
+  .svc-pmu .pmu-hero-body > p { max-width: 48ch; font-size: 14px }
+  .svc-pmu .pmu-hero-actions { margin-top: 20px }
+  .svc-pmu .pmu-intro { padding: 75px 0 68px }
+  .svc-pmu .pmu-intro-grid {
+    grid-template-columns: minmax(130px,.6fr) minmax(0,1.4fr);
+    column-gap: 7%;
+    row-gap: 28px
+  }
+  .svc-pmu .pmu-intro .pmu-kicker { padding-top: 8px }
+  .svc-pmu .pmu-intro h2 { font-size: 54px }
+  .svc-pmu .pmu-intro-copy { grid-column: 2; padding-top: 0 }
+  .svc-pmu .pmu-pricing { padding: 72px 0 78px }
+  .svc-pmu .pmu-pricing-head {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 20px;
+    margin-bottom: 38px
+  }
+  .svc-pmu .pmu-pricing-head h2 { font-size: 50px }
+  .svc-pmu .pmu-pricing-head > p { max-width: 53ch; padding-bottom: 0 }
+  .svc-pmu .pmu-pricing-layout {
+    grid-template-columns: minmax(0,1.15fr) minmax(245px,.85fr);
+    gap: 28px
+  }
+  .svc-pmu .pmu-initial-pricing > h3 { font-size: 28px }
+  .svc-pmu .pmu-price-list li {
+    grid-template-columns: minmax(0,1fr) auto;
+    min-height: 91px;
+    padding-block: 20px 18px;
+    column-gap: 10px
+  }
+  .svc-pmu .pmu-price-copy strong { font-size: 21px }
+  .svc-pmu .pmu-price-copy small { font-size: 10px; letter-spacing: .65px }
+  .svc-pmu .pmu-price-amount { padding-left: 8px; font-size: 22px }
+  .svc-pmu .pmu-pricing-action .button { width: 100% }
+  .svc-pmu .pmu-touchups { padding: 31px 23px 20px }
+  .svc-pmu .pmu-touchups > h3 { font-size: 36px }
+  .svc-pmu .pmu-touchup-list dt { font-size: 10px; letter-spacing: .7px }
+  .svc-pmu .pmu-standard-head {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px
+  }
+  .svc-pmu .pmu-standard-list { grid-template-columns: repeat(2,minmax(0,1fr)) }
+  .svc-pmu .pmu-standard-list li {
+    min-height: 92px;
+    padding: 21px 18px 0;
+    border-left: 0
+  }
+  .svc-pmu .pmu-standard-list li:nth-child(even) { border-left: 1px solid #cfc4b7 }
+  .svc-pmu .pmu-standard-list li:nth-child(n+3) { border-top: 1px solid #cfc4b7 }
+  .svc-pmu .pmu-standard-list li:nth-child(odd) { padding-left: 0 }
+  .svc-pmu .pmu-process { padding: 75px 0 80px }
+  .svc-pmu .pmu-process-layout {
+    grid-template-columns: repeat(2,minmax(0,1fr));
+    gap: 27px 18px
+  }
+  .svc-pmu .pmu-process-head {
+    grid-column: 1 / -1;
+    max-width: 660px;
+    padding: 0 0 9px
+  }
+  .svc-pmu .pmu-process-head h2 { font-size: 52px }
+  .svc-pmu .pmu-process-head > p:last-child { max-width: 52ch; margin-top: 20px }
+  .svc-pmu .pmu-results { padding: 76px 0 80px; --pmu-slide-h: 400px }
+  .svc-pmu .pmu-results-head { margin-bottom: 34px }
+  .svc-pmu .pmu-results-head h2 { font-size: 56px }
+  /* Swiping is the natural gesture on touch widths — the arrows step aside
+     and the counter + progress bar carry the wayfinding. */
+  .svc-pmu .pmu-results-arrows { display: none }
+  .svc-pmu .pmu-results-quote { margin-top: 48px; padding-top: 34px; font-size: 28px }
+  .svc-pmu .pmu-cta { min-height: 460px }
+  .svc-pmu .pmu-cta-copy { padding: 72px 0 }
+  .svc-pmu .pmu-cta h2 { max-width: none; font-size: 64px }
+}
+
+@media (max-width:720px) {
+  .svc-pmu .pmu-pricing-layout { grid-template-columns: minmax(0,1fr); gap: 46px }
+  .svc-pmu .pmu-pricing-action {
+    display: grid;
+    grid-template-columns: minmax(0,1fr) minmax(180px,.8fr);
+    align-items: center
+  }
+  .svc-pmu .pmu-touchups { padding: 34px 30px 22px }
+}
+
+/* Compact phones Â· the results carousel simply shortens its slides (the
+   540px block sets --pmu-slide-h); the scroll-snap track needs no layout
+   change, so the old asymmetric grid overrides are gone. */
+
+@media (max-width:540px) {
+  .svc-pmu .pmu-kicker { font-size: 10px; letter-spacing: 1.6px }
+  .svc-pmu .pmu-hero { min-height: 690px }
+  .svc-pmu .pmu-hero-lead { padding: 108px 5.9% 22px }
+  .svc-pmu .pmu-hero h1 { font-size: clamp(42px,12vw,54px); letter-spacing: -1.1px }
+  .svc-pmu .pmu-hero-media img { object-position: 67% 46% }
+  .svc-pmu .pmu-hero-body { padding-block: 0 30px }
+  .svc-pmu .pmu-hero-actions {
+    display: grid;
+    grid-template-columns: minmax(0,1fr);
+    gap: 8px;
+    margin-top: 18px
+  }
+  .svc-pmu .pmu-hero-actions .button { width: 100% }
+  .svc-pmu .pmu-intro { padding: 61px 0 57px }
+  .svc-pmu .pmu-intro-grid { grid-template-columns: minmax(0,1fr); row-gap: 21px }
+  .svc-pmu .pmu-intro .pmu-kicker { padding-top: 0 }
+  .svc-pmu .pmu-intro h2 { font-size: clamp(43px,13vw,58px) }
+  .svc-pmu .pmu-intro-copy { grid-column: auto; max-width: 47ch }
+  .svc-pmu .pmu-intro-signature { margin-top: 21px }
+  .svc-pmu .pmu-pricing { padding: 61px 0 66px }
+  .svc-pmu .pmu-pricing-head { gap: 17px; margin-bottom: 31px }
+  .svc-pmu .pmu-pricing-head .pmu-kicker { margin-bottom: 14px }
+  .svc-pmu .pmu-pricing-head h2 { font-size: clamp(42px,12.5vw,52px) }
+  .svc-pmu .pmu-initial-pricing > h3 { font-size: 26px }
+  .svc-pmu .pmu-price-list { margin-top: 20px }
+  .svc-pmu .pmu-price-list li {
+    grid-template-columns: minmax(0,1fr) auto;
+    min-height: 0;
+    padding-block: 18px 16px;
+    column-gap: 8px
+  }
+  .svc-pmu .pmu-price-copy strong { font-size: 20px; line-height: 1.12 }
+  .svc-pmu .pmu-price-copy small { max-width: 34ch; margin-top: 6px; line-height: 1.65 }
+  .svc-pmu .pmu-price-amount { padding-left: 5px; font-size: 21px }
+  .svc-pmu .pmu-pricing-action {
+    display: flex;
+    align-items: stretch;
+    gap: 15px;
+    margin-top: 28px
+  }
+  .svc-pmu .pmu-pricing-action > p { max-width: none }
+  .svc-pmu .pmu-touchups { padding: 31px 22px 18px }
+  .svc-pmu .pmu-touchups > h3 { font-size: 34px }
+  .svc-pmu .pmu-touchup-list { margin-top: 23px }
+  .svc-pmu .pmu-touchup-list > div { padding-block: 15px }
+  .svc-pmu .pmu-touchup-list dt { max-width: 25ch }
+  .svc-pmu .pmu-standard { padding: 43px 0 47px }
+  .svc-pmu .pmu-standard-head { margin-bottom: 23px }
+  .svc-pmu .pmu-standard-head h2 { font-size: 28px }
+  .svc-pmu .pmu-standard-list li { min-height: 102px; padding-right: 10px }
+  .svc-pmu .pmu-standard-list li:nth-child(even) { padding-left: 14px }
+  .svc-pmu .pmu-standard-list strong { font-size: 10px; letter-spacing: .9px }
+  .svc-pmu .pmu-standard-list small { font-size: 10px }
+  .svc-pmu .pmu-process { padding: 63px 0 67px }
+  .svc-pmu .pmu-process-layout { gap: 23px 10px }
+  .svc-pmu .pmu-process-head h2 { font-size: clamp(42px,12vw,52px) }
+  .svc-pmu .pmu-process-item figcaption { margin-top: 11px; padding-top: 11px }
+  .svc-pmu .pmu-process-item figcaption span { font-size: 10px; letter-spacing: .8px }
+  .svc-pmu .pmu-process-item figcaption small { display: none }
+  .svc-pmu .pmu-results { padding: 63px 0 67px; --pmu-slide-h: 360px }
+  /* Small phones: the widest slides nearly fill the screen, so the end
+     gutter is dropped — the last slide can then scroll fully into view
+     (flush to the right edge) instead of resting a few pixels short. */
+  .svc-pmu .pmu-results-track { padding-right: 0; scroll-padding-inline-end: 0 }
+  .svc-pmu .pmu-results-head {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 27px
+  }
+  .svc-pmu .pmu-results-head .pmu-kicker { margin-bottom: 13px }
+  .svc-pmu .pmu-results-head h2 { font-size: 48px }
+  .svc-pmu .pmu-result figcaption {
+    display: block;
+    margin-top: 9px;
+    font-size: 14px;
+    letter-spacing: .8px
+  }
+  .svc-pmu .pmu-result figcaption small { display: block; margin-top: 3px; font-size: 10px }
+  .svc-pmu .pmu-results-status { padding-top: 20px }
+  .svc-pmu .pmu-results-quote { margin-top: 38px; padding-top: 27px; font-size: 24px }
+  .svc-pmu .pmu-cta { min-height: 430px }
+  .svc-pmu .pmu-cta-copy { width: 86%; padding: 64px 0 }
+  .svc-pmu .pmu-cta h2 { font-size: clamp(50px,15vw,64px) }
+  .svc-pmu .pmu-cta .button { width: 100%; max-width: 350px }
+}
+
+@media (max-width:360px) {
+  .svc-pmu .pmu-hero h1 { font-size: 34px; letter-spacing: -.7px }
+  .svc-pmu .pmu-price-list li { grid-template-columns: minmax(0,1fr) auto; column-gap: 6px }
+  .svc-pmu .pmu-price-copy strong { font-size: 18px }
+  .svc-pmu .pmu-price-copy small { font-size: 10px }
+  .svc-pmu .pmu-price-amount { font-size: 20px }
+  .svc-pmu .pmu-touchups { padding-inline: 18px }
+  .svc-pmu .pmu-touchup-list dt { font-size: 10px }
+  .svc-pmu .pmu-standard-list li { grid-template-columns: minmax(0,1fr); padding-right: 5px }
+  .svc-pmu .pmu-standard-list li:nth-child(even) { padding-left: 9px }
+  .svc-pmu .pmu-process-item figcaption span { font-size: 10px; letter-spacing: .5px }
+  .svc-pmu .pmu-cta h2 { font-size: 48px }
+}
+
+/* ==========================================================================
+   BROW LAMINATION & TINT ROUTE Â· body.svc-brow.
+   A light editorial brow page that belongs beside the approved lash and
+   permanent-makeup routes while keeping its own architecture: asymmetric brow
+   hero Â· hairline service rows with verified pricing Â· macro editorial pause Â·
+   real before / after results Â· compact dotted process timeline Â· dark booking
+   close. It reuses the design system tokens, buttons, shared section head and
+   the page-local script from css/styles.css + js/service-page.js and is scoped
+   to body.svc-brow so the lash and PMU routes are untouched.
+   ========================================================================== */
+
+/* Shared editorial eyebrow for this route (light ground). */
+.brow-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 1.9px;
+  text-transform: uppercase;
+  color: var(--muted)
+}
+.brow-eyebrow:before {
+  content: '';
+  flex: 0 0 auto;
+  width: 32px;
+  height: 1px;
+  background: currentColor;
+  opacity: .5
+}
+
+/* --------------------------------------------------------------------------
+   SERVICES & PRICING Â· tall brow result left, four hairline service rows
+   right. Serif service names, restrained descriptors, verified prices and a
+   small booking arrow. No boxes or shadows.
+   -------------------------------------------------------------------------- */
+.brow-services { padding: 96px 0 92px }
+.brow-services-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 44px;
+  margin-bottom: 48px
+}
+.brow-services-intro .brow-eyebrow { margin-bottom: 18px }
+.brow-services-title {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: 54px;
+  line-height: 1;
+  letter-spacing: -1px
+}
+.brow-services-note {
+  text-align: right;
+  font-size: 11px;
+  letter-spacing: 1.6px;
+  line-height: 1.9;
+  color: var(--muted)
+}
+.brow-services-inner {
+  display: grid;
+  grid-template-columns: minmax(0,.78fr) minmax(0,1fr);
+  column-gap: 64px;
+  align-items: start
+}
+.brow-services-media {
+  margin: 0;
+  overflow: hidden;
+  aspect-ratio: 3 / 4;
+  background: #cbb9a5
+}
+.brow-services-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 44%
+}
+.brow-service-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--line)
+}
+.brow-service { border-bottom: 1px solid var(--line) }
+.brow-service-row {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) auto;
+  align-items: center;
+  column-gap: 30px;
+  padding: 26px 0
+}
+.brow-service-info { min-width: 0 }
+.brow-service-name {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: 30px;
+  line-height: 1.05;
+  letter-spacing: .3px;
+  transition: color 250ms ease
+}
+@media (hover:hover) and (pointer:fine) {
+  .brow-service:hover .brow-service-name { color: var(--gold) }
+}
+.brow-service-desc {
+  margin-top: 12px;
+  font-size: 14px;
+  letter-spacing: 1.3px;
+  line-height: 1.9;
+  color: var(--muted);
+  max-width: 44ch
+}
+.brow-service-price {
+  justify-self: end;
+  font-family: var(--price-font);
+  font-weight: var(--price-weight);
+  font-variant-numeric: var(--price-numeric);
+  font-size: 23px;
+  letter-spacing: 0;
+  white-space: nowrap
+}
+/* Booking prompt · sits after the service rows so the decision to book is one
+   short reach from the prices. Mirrors the Permanent Makeup and Lash Lift
+   pricing actions: the gold button beside a quiet supporting note. */
+.brow-pricing-action {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-top: 35px
+}
+.brow-pricing-action > p {
+  max-width: 330px;
+  font-size: 10px;
+  line-height: 1.7;
+  letter-spacing: .85px;
+  color: var(--muted)
+}
+/* --------------------------------------------------------------------------
+   WHY BROW LAMINATION Â· editorial pause with a large macro photograph. The
+   shared image-led shell is retained for the routes that still use it; the
+   Brow page now pairs its copy with What to expect (below).
+   -------------------------------------------------------------------------- */
+.brow-why { padding: 12px 0 96px }
+.brow-why-inner {
+  display: grid;
+  grid-template-columns: minmax(0,.85fr) minmax(0,1fr);
+  column-gap: 72px;
+  align-items: center
+}
+.brow-why-media {
+  margin: 0;
+  overflow: hidden;
+  aspect-ratio: 4 / 5;
+  background: #cbb9a5
+}
+.brow-why-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 42%
+}
+.brow-why-title {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: 54px;
+  line-height: 1.02;
+  letter-spacing: -1px;
+  margin-top: 20px
+}
+.brow-why-lead {
+  margin-top: 22px;
+  font-size: 14px;
+  letter-spacing: 1.1px;
+  line-height: 1.95;
+  color: var(--muted);
+  max-width: 42ch
+}
+
+/* --------------------------------------------------------------------------
+   WHY + WHAT TO EXPECT Â· one editorial section, two balanced columns (Brow).
+   Left: why clients choose brow lamination. Right: the appointment itself. A
+   single shared ground and one subtle vertical hairline keep them reading as
+   one idea â€” no cards, no icons, no numbering.
+   -------------------------------------------------------------------------- */
+.brow-combined { padding: 88px 0 96px }
+.brow-combined-grid {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) minmax(0,1fr);
+  align-items: start
+}
+.brow-combined-grid > .brow-why-copy { padding-right: 72px }
+.brow-combined-grid > .brow-expect {
+  border-left: 1px solid var(--line);
+  padding-left: 72px
+}
+.brow-col-title {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: 40px;
+  line-height: 1.06;
+  letter-spacing: -.7px;
+  margin-top: 18px
+}
+.brow-list {
+  list-style: none;
+  margin: 40px 0 0;
+  padding: 0
+}
+.brow-list-item {
+  border-top: 1px solid var(--line);
+  padding: 16px 0
+}
+.brow-list-title {
+  font-family: var(--sans);
+  font-size: 11.5px;
+  font-weight: 500;
+  letter-spacing: 1.7px;
+  line-height: 1.5;
+  text-transform: uppercase
+}
+.brow-list-note {
+  margin-top: 8px;
+  font-size: 14px;
+  letter-spacing: 1.3px;
+  line-height: 1.9;
+  color: var(--muted)
+}
+
+/* --------------------------------------------------------------------------
+   TWO-TONE SPLIT MODIFIERS · page-specific, additive only. The base
+   .brow-combined rules above are untouched, so any other page using them
+   renders exactly as before. The container is always viewport-centred
+   (margin-inline:auto), so a hard-stop 50/50 section gradient lands the
+   colour edge exactly on the grid's column boundary at every width, while
+   the dark ground bleeds to the viewport edge. --dark-left is used by the
+   Lash Lift route, --dark-right by Brow Lamination & Tint.
+   -------------------------------------------------------------------------- */
+
+/* Full-bleed 50/50 grounds, split at the container (and viewport) centre. */
+.brow-combined.brow-combined--dark-left {
+  background: linear-gradient(to right, var(--dark) 50%, var(--ivory) 50%)
+}
+.brow-combined.brow-combined--dark-right {
+  background: linear-gradient(to left, var(--dark) 50%, var(--ivory) 50%)
+}
+
+/* The colour change replaces the vertical hairline between the columns. */
+.brow-combined--dark-left .brow-expect,
+.brow-combined--dark-right .brow-expect { border-left: 0 }
+
+/* Dark half · shared recolour (which column is dark differs per page). */
+.brow-combined--dark-left .brow-why-copy,
+.brow-combined--dark-right .brow-expect { color: var(--ivory) }
+.brow-combined--dark-left .brow-why-copy .brow-eyebrow,
+.brow-combined--dark-right .brow-expect .brow-eyebrow { color: var(--gold) }
+.brow-combined--dark-left .brow-why-copy .brow-col-title,
+.brow-combined--dark-right .brow-expect .brow-col-title,
+.brow-combined--dark-left .brow-why-copy .brow-list-title,
+.brow-combined--dark-right .brow-expect .brow-list-title { color: var(--ivory) }
+/* Descriptions: ivory at 75% — composites to ≈ #bdbbb8 on --dark, ≈ 9.6:1. */
+.brow-combined--dark-left .brow-why-copy .brow-why-lead,
+.brow-combined--dark-right .brow-expect .brow-why-lead,
+.brow-combined--dark-left .brow-why-copy .brow-list-note,
+.brow-combined--dark-right .brow-expect .brow-list-note {
+  color: rgba(245,242,239,.75)
+}
+/* List dividers: 1px ivory at 18% on the dark side. */
+.brow-combined--dark-left .brow-why-copy .brow-list-item,
+.brow-combined--dark-right .brow-expect .brow-list-item {
+  border-top-color: rgba(245,242,239,.18)
+}
+/* Focus ring that reads on the dark ground (gold ≈ 6.9:1 on --dark). */
+.brow-combined--dark-left .brow-why-copy :is(a,button):focus-visible,
+.brow-combined--dark-right .brow-expect :is(a,button):focus-visible {
+  outline-color: var(--gold)
+}
+
+/* --------------------------------------------------------------------------
+   REAL RESULTS Â· a large before / after comparison with restrained corner
+   labels and two supporting result close-ups. Existing studio imagery only.
+   -------------------------------------------------------------------------- */
+.brow-results { padding: 8px 0 92px }
+.brow-results-head { margin-bottom: 40px }
+.brow-results-feature {
+  position: relative;
+  margin: 0;
+  overflow: hidden;
+  aspect-ratio: 1.55;
+  background: #cbb9a5
+}
+.brow-results-feature img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 44%
+}
+.brow-results-feature:after {
+  content: '';
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 34%;
+  background: linear-gradient(to top,rgba(20,20,19,.46),transparent);
+  pointer-events: none
+}
+.brow-results-labels {
+  position: absolute;
+  inset: auto 0 0 0;
+  z-index: 1;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 0 26px 22px;
+  pointer-events: none
+}
+.brow-results-label {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 2.4px;
+  text-transform: uppercase;
+  color: #fffaf3
+}
+.brow-results-support {
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  gap: 18px;
+  margin-top: 18px
+}
+.brow-result-card { margin: 0 }
+.brow-result-media {
+  overflow: hidden;
+  aspect-ratio: 3 / 2;
+  background: #cbb9a5
+}
+.brow-result-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 30%
+}
+.brow-result-caption {
+  margin-top: 14px;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+  color: var(--muted)
+}
+
+/* --------------------------------------------------------------------------
+   REAL RESULTS Â· Brow-only refinement. A smaller, curated gallery: the
+   before / after feature is centred at a controlled width, and the two
+   supporting close-ups sit beneath it in a narrower portrait frame. Scoped to
+   body.svc-brow so the shared gallery used by the other routes is untouched.
+   -------------------------------------------------------------------------- */
+.svc-brow .brow-results-head { margin-bottom: 36px }
+.svc-brow .brow-results-feature {
+  width: 100%;
+  max-width: 780px;
+  margin-inline: auto;
+  aspect-ratio: 3 / 2
+}
+.svc-brow .brow-results-support {
+  width: 100%;
+  max-width: 640px;
+  margin: 22px auto 0
+}
+.svc-brow .brow-result-media { aspect-ratio: 4 / 5 }
+.svc-brow .brow-result-card:nth-child(1) .brow-result-media img { object-position: 50% 42% }
+.svc-brow .brow-result-card:nth-child(2) .brow-result-media img { object-position: 50% 32% }
+
+/* --------------------------------------------------------------------------
+   FINAL CTA Â· dark warm photographic close.
+   -------------------------------------------------------------------------- */
+.brow-cta { position: relative; isolation: isolate; overflow: hidden; padding: 0; text-align: center }
+.brow-cta-copy {
+  position: relative;
+  max-width: 860px;
+  margin-inline: auto;
+  padding: 92px 5.9%
+}
+.brow-cta h2 {
+  font-size: 50px;
+  line-height: 1.03;
+  letter-spacing: -.8px;
+  color: #f4eee5
+}
+.brow-cta-support {
+  margin-top: 20px;
+  font-size: 14px;
+  line-height: 1.7;
+  color: #ddd4c4
+}
+.brow-cta .button { margin-top: 32px }
+
+/* --------------------------------------------------------------------------
+   Reveal start state for this route only. Set only when JS runs and reduced
+   motion is not requested; opacity only, no geometry change. Targets match the
+   service-page reveal list in js/service-page.js exactly.
+   -------------------------------------------------------------------------- */
+html.motion-armed .svc-brow .brow-services-head,
+html.motion-armed .svc-brow .brow-services-inner,
+html.motion-armed .svc-brow .brow-combined-grid,
+html.motion-armed .svc-brow .brow-results-head,
+html.motion-armed .svc-brow .brow-results-feature,
+html.motion-armed .svc-brow .brow-results-support,
+html.motion-armed .svc-brow .brow-cta-copy { opacity: 0 }
+
+/* --------------------------------------------------------------------------
+   Responsive Â· compact desktop and mobile are art-directed, not a stack.
+   -------------------------------------------------------------------------- */
+@media (max-width:1300px) {
+  .brow-services-title { font-size: 48px }
+  .brow-why-title { font-size: 48px }
+  .brow-col-title { font-size: 38px }
+  .brow-service-name { font-size: 27px }
+  .brow-cta h2 { font-size: 46px }
+  .brow-services-inner { column-gap: 52px }
+  .brow-why-inner { column-gap: 58px }
+}
+@media (max-width:1050px) {
+  .brow-services { padding: 82px 0 78px }
+  .brow-services-title { font-size: 42px }
+  .brow-services-inner { grid-template-columns: minmax(0,.8fr) minmax(0,1fr); column-gap: 44px }
+  .brow-pricing-action { align-items: flex-start; flex-direction: column }
+  .brow-service-row { column-gap: 22px; padding: 22px 0 }
+  .brow-service-name { font-size: 25px }
+  .brow-service-price { font-size: 21px }
+  .brow-why { padding: 8px 0 82px }
+  .brow-why-title { font-size: 44px }
+  .brow-combined { padding: 74px 0 82px }
+  .brow-combined-grid > .brow-why-copy { padding-right: 52px }
+  .brow-combined-grid > .brow-expect { padding-left: 52px }
+  .brow-col-title { font-size: 36px }
+  .brow-cta h2 { font-size: 42px }
+}
+@media (max-width:800px) {
+  /* Services Â· header, then image, then the hairline rows. */
+  .brow-services { padding: 62px 0 66px }
+  .brow-services-head { flex-direction: column; align-items: flex-start; gap: 14px; margin-bottom: 34px }
+  .brow-services-intro .brow-eyebrow { margin-bottom: 14px }
+  .brow-services-title { font-size: 36px }
+  .brow-services-note { text-align: left }
+  .brow-services-inner { grid-template-columns: minmax(0,1fr); row-gap: 34px }
+  .brow-services-media { aspect-ratio: 4 / 5; max-width: 420px }
+  .brow-pricing-action .button { width: 100% }
+  .brow-service-row {
+    grid-template-columns: minmax(0,1fr);
+    grid-template-areas: "info" "price";
+    column-gap: 18px;
+    row-gap: 10px;
+    align-items: center;
+    padding: 24px 0
+  }
+  .brow-service-info { grid-area: info }
+  .brow-service-price { grid-area: price; justify-self: start; font-size: 21px }
+  .brow-service-name { font-size: 24px }
+  .brow-service-desc { font-size: 14px; max-width: none }
+
+  /* Why Â· image, then statement (routes that keep the image-led layout). */
+  .brow-why { padding: 0 0 62px }
+  .brow-why-inner { grid-template-columns: minmax(0,1fr); row-gap: 30px }
+  .brow-why-media { aspect-ratio: 4 / 3; max-width: none }
+  .brow-why-media img { object-position: 50% 34% }
+  .brow-why-title { font-size: 38px }
+
+  /* Why + What to expect (Brow) Â· the two columns stack, still one section. */
+  .brow-combined { padding: 56px 0 64px }
+  .brow-combined-grid { grid-template-columns: minmax(0,1fr) }
+  .brow-combined-grid > .brow-why-copy { padding-right: 0 }
+  .brow-combined-grid > .brow-expect {
+    border-left: 0;
+    margin-top: 44px;
+    padding: 44px 0 0;
+    border-top: 1px solid var(--line)
+  }
+  .brow-col-title { font-size: 32px }
+  .brow-list { margin-top: 32px }
+
+  /* Results Â· feature, then full-width supporting close-ups. */
+  .brow-results { padding: 0 0 64px }
+  .brow-results-head { margin-bottom: 30px }
+  .brow-results-feature { aspect-ratio: 1.35 }
+  .brow-results-feature img { object-position: 50% 42% }
+  .brow-results-labels { padding: 0 16px 16px }
+  .brow-results-support { grid-template-columns: minmax(0,1fr); gap: 26px; margin-top: 26px }
+  .brow-result-media { aspect-ratio: 3 / 2 }
+
+  /* Brow-only Â· keep the refined gallery tight on phones. */
+  .svc-brow .brow-results-support { max-width: 320px; margin: 26px auto 0 }
+
+  .brow-cta-copy { padding: 68px 5.9% }
+  .brow-cta h2 { font-size: 37px }
+  .brow-cta .button { width: 100%; max-width: 360px }
+}
+@media (max-width:540px) {
+  .brow-services { padding: 54px 0 58px }
+  .brow-services-title { font-size: 32px }
+  .brow-pricing-action { align-items: stretch; gap: 15px; margin-top: 28px }
+  .brow-pricing-action > p { max-width: none }
+  .brow-service-name { font-size: 22px }
+  .brow-service-desc { font-size: 14px }
+  .brow-service-price { font-size: 21px }
+  .brow-why-title { font-size: 33px }
+  .brow-col-title { font-size: 30px }
+  .brow-results-feature { aspect-ratio: 1.25 }
+  .brow-results-label { font-size: 10px; letter-spacing: 2px }
+  .brow-cta h2 { font-size: 33px }
+}
+@media (max-width:380px) {
+  .brow-service-name { font-size: 21px }
+}
+
+/* --------------------------------------------------------------------------
+   TWO-TONE SPLIT MODIFIERS · mobile band behaviour. Placed after the base
+   responsive rules so the overrides win at equal specificity.
+   -------------------------------------------------------------------------- */
+@media (max-width:800px) {
+  /* Mobile · the split becomes two full-width bands in DOM order. Section
+     padding moves into the columns (~56px top/bottom); side gutters stay
+     with .container. box-shadow + clip-path bleeds each dark band to the
+     viewport edges without causing horizontal overflow. */
+  .brow-combined.brow-combined--dark-left,
+  .brow-combined.brow-combined--dark-right { padding: 0; background: var(--ivory) }
+  .brow-combined--dark-left .brow-why-copy,
+  .brow-combined--dark-right .brow-expect {
+    background: var(--dark);
+    box-shadow: 0 0 0 100vmax var(--dark);
+    clip-path: inset(0 -100vmax);
+    padding: 56px 0
+  }
+  .brow-combined--dark-left .brow-expect,
+  .brow-combined--dark-right .brow-why-copy { padding: 56px 0 }
+  /* No hairline and no extra gap between the stacked bands. */
+  .brow-combined--dark-left .brow-expect,
+  .brow-combined--dark-right .brow-expect {
+    margin-top: 0;
+    border-top: 0
+  }
+}

@@ -1,0 +1,280 @@
+/* ==========================================================================
+   CONTACT PAGE · /contact/
+   Page-local layer for the production Contact route. Loaded AFTER
+   css/styles.css, which stays the design-system authority: this file reuses
+   its tokens (--ivory, --card, --ink, --dark, --gold, --muted, --line), the
+   Cormorant / Jost pairing, the button set, the footer, the dialog shell and
+   the motion tokens. Nothing here is Home-specific and styles.css is never
+   re-declared.
+   Scope: body.contact-page only.
+
+    Section order follows the approved service-route rhythm:
+    unified dark photographic hero (.le-hero, css/service-hero.css) → one
+    consolidated contact/location block on hairlines → simple dark final
+    booking CTA.
+    ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   HEADER · the route adopts the same approved dark header treatment as every
+   other route: the announcement, header and first band read as one continuous
+   surface. Structure and behaviour are shared; only colour is scoped here.
+   -------------------------------------------------------------------------- */
+.contact-page .header-shell { background: var(--dark) }
+.contact-page .site-header { color: #f4eee5 }
+.contact-page .menu-toggle { border-color: rgba(244,238,229,.34); background: transparent }
+.contact-page .menu-toggle span { background: #f4eee5 }
+@media (max-width:800px) {
+  .contact-page .enhanced .main-navigation a,
+  .contact-page .main-navigation.is-open a { color: #f5ede0 }
+}
+
+/* --------------------------------------------------------------------------
+   EDITORIAL EYEBROW · small tracked label with a short leading rule.
+   -------------------------------------------------------------------------- */
+.contact-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 1.9px;
+  text-transform: uppercase;
+  color: var(--muted)
+}
+.contact-eyebrow:before {
+  content: '';
+  flex: 0 0 auto;
+  width: 32px;
+  height: 1px;
+  background: currentColor;
+  opacity: .5
+}
+.contact-eyebrow-light { color: #c9bda8 }
+
+/* --------------------------------------------------------------------------
+    HERO ART DIRECTION · the route shares the unified .le-hero component from
+    css/service-hero.css (loaded after this file, as on the service routes).
+    Only the crop is route-specific: the booking photograph keeps its left
+    third dark and empty for the headline, with the tweezers right-of-center.
+    -------------------------------------------------------------------------- */
+.contact-page .le-hero-photo img { object-position: 58% 44% }
+
+@media (max-width:800px) {
+  /* Mobile crop · the shorter landscape frame holds the tweezers and tray. */
+  .contact-page .le-hero-photo img { object-position: 60% 42% }
+}
+
+/* --------------------------------------------------------------------------
+   CONTACT & LOCATION · editorial section head, then two columns on hairline
+   dividers (the FAQ column pattern). No cards, no action panels, no shadows.
+   -------------------------------------------------------------------------- */
+.contact-details { padding: 78px 0 84px }
+.contact-details-head { margin-bottom: 44px; max-width: 760px }
+.contact-details-title {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: 54px;
+  line-height: 1;
+  letter-spacing: -.8px;
+  margin-top: 16px
+}
+
+/* Two balanced columns separated by a hairline, like the FAQ service grid. */
+.contact-columns {
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  column-gap: 0;
+  align-items: start;
+  border-top: 1px solid var(--line)
+}
+.contact-column { padding: 40px 30px 26px; min-width: 0 }
+.contact-column:first-child { padding-left: 0 }
+.contact-column:last-child { padding-right: 0 }
+.contact-column + .contact-column { border-left: 1px solid var(--line) }
+.contact-column-title {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: 26px;
+  line-height: 1.12;
+  letter-spacing: -.2px;
+  margin-bottom: 20px
+}
+
+/* Contact rows · pure typographic hierarchy on hairlines, in the editorial
+   family of the service pages' price/service rows (service-pages.css): a
+   small tracked label, a confident serif value and a quiet text link. No
+   icons, no boxes — the value carries the row. */
+.contact-info-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--line)
+}
+.contact-info-item {
+  padding: 30px 0 32px;
+  border-bottom: 1px solid var(--line)
+}
+.contact-info-label {
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+  color: var(--muted)
+}
+.contact-info-value {
+  display: block;
+  margin-top: 12px;
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: 28px;
+  line-height: 1.28;
+  letter-spacing: .2px;
+  color: var(--ink);
+  font-style: normal
+}
+/* Value links reuse the service rows' hover exactly: gold, 250ms ease,
+   fine-pointer only (service-pages.css .brow-service-name pattern). */
+.contact-info-value a {
+  display: inline-block;
+  padding-block: 2px;
+  transition: color 250ms ease
+}
+@media (hover:hover) and (pointer:fine) {
+  .contact-info-item:hover .contact-info-value a { color: var(--gold) }
+}
+/* Numeric values follow the site's price convention exactly (styles.css
+   --price-* tokens, service-pages.css .pmu-price-amount): Jost 300 with
+   lining tabular figures — never serif old-style digits. */
+.contact-info-value-numeric {
+  font-family: var(--price-font);
+  font-weight: var(--price-weight);
+  font-variant-numeric: var(--price-numeric);
+  font-size: 23px;
+  letter-spacing: 1.2px;
+  line-height: 1.55
+}
+.contact-info-note { margin-top: 10px; font-size: 10.5px; letter-spacing: 1.6px }
+.contact-textlink {
+  display: inline-block;
+  padding-block: 3px;
+  color: #7a5e3a;
+  border-bottom: 1px solid #c4b295;
+  transition: color var(--duration-normal) var(--ease-premium), border-color var(--duration-normal) var(--ease-premium)
+}
+@media (hover:hover) and (pointer:fine) {
+  .contact-textlink:hover { color: #6e4e28; border-color: #7a5e3a }
+}
+
+/* --------------------------------------------------------------------------
+   FINAL BOOKING CTA · simple dark close, matching the FAQ page's "Still have
+   a question?" band. No photograph, no overlay.
+   -------------------------------------------------------------------------- */
+.contact-cta { padding: 84px 0 }
+.contact-cta-inner { max-width: 760px; margin-inline: auto; text-align: center }
+.contact-cta .contact-eyebrow { justify-content: center }
+.contact-cta-title {
+  font-size: 46px;
+  line-height: 1.04;
+  letter-spacing: -.6px;
+  color: #f4eee5;
+  margin-top: 16px
+}
+.contact-cta-support {
+  margin-top: 20px;
+  font-size: 14px;
+  line-height: 1.85;
+  color: #ddd4c4
+}
+.contact-cta-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 18px;
+  margin-top: 34px
+}
+
+/* --------------------------------------------------------------------------
+   DIALOG · reuses the shared .detail-dialog shell with a page-local content
+   id, mirroring the Home-only #dialog-content rules.
+   -------------------------------------------------------------------------- */
+#contact-dialog-content > .eyebrow:first-child,
+#contact-dialog-content > h2:first-child { padding-right: 58px }
+
+/* --------------------------------------------------------------------------
+   Reveal start state for this route. Only ever set when JS runs and reduced
+   motion is not requested; opacity only, no geometry change. Targets match
+   the contact-page reveal list in js/contact.js exactly.
+   -------------------------------------------------------------------------- */
+html.motion-armed .contact-page .site-header,
+html.motion-armed .contact-page .le-hero-lead,
+html.motion-armed .contact-page .le-hero-photo,
+html.motion-armed .contact-page .le-hero-body,
+html.motion-armed .contact-page .le-hero-caption,
+html.motion-armed .contact-details-head,
+html.motion-armed .contact-columns,
+html.motion-armed .contact-cta-inner { opacity: 0 }
+
+/* --------------------------------------------------------------------------
+   Responsive · compact desktop and mobile are art-directed, not a stack.
+   -------------------------------------------------------------------------- */
+@media (max-width:1300px) {
+  .contact-details-title { font-size: 48px }
+  .contact-cta-title { font-size: 42px }
+}
+
+@media (max-width:800px) {
+  .contact-details { padding: 52px 0 56px }
+  .contact-details-head { margin-bottom: 30px }
+  .contact-details-title { font-size: 36px }
+
+  /* One column, hairline-separated blocks. */
+  .contact-columns { grid-template-columns: minmax(0,1fr) }
+  .contact-column,
+  .contact-column:first-child,
+  .contact-column:last-child { padding: 0 0 26px; border-left: 0 }
+  .contact-column + .contact-column { border-top: 1px solid var(--line); padding-top: 30px }
+  .contact-column-title { font-size: 24px }
+
+  /* Mobile rows · compact two-part structure: the small tracked label on the
+     left, the value right-aligned on the same baseline. The duplicate action
+     links (Call now / View Instagram / Get directions) are hidden — the
+     values themselves carry the same tel:/Instagram/Maps links, so nothing
+     is lost — and each linked row becomes one full-width tap target via the
+     stretched-link ::after. */
+  .contact-info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: first baseline;
+    column-gap: 24px;
+    position: relative;
+    padding: 18px 0
+  }
+  .contact-info-label { flex: 0 0 auto }
+  .contact-info-value {
+    margin-top: 0;
+    font-size: 18px;
+    line-height: 1.45;
+    text-align: right
+  }
+  .contact-info-value-numeric { font-size: 15px; letter-spacing: .8px; line-height: 1.7 }
+  .contact-info-value a { display: inline; padding-block: 0; position: static }
+  .contact-info-value a:after {
+    content: '';
+    position: absolute;
+    inset: 0
+  }
+  .contact-info-note { display: none }
+
+  .contact-cta { padding: 62px 0 }
+  .contact-cta-title { font-size: 36px }
+  .contact-cta-actions { gap: 14px }
+  .contact-cta-actions .button { width: 100%; max-width: 360px }
+}
+
+@media (max-width:540px) {
+  .contact-details-title { font-size: 32px }
+  .contact-column-title { font-size: 22px }
+  .contact-info-value { font-size: 17px }
+  .contact-info-value-numeric { font-size: 14px; letter-spacing: .6px }
+  .contact-cta-title { font-size: 32px }
+}

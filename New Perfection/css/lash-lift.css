@@ -1,0 +1,301 @@
+/* ==========================================================================
+   LASH LIFT ROUTE · body.svc-lashlift.
+
+   The route reuses the shared service-page components defined in
+   css/service-pages.css (the editorial pause, the real-results gallery and the
+   dark photographic CTA). This file owns two things:
+     1. "Choose your lift" — the two-service version of the approved Lash
+        Extensions editorial pricing system. Same serif names, quiet
+        descriptors, hairline language, active treatment and price scale,
+        simplified to two options shown together (no carousel, no refills).
+     2. The reveal start-state and art direction for the Lash Lift photographs
+        used by the remaining shared sections.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Reveal start state for this route. Set only when JS runs and reduced motion
+   is not requested; opacity only, no geometry change. Targets match the shared
+   reveal list in js/service-page.js exactly.
+   -------------------------------------------------------------------------- */
+html.motion-armed .svc-lashlift .ll-edit,
+html.motion-armed .svc-lashlift .brow-combined-grid,
+html.motion-armed .svc-lashlift .brow-why-media,
+html.motion-armed .svc-lashlift .brow-why-copy,
+html.motion-armed .svc-lashlift .brow-results-head,
+html.motion-armed .svc-lashlift .ll-results-grid,
+html.motion-armed .svc-lashlift .brow-results-feature,
+html.motion-armed .svc-lashlift .brow-results-support,
+html.motion-armed .svc-lashlift .brow-cta-copy { opacity: 0 }
+
+/* --------------------------------------------------------------------------
+   Art direction · the remaining Lash Lift photographs are square before / after
+   pairs, so the shared crops hold both the relaxed and the lifted lashes, and
+   the eye, in view.
+   -------------------------------------------------------------------------- */
+.svc-lashlift .brow-why-media img { object-position: 50% 50% }
+.svc-lashlift .brow-results-feature img { object-position: 50% 46% }
+.svc-lashlift .brow-result-media img { object-position: 50% 42% }
+.svc-lashlift .brow-cta-media img { object-position: 50% 36% }
+
+/* The shared head gap is cleared here; the results grid owns its own top
+   spacing instead. */
+.svc-lashlift .brow-results-head { margin-bottom: 0 }
+
+/* --------------------------------------------------------------------------
+   REAL RESULTS · a modest two-up of equal square result photographs. Unlike
+   the Brow route's feature-plus-support gallery, both images share one fixed
+   square frame, capped at lashlift.webp's native 510px so they read as a
+   matched pair rather than a feature and its supports.
+   -------------------------------------------------------------------------- */
+.ll-results-grid {
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,510px));
+  justify-content: center;
+  gap: 18px;
+  margin-top: 40px
+}
+.ll-result-card { margin: 0 }
+.ll-result-media {
+  overflow: hidden;
+  aspect-ratio: 1 / 1;
+  background: #cbb9a5
+}
+.ll-result-media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 50%
+}
+.ll-result-caption {
+  margin-top: 14px;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+  color: var(--muted)
+}
+
+@media (max-width:800px) {
+  .svc-lashlift .brow-why-media img { object-position: 50% 46% }
+  .svc-lashlift .brow-results-feature img { object-position: 50% 44% }
+  .svc-lashlift .brow-result-media img { object-position: 50% 40% }
+  .ll-results-grid { grid-template-columns: minmax(0,1fr); max-width: 320px; gap: 26px; margin: 26px auto 0 }
+}
+
+/* ==========================================================================
+   CHOOSE YOUR LIFT · the two-service version of the Lash Extensions editorial
+   pricing system. Two options are always visible together; selecting one shows
+   its detail panel. Typography, hairlines, active state and price scale are
+   carried over from Lash Extensions and only the architecture is simplified.
+   ========================================================================== */
+.ll-edit { padding: 96px 0 92px }
+.ll-edit-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 44px;
+  margin-bottom: 52px
+}
+.ll-edit-eyebrow {
+  margin-bottom: 20px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 2px;
+  line-height: 1.65;
+  text-transform: uppercase;
+  color: var(--muted)
+}
+.ll-edit-title {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: clamp(44px, 5.1vw, 74px);
+  line-height: 1;
+  letter-spacing: -1.5px
+}
+.ll-edit-intro {
+  max-width: 390px;
+  padding-bottom: 4px;
+  font-size: 11px;
+  line-height: 1.9;
+  letter-spacing: 1px;
+  color: var(--muted)
+}
+
+/* Photo + pricing split · the same photograph / content grid used by the Brow
+   route's services section, so the service pages share one pricing rhythm.
+   Unlike the Brow photo (a native 3:4 portrait), this source is square
+   (736x736), so the frame matches at 1:1 and object-fit: cover trims almost
+   nothing. The photo stacks above the pricing content on mobile. */
+.ll-edit-inner {
+  display: grid;
+  grid-template-columns: minmax(0,.78fr) minmax(0,1fr);
+  column-gap: 64px;
+  align-items: start
+}
+.ll-edit-media {
+  margin: 0;
+  overflow: hidden;
+  aspect-ratio: 1 / 1;
+  background: #cbb9a5
+}
+.ll-edit-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 50%
+}
+
+.ll-options {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) minmax(0,1fr);
+  column-gap: 72px
+}
+.ll-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 22px 0;
+  border-bottom: 1px solid var(--line);
+  font-family: var(--serif);
+  font-size: 31px;
+  line-height: 1.05;
+  color: var(--muted);
+  transition: color 180ms ease, border-color 180ms ease
+}
+.ll-option small {
+  display: block;
+  margin-top: 8px;
+  font-family: var(--sans);
+  font-size: 10px;
+  line-height: 1.5;
+  letter-spacing: 1.4px;
+  color: var(--muted)
+}
+.ll-option > span:last-child {
+  flex: 0 0 auto;
+  font-family: var(--sans);
+  font-size: 19px;
+  color: var(--muted);
+  transition: color 180ms ease
+}
+.ll-option[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--ink) }
+.ll-option[aria-selected="true"] > span:last-child { transform: rotate(45deg); color: var(--ink) }
+.ll-option[aria-selected="false"] { color: var(--muted) }
+.ll-option:focus-visible { outline: 2px solid var(--gold); outline-offset: 5px }
+
+/* Refined hover / keyboard-focus feedback. The service name and its arrow warm
+   to the approved site accent (--gold, the same token behind the ABOUT /
+   SERVICES navigation), while the descriptor stays muted. Scoped to the
+   unselected option so it can never read as the active service, and gated to
+   fine pointers so a tap never leaves a stuck hover. Typography only: no box,
+   glow, movement or scale. */
+@media (hover: hover) and (pointer: fine) {
+  .ll-option[aria-selected="false"]:hover { color: var(--gold) }
+  .ll-option[aria-selected="false"]:hover > span:last-child { color: var(--gold) }
+}
+.ll-option[aria-selected="false"]:focus-visible { color: var(--gold) }
+.ll-option[aria-selected="false"]:focus-visible > span:last-child { color: var(--gold) }
+.ll-arrow { display: block; width: 1em; height: 1em; pointer-events: none }
+
+.ll-detail { margin-top: 46px }
+/* Selected-service panel · the approved light treatment, mirroring the Lash
+   Extensions detail: a quiet light card ground, the page's own ink and the
+   shared hairline language. */
+.ll-profile {
+  position: relative;
+  padding: 28px 36px 12px;
+  background: var(--card)
+}
+.ll-profile + .ll-profile { margin-top: 30px }
+.ll-profile[hidden] { display: none }
+.ll-profile:focus-visible { outline: 2px solid var(--gold); outline-offset: 5px }
+.ll-tabs-ready .ll-profile { margin: 0 }
+.ll-profile-top {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 1.1px;
+  line-height: 1.5
+}
+.ll-profile-top span { padding-inline: 4px }
+.ll-profile h3 {
+  margin-top: 18px;
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: clamp(30px, 3vw, 44px);
+  line-height: 1.08;
+  letter-spacing: -.5px
+}
+.ll-profile-description {
+  margin-top: 16px;
+  max-width: 57ch;
+  font-size: 11px;
+  line-height: 1.9;
+  letter-spacing: .65px
+}
+.ll-prices { margin: 26px 0 0 }
+.ll-prices > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 20px;
+  padding-block: 13px;
+  border-top: 1px solid var(--line)
+}
+.ll-prices dt { font-size: 10px; letter-spacing: 1px }
+.ll-prices dd { margin: 0; font-family: var(--price-font); font-weight: var(--price-weight); font-variant-numeric: var(--price-numeric); font-size: 23px; line-height: 1.1; letter-spacing: 0; white-space: nowrap }
+
+/* Booking prompt · sits after the price cards, outside both tab panels, so the
+   decision to book stays one short reach from the prices whichever lift is
+   selected. Mirrors the Permanent Makeup pricing action: the gold button beside
+   a quiet supporting note. */
+.ll-edit-action {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-top: 35px
+}
+.ll-edit-action > p {
+  max-width: 330px;
+  font-size: 10px;
+  line-height: 1.7;
+  letter-spacing: .85px;
+  color: var(--muted)
+}
+
+@media (max-width:1050px) {
+  .ll-edit { padding: 82px 0 76px }
+  .ll-edit-inner { grid-template-columns: minmax(0,.8fr) minmax(0,1fr); column-gap: 44px }
+  .ll-edit-action { align-items: flex-start; flex-direction: column }
+  .ll-options { column-gap: 48px }
+  .ll-option { font-size: 27px }
+}
+@media (max-width:800px) {
+  .ll-edit { padding: 62px 0 64px }
+  .ll-edit-head { flex-direction: column; align-items: flex-start; gap: 14px; margin-bottom: 32px }
+  .ll-edit-title { font-size: 48px; letter-spacing: -1px }
+  .ll-edit-intro { max-width: none }
+  .ll-edit-inner { grid-template-columns: minmax(0,1fr); row-gap: 34px }
+  .ll-edit-media { aspect-ratio: 1 / 1; max-width: 420px }
+  .ll-edit-action .button { width: 100% }
+  .ll-options { column-gap: 32px }
+  .ll-option { font-size: 23px; padding: 16px 0 }
+  .ll-option small { font-size: 10px; letter-spacing: .8px; margin-top: 6px }
+  .ll-option > span:last-child { font-size: 16px }
+  .ll-detail { margin-top: 30px }
+  .ll-profile { padding: 23px 26px 10px }
+  .ll-profile h3 { font-size: 34px }
+  .ll-profile-description { max-width: none }
+}
+@media (max-width:540px) {
+  .ll-edit-title { font-size: 43px }
+  .ll-prices dd { font-size: 21px }
+  .ll-edit-action { align-items: stretch; gap: 15px; margin-top: 28px }
+  .ll-edit-action > p { max-width: none }
+}
+@media (max-width:360px) {
+  .ll-edit-title { font-size: 38px }
+  .ll-options { grid-template-columns: minmax(0,1fr); column-gap: 0 }
+  .ll-option { font-size: 25px }
+}

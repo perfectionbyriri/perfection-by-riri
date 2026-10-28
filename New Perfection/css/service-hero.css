@@ -1,0 +1,165 @@
+/* ==========================================================================
+   UNIFIED SERVICE HERO · the shared opening band for the new Permanent Makeup,
+   Lash Lift and Brow Lamination & Tint routes.
+
+   It reuses the approved Lash Extensions hero component (.le-hero), its design
+   tokens (--dark, --ivory, type scale, spacing) and its responsive behaviour,
+   so all four service pages read as one premium, dark, editorial family.
+
+   This file is linked only by the three new routes. The Lash Extensions page
+   does not load it, so its approved hero is completely untouched.
+   ========================================================================== */
+
+.le-hero {
+  --le-gutter: max(5.9vw, calc((100vw - 1272px) / 2));
+  display: grid;
+  grid-template-columns: 53% 47%;
+  grid-template-rows: auto auto;
+  position: relative;
+  isolation: isolate;
+  min-height: 650px;
+  color: var(--ivory);
+  background: var(--dark);
+}
+.le-hero-photo { grid-area: 1 / 1 / 3 / 3; min-width: 0; min-height: 0; margin: 0; }
+.le-hero-photo img { width: 100%; height: 100%; position: absolute; inset: 0; object-fit: cover; object-position: 50% 45%; }
+.le-hero-lead { grid-area: 1 / 1; z-index: 1; padding: 64px 0 0 var(--le-gutter); align-self: end; }
+.le-hero-lead .le-label { color: var(--ivory); margin-bottom: 25px; }
+.le-hero h1 { font-size: clamp(60px, 5.6vw, 86px); line-height: .99; letter-spacing: -2px; }
+.le-hero-body { grid-area: 2 / 1; z-index: 1; padding: 30px 0 64px var(--le-gutter); }
+.le-hero-body > p { font-size: 14px; line-height: 1.85; letter-spacing: 1.25px; }
+.le-hero-body .button { margin-top: 28px; }
+.le-hero-caption { grid-area: 2 / 2; z-index: 1; justify-self: end; align-self: end; text-align: right; padding: 0 var(--le-gutter) 28px 0; font-size: 10px; letter-spacing: 1.8px; line-height: 1.8; }
+.le-hero .le-label { font-size: 11px; font-weight: 500; letter-spacing: 2px; line-height: 1.65; }
+
+/* --------------------------------------------------------------------------
+   DARK SERVICE HEADER · the new heroes open on the dark photographic band, so
+   these two routes adopt the exact approved dark header treatment already used
+   by Lash Extensions and Brow Lamination & Tint. Announcement, header and hero
+   read as one continuous dark surface ending at the first ivory section.
+   -------------------------------------------------------------------------- */
+.svc-pmu .header-shell,
+.svc-lashlift .header-shell { background: var(--dark); }
+.svc-pmu .site-header,
+.svc-lashlift .site-header { color: #f4eee5; }
+.svc-pmu .menu-toggle,
+.svc-lashlift .menu-toggle { border-color: rgba(244,238,229,.34); background: transparent; }
+.svc-pmu .menu-toggle span,
+.svc-lashlift .menu-toggle span { background: #f4eee5; }
+
+/* --------------------------------------------------------------------------
+   ART DIRECTION · one shared composure, three intentional crops. The vertical
+   position is tuned to each photograph's subject: eyebrows, eyes and lips for
+   Permanent Makeup; the lifted lashes and eye for Lash Lift; the laminated
+   brows for Brow Lamination & Tint.
+   -------------------------------------------------------------------------- */
+.svc-pmu .le-hero-photo img { object-position: 62% 44%; }
+.svc-lashlift .le-hero-photo img { object-position: 50% 34%; }
+.svc-brow .le-hero-photo img { object-position: 64% 42%; }
+
+@media (max-width: 1050px) {
+  .le-hero { min-height: 585px; }
+  .le-hero-lead { padding-top: 70px; }
+  .le-hero h1 { font-size: 64px; }
+}
+@media (max-width: 800px) {
+  /* LEGACY STACKED HERO · now scoped to the Contact page only, so that route
+     stays pixel-identical while the three service routes adopt the PMU scene. */
+  .contact-page .le-hero { grid-template-columns: 1fr; grid-template-rows: auto auto auto; min-height: 0; }
+  .contact-page .le-hero-lead { grid-area: 1 / 1; padding: 34px 5.9% 27px; }
+  .contact-page .le-hero-lead .le-label { font-size: 11px; letter-spacing: 1.4px; margin-bottom: 17px; }
+  .contact-page .le-hero h1 { font-size: clamp(44px, 8.8vw, 70px); line-height: .98; letter-spacing: -1.2px; }
+  .contact-page .le-hero-photo { grid-area: 2 / 1; height: clamp(255px, 66vw, 420px); position: relative; }
+  .contact-page .le-hero-body { grid-area: 3 / 1; display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 14px 25px; padding: 26px 5.9% 25px; }
+  .contact-page .le-hero-body > p { font-size: 14px; letter-spacing: .8px; }
+  .contact-page .le-hero-body .button { margin: 0; }
+  .contact-page .le-hero-caption { display: none; }
+
+  /* MOBILE SCENE · Lash Extensions, Lash Lift and Brow Lamination & Tint adopt
+     the approved PMU mobile hero: one full-bleed photo scene directly under
+     the dark header, the same gradient overlay, a gold kicker, bottom-aligned
+     copy and a full-width gold button. DOM, #content, aria-labelledby and the
+     html.motion-armed reveal targets are unchanged. */
+  .svc-lash .le-hero,
+  .svc-lashlift .le-hero,
+  .svc-brow .le-hero {
+    grid-template-columns: minmax(0,1fr);
+    grid-template-rows: minmax(0,1fr) auto;
+    min-height: clamp(620px, calc(100svh - 144px), 700px);
+  }
+  .svc-lash .le-hero-photo,
+  .svc-lashlift .le-hero-photo,
+  .svc-brow .le-hero-photo {
+    position: absolute;
+    inset: 0;
+    grid-area: 1 / 1 / 3 / 2;
+    height: auto;
+  }
+  /* Same overlay values as .svc-pmu .pmu-hero-media:after on mobile: darker at
+     the top (blends with the header) and bottom (legibility), lighter middle. */
+  .svc-lash .le-hero-photo:after,
+  .svc-lashlift .le-hero-photo:after,
+  .svc-brow .le-hero-photo:after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(180deg,rgba(20,20,19,.5) 0%,rgba(20,20,19,.08) 38%,rgba(20,20,19,.82) 100%),
+      linear-gradient(90deg,rgba(20,20,19,.62) 0%,rgba(20,20,19,.18) 82%);
+  }
+  .svc-lash .le-hero-lead,
+  .svc-lashlift .le-hero-lead,
+  .svc-brow .le-hero-lead {
+    grid-area: 1 / 1;
+    align-self: end;
+    width: 100%;
+    padding: 118px 5.9% 24px;
+  }
+  .svc-lash .le-hero-lead .le-label,
+  .svc-lashlift .le-hero-lead .le-label,
+  .svc-brow .le-hero-lead .le-label { color: var(--gold); margin-bottom: 17px; font-size: 10px; letter-spacing: 1.6px; }
+  .svc-lash .le-hero h1,
+  .svc-lashlift .le-hero h1,
+  .svc-brow .le-hero h1 { font-size: clamp(42px,12vw,54px); line-height: .96; letter-spacing: -1.1px; }
+  .svc-lash .le-hero-body,
+  .svc-lashlift .le-hero-body,
+  .svc-brow .le-hero-body { grid-area: 2 / 1; display: block; width: 100%; padding: 0 5.9% 34px; }
+  .svc-lash .le-hero-body > p,
+  .svc-lashlift .le-hero-body > p,
+  .svc-brow .le-hero-body > p { max-width: 48ch; font-size: 14px; letter-spacing: .8px; }
+  .svc-lash .le-hero-body .button,
+  .svc-lashlift .le-hero-body .button,
+  .svc-brow .le-hero-body .button { width: 100%; margin: 20px 0 0; }
+  .svc-lash .le-hero-caption,
+  .svc-lashlift .le-hero-caption,
+  .svc-brow .le-hero-caption { display: none; }
+  /* Optional light text link (Lash Extensions "Find your look"), styled like
+     PMU's .pmu-text-link-light; 44px tap target kept. */
+  .svc-lash .le-hero-body .le-text-link { margin: 10px 0 0; min-height: 44px; grid-column: auto; color: #f4eee5; }
+
+  /* Per-page mobile crops · the eye / brows stay in the upper-middle of the
+     tall scene, clear of the bottom-aligned copy. */
+  .svc-lashlift .le-hero-photo img { object-position: 50% 26%; }
+  .svc-brow .le-hero-photo img { object-position: 62% 28%; }
+}
+@media (max-width: 540px) {
+  /* Contact keeps the legacy stacked refinements (untouched page). */
+  .contact-page .le-hero-body { display: flex; flex-wrap: wrap; gap: 16px; }
+  .contact-page .le-hero-body > p { flex: 1 1 100%; }
+  .contact-page .le-hero-body > p br { display: none; }
+  .contact-page .le-hero-body .button { width: 100%; }
+
+  /* Match PMU's ≤540 scene refinement. */
+  .svc-lash .le-hero-lead,
+  .svc-lashlift .le-hero-lead,
+  .svc-brow .le-hero-lead { padding: 108px 5.9% 22px; }
+  .svc-lash .le-hero-body,
+  .svc-lashlift .le-hero-body,
+  .svc-brow .le-hero-body { padding-block: 0 32px; }
+  .svc-lash .le-hero-body .button,
+  .svc-lashlift .le-hero-body .button,
+  .svc-brow .le-hero-body .button { margin-top: 18px; }
+}
+@media (max-width: 360px) {
+  .contact-page .le-hero h1 { font-size: 35px; }
+}

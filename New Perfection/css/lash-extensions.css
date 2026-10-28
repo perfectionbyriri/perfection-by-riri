@@ -1,0 +1,336 @@
+/* Lash Extensions / The Lash Edit. Shared fonts, colors, buttons and shell
+   remain owned by styles.css and service-pages.css. All rules are page-local. */
+.le-page { --le-gutter: max(5.9vw, calc((100vw - 1272px) / 2)); }
+.le-page :where(figure) { margin: 0; }
+.le-wrap { width: 88.2%; max-width: var(--page-width); margin-inline: auto; }
+.le-label { font-size: 11px; font-weight: 500; letter-spacing: 2px; line-height: 1.65; }
+.le-page h2 { font-size: clamp(44px, 5.1vw, 74px); letter-spacing: -1.5px; }
+.le-text-link { display: inline-flex; align-items: center; gap: 20px; min-height: 44px; font-size: 10px; font-weight: 500; letter-spacing: 1.3px; }
+.le-text-link span { font-size: 19px; transition: transform 180ms var(--ease-premium); }
+
+/* Icon fix · monochrome inline-SVG arrows replace the previous Unicode arrow
+   glyphs (U+2192/U+2197/U+2193), which iOS Safari could resolve through Apple
+   Color Emoji. The icon scales from the wrapper's font-size, inherits the text
+   colour via currentColor, and never intercepts pointer events. */
+.le-arrow { display: block; width: 1em; height: 1em; pointer-events: none; }
+.le-mobile-hint span { display: inline-flex; align-items: center; gap: 5px; }
+
+/* Page-entry start state · the Lash Extensions route now joins the same shared
+   reveal system as the other service pages and Contact. Only the route's own
+   section blocks are hidden pre-paint; the hero start states are shared in
+   css/service-pages.css. No-JS and reduced-motion visitors render fully. */
+html.motion-armed .svc-lash .le-discovery,
+html.motion-armed .svc-lash .le-results,
+html.motion-armed .svc-lash .le-care,
+html.motion-armed .svc-lash .le-questions,
+html.motion-armed .svc-lash .le-booking { opacity: 0 }
+.le-page summary:focus-visible { outline: 2px solid var(--gold); outline-offset: 5px; }
+.le-page summary { cursor: pointer; touch-action: manipulation; }
+.le-page :is(section, article, details) { scroll-margin-top: 32px; }
+
+/* Hero base rules come from css/service-hero.css (shared source of truth).
+   Only the Lash Extensions art direction and the hero CTA link are page-specific. */
+.svc-lash .le-hero-photo img { object-position: 78% 43%; }
+.le-hero-body .le-text-link { display: flex; width: fit-content; margin-top: 12px; }
+
+/* Editorial consultation: a typographic index and one contextual profile. */
+.le-discovery { padding-block: 110px 72px; }
+.le-section-head { display: flex; justify-content: space-between; align-items: end; gap: 40px; margin-bottom: 62px; }
+.le-section-head .le-label { margin-bottom: 20px; color: var(--muted); }
+.le-intro { font-size: 14px; line-height: 1.9; letter-spacing: 1px; max-width: 390px; padding-bottom: 4px; }
+.le-intro .le-text-link { margin-top: 12px; }
+.le-consultation { display: grid; grid-template-columns: .85fr 1.15fr; gap: 9%; align-items: start; }
+.le-style-nav { display: flex; flex-direction: column; }
+.le-mobile-hint { display: none; }
+.le-style-link { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 20px 0; border-bottom: 1px solid var(--line); font-family: var(--serif); font-size: 31px; line-height: 1.05; transition: color 250ms ease; }
+.le-style-link:first-child { border-top: 1px solid var(--line); }
+.le-style-link small { display: block; margin-top: 8px; font-family: var(--sans); font-size: 10px; line-height: 1.5; letter-spacing: 1.4px; color: var(--muted); }
+.le-style-link > span:last-child { font-family: var(--sans); font-size: 19px; color: var(--muted); transition: color 250ms ease; }
+.le-style-link[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--ink); }
+.le-style-link[aria-selected="true"] > span:last-child { transform: rotate(45deg); color: var(--ink); }
+.le-style-link[aria-selected="false"] { color: var(--muted); }
+@media (hover: hover) and (pointer: fine) {
+  .le-style-link[aria-selected="false"]:hover { color: var(--gold); }
+  .le-style-link[aria-selected="false"]:hover > span:last-child { color: var(--gold); }
+}
+.le-wispy-note { margin-top: 30px; max-width: 380px; }
+.le-wispy-note > p:last-of-type { margin-top: 10px; font-size: 10px; line-height: 1.9; letter-spacing: .65px; color: var(--muted); }
+.le-profile { position: relative; padding: 28px 36px 12px; background: var(--card); }
+.le-profile + .le-profile { margin-top: 30px; }
+.le-profile[hidden] { display: none; }
+.le-profile:focus-visible { outline: 2px solid var(--gold); outline-offset: 5px; }
+.le-tabs-ready .le-profile { margin: 0; }
+.le-profile-top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
+.le-profile-top .le-label { font-size: 10px; letter-spacing: 1.1px; }
+.le-profile-top .le-label span { padding-inline: 4px; }
+.le-study-label { font-size: 10px; letter-spacing: 1px; color: var(--muted); }
+.le-lash-study { display: block; width: 230px; height: 111px; margin: 5px auto 0; color: var(--ink); }
+.le-profile h3 { font-family: var(--serif); font-size: clamp(30px, 3vw, 44px); font-weight: 400; line-height: 1.08; letter-spacing: -.5px; }
+.le-profile-description { margin-top: 16px; max-width: 57ch; font-size: 14px; line-height: 1.9; letter-spacing: .65px; min-height: 84px; }
+.le-prices { margin: 26px 0 0; }
+.le-prices > div { display: flex; align-items: baseline; justify-content: space-between; gap: 20px; padding-block: 13px; border-top: 1px solid var(--line); }
+.le-prices dt { font-size: 10px; letter-spacing: 1px; }
+.le-prices dt small { display: block; color: var(--muted); font-size: 10px; letter-spacing: .4px; margin-top: 3px; }
+.le-prices dd { margin: 0; font-family: var(--price-font); font-weight: var(--price-weight); font-variant-numeric: var(--price-numeric); font-size: 23px; line-height: 1.1; letter-spacing: 0; white-space: nowrap; }
+.le-refills { border-top: 1px solid var(--line); margin-top: 5px; }
+.le-refills-heading { min-height: 58px; display: flex; align-items: center; gap: 12px; font-size: 10px; letter-spacing: 1px; }
+.le-refills-heading span { margin-left: auto; font-size: 10px; color: var(--muted); }
+.le-question-list summary::-webkit-details-marker { display: none; }
+.le-question-list summary::after { content: '+'; font-size: 20px; font-weight: 300; }
+.le-question-list details[open] summary::after { content: '−'; }
+.le-refills table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.le-refills caption { text-align: left; font-size: 10px; letter-spacing: 1px; padding-bottom: 14px; }
+.le-refills th { font-weight: 400; text-align: left; }
+.le-refills thead { font-size: 10px; color: var(--muted); }
+.le-refills td, .le-refills th { padding: 9px 0; border-bottom: 1px solid var(--line); }
+.le-refills tbody td { font-weight: var(--price-weight); font-variant-numeric: var(--price-numeric); white-space: nowrap; }
+.le-refills :is(td, th):not(:first-child) { text-align: right; }
+.le-refills > p { padding-block: 15px; font-size: 10px; letter-spacing: .6px; color: var(--muted); }
+.le-service-foot { display: flex; justify-content: space-between; gap: 24px; align-items: center; border-top: 1px solid var(--line); margin-top: 50px; padding-top: 25px; font-size: 10px; line-height: 1.8; letter-spacing: 1px; }
+.le-service-foot strong { font-size: 19px; font-family: var(--price-font); font-weight: var(--price-weight); font-variant-numeric: var(--price-numeric); letter-spacing: 0; margin-left: 30px; white-space: nowrap; }
+/* Booking prompt · one instance after the whole consultation, never inside a
+   style tab, so it stays visible whichever look is selected. Mirrors the
+   Permanent Makeup, Lash Lift and Brow pricing actions. */
+.le-pricing-action { display: flex; align-items: center; gap: 24px; margin-top: 35px; }
+.le-pricing-action > p { max-width: 330px; font-size: 10px; line-height: 1.7; letter-spacing: .85px; color: var(--muted); }
+
+/* Real results: one equal-height row of three figures. Each figure's flex-grow
+   matches its frame's aspect ratio, so every frame resolves to the SAME height
+   (h = free space ÷ Σgrow) while widths follow the ratios — no dead space, no
+   distortion. Portrait (912/1136) and detail (680/510) frames use their exact
+   native ratios, so object-fit never crops them. The lead keeps a light
+   hierarchy: flex-grow 1.37 ≈ 1.25 × its native 1.095, with the frame at the
+   same 1.37 so the row stays level (only the tolerant before/after composite
+   gives up a thin top/bottom sliver). */
+.le-results { padding-block: 95px 100px; color: var(--ivory); background: var(--dark); }
+.le-results .le-label { color: var(--gold); }
+.le-results .le-section-head { margin-bottom: 55px; }
+.le-results .le-section-head .le-label { font-size: 13px; }
+.le-results .le-intro { font-size: 15px; color: #e0e0e0; }
+.le-result-grid { display: flex; gap: clamp(16px, 1.7vw, 24px); }
+.le-result { display: flex; flex-direction: column; min-width: 0; }
+.le-result-lead { flex: 1.369 1 0; }
+.le-result-portrait { flex: .803 1 0; }
+.le-result-detail { flex: 1.333 1 0; }
+.le-result-frame { position: relative; }
+.le-result-lead .le-result-frame { aspect-ratio: 1.369; }
+.le-result-portrait .le-result-frame { aspect-ratio: 912 / 1136; }
+.le-result-detail .le-result-frame { aspect-ratio: 680 / 510; }
+.le-result-frame img { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: cover; }
+/* Natural / Extensions tags sit directly on the lead image's two halves
+   (aria-hidden — the caption already names both sides). */
+.le-result-badge { position: absolute; top: 16px; left: 16px; z-index: 1; padding: 8px 13px; font-size: 11px; font-weight: 500; letter-spacing: 2px; line-height: 1; text-transform: uppercase; color: #fff; background: rgba(20, 20, 19, .55); border: 1px solid rgba(255, 255, 255, .4); }
+.le-result-badge--after { left: calc(50% + 16px); }
+/* Unified captions: Jost, 13px, uppercase, left-aligned, AA contrast on dark.
+   A two-line min-height keeps every caption on one baseline. */
+.le-result figcaption { margin-top: 13px; min-height: 3.2em; font-size: 13px; font-weight: 500; letter-spacing: 1.1px; line-height: 1.6; text-transform: uppercase; color: #e0e0e0; }
+/* Quote strip: full-width, separated by a 1px ivory hairline at 18%. Quote
+   left, CTA right and bottom-aligned with the quote baseline. */
+.le-result-bar { display: flex; align-items: end; justify-content: space-between; gap: 30px 48px; margin-top: 22px; padding-top: 38px; border-top: 1px solid rgba(245, 242, 239, .18); }
+.le-result-quote { margin: 16px 0 0; font-family: var(--serif); font-size: clamp(28px, 3vw, 42px); line-height: 1.15; letter-spacing: -.5px; }
+/* CTA: refined outline button, 52px tap height, clear hover fill. */
+.le-result-cta { flex: 0 0 auto; min-height: 52px; padding: 0 24px; font-size: 12px; letter-spacing: 2px; border: 1px solid rgba(245, 242, 239, .55); transition: background 250ms var(--ease-premium), color 250ms var(--ease-premium), border-color 250ms var(--ease-premium); }
+.le-result-cta:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
+
+/* Trust is one concise editorial chapter, grounded in existing studio copy. */
+.le-care { display: grid; grid-template-columns: 1fr 1fr; column-gap: 13%; padding-block: 110px 75px; }
+.le-care .le-label { color: var(--muted); margin-bottom: 22px; }
+.le-care-intro { font-size: 13px; line-height: 1.9; letter-spacing: .8px; }
+/* The studio's minimum · a prominent editorial stat inside the style-selection
+   header, so it is visible while the look is being chosen. Serif number over a
+   single hairline, no box or badge. The sentence-long label reads better in
+   sentence case than in the site's small tracked-uppercase label treatment. */
+.le-styles-stat { margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--line); }
+.le-styles-stat-number { display: block; font-family: var(--serif); font-weight: 400; font-size: clamp(42px, 4.4vw, 62px); line-height: 1; letter-spacing: -1.5px; color: var(--ink); }
+.le-styles-stat-label { display: block; margin-top: 10px; max-width: 40ch; font-size: 11px; line-height: 1.75; letter-spacing: .4px; color: var(--muted); }
+.le-process { margin: 30px 0 0; }
+.le-process > div { padding-block: 22px; border-top: 1px solid var(--line); }
+.le-process dt { font-size: 11px; font-weight: 500; letter-spacing: 1.2px; }
+.le-process dd { margin: 8px 0 0; font-size: 11px; line-height: 1.8; letter-spacing: .6px; color: var(--muted); }
+.le-questions { display: grid; grid-template-columns: 1fr 1fr; column-gap: 13%; padding-block: 45px 100px; }
+.le-questions .le-label { color: var(--muted); margin-bottom: 20px; }
+.le-questions h2 { font-size: 46px; }
+.le-question-list details { border-bottom: 1px solid var(--line); }
+.le-question-list details:first-child { border-top: 1px solid var(--line); }
+.le-question-list summary { display: flex; justify-content: space-between; align-items: center; gap: 20px; list-style: none; min-height: 72px; padding-block: 16px; font-size: 11px; letter-spacing: .7px; }
+.le-question-list p { font-size: 11px; line-height: 1.9; letter-spacing: .5px; color: var(--muted); padding-bottom: 24px; }
+.le-booking { background: var(--dark); color: var(--ivory); padding-block: 85px 55px; }
+.le-booking .le-label { color: var(--gold); }
+.le-booking h2 { margin-block: 32px 65px; font-size: clamp(54px, 6.5vw, 94px); }
+.le-booking h2 em { font-weight: 400; }
+.le-booking-bottom { display: flex; align-items: center; justify-content: space-between; gap: 24px; border-top: 1px solid #47443d; padding-top: 30px; }
+.le-booking-bottom p { font-size: 10px; line-height: 1.9; letter-spacing: 1px; }
+.le-booking-bottom p:last-child { text-align: right; }
+@media (hover: hover) and (pointer: fine) {
+  .le-text-link:hover span { transform: translate(3px, -2px); }
+  .le-result-cta:hover { background: var(--ivory); color: var(--dark); border-color: var(--ivory); }
+  .le-style-link:hover { color: var(--ink); }
+}
+@media (min-width: 801px) {
+  .le-tabs-ready .le-profiles { min-height: 565px; }
+}
+@media (max-width: 1050px) {
+  .le-consultation { gap: 6%; }
+  .le-profile { padding-inline: 24px; }
+  .le-profile-description { min-height: 105px; }
+  .le-pricing-action { align-items: flex-start; flex-direction: column; }
+}
+@media (max-width: 800px) {
+  .le-page h2 { font-size: 48px; letter-spacing: -1px; }
+  /* Mobile scene tuning (page-scoped: other .le-hero routes untouched).
+     Approach (a) · the landscape source is cover-scaled by HEIGHT in the tall
+     scene, leaving no vertical slack, so object-position alone can't lift the
+     eye. The img box is made 30% taller than the scene and shifted up by the
+     same 30% (bottom stays flush — no empty band, no distortion, same
+     gradient untouched). The eye+brow then sit at ~14-40% of the scene, with
+     clear space above the kicker. Rendered width ≈ 1617px at 700px scene —
+     never upscaled beyond the 1672px source. Horizontal crop keeps the eye
+     centre-right (≈ 55-58% of scene width on phones). */
+  /* Clip the enlarged photo to the scene: the img is 130% tall and shifted
+     -30% up, so without clipping it paints above the hero (over the header).
+     The figure is already absolute inset:0 within the hero, so overflow:hidden
+     crops the photo and its overlay exactly to the hero rectangle. The visible
+     crop, eye position and gradient are unchanged. */
+  .svc-lash .le-hero,
+  .svc-lash .le-hero-photo { overflow: hidden; }
+  .svc-lash .le-hero-photo img {
+    height: 130%;
+    top: -30%;
+    bottom: auto;
+    object-position: 88% 50%;
+  }
+  /* H1 on exactly two lines down to 360px ("Your eyes." / "Their moment."). */
+  .svc-lash .le-hero h1 { font-size: clamp(36px,10.4vw,46px); }
+  /* Style-header stat tightens its spacing under the intro copy on phones. */
+  .le-styles-stat { margin-top: 24px; padding-top: 16px; }
+  .le-styles-stat-label { margin-top: 8px; }
+  .le-hero-body .le-text-link { margin: 0; grid-column: 2; }
+  .le-discovery { padding-block: 64px 45px; }
+  .le-section-head { gap: 22px; margin-bottom: 35px; }
+  .le-section-head .le-label { margin-bottom: 15px; }
+  .le-intro { font-size: 14px; max-width: 280px; }
+  .le-consultation { grid-template-columns: 1fr; gap: 24px; }
+  .le-style-index { display: contents; }
+  .le-mobile-hint { display: flex; justify-content: space-between; gap: 12px; margin-bottom: -15px; font-size: 10px; letter-spacing: 1px; color: var(--muted); transition: opacity 220ms ease, visibility 0s 220ms; }
+  /* Dismissed by JS on first tap / first scroll; readable when JS never runs. */
+  .le-mobile-hint.le-hint-dismissed { opacity: 0; visibility: hidden; }
+  /* Segmented tab bar: a full-bleed snap scroller. The negative margins pull
+     it to the screen edges while padding + scroll-padding keep the tabs
+     aligned to the page gutter at rest and at the snap points. The bleed is
+     a percentage of the 88.2% wrap (5.9 / 88.2), not vw, so a classic
+     desktop scrollbar can never push the page wider than the viewport. */
+  .le-style-nav {
+    --le-bleed: calc(100% * 5.9 / 88.2);
+    display: flex;
+    flex-direction: row;
+    gap: 24px;
+    margin-inline: calc(-1 * var(--le-bleed));
+    padding: 0 var(--le-bleed) 8px;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    scroll-padding-inline: var(--le-bleed);
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .le-style-nav::-webkit-scrollbar { display: none; }
+  /* Soft edge fades, only while more content is reachable in that direction
+     (classes toggled from JS scroll listener, rAF-batched). */
+  .le-style-nav.has-prev { -webkit-mask-image: linear-gradient(90deg, transparent, #000 34px); mask-image: linear-gradient(90deg, transparent, #000 34px); }
+  .le-style-nav.has-next { -webkit-mask-image: linear-gradient(270deg, transparent, #000 34px); mask-image: linear-gradient(270deg, transparent, #000 34px); }
+  .le-style-nav.has-prev.has-next { -webkit-mask-image: linear-gradient(90deg, transparent, #000 34px, #000 calc(100% - 34px), transparent); mask-image: linear-gradient(90deg, transparent, #000 34px, #000 calc(100% - 34px), transparent); }
+  /* Selected state mirrors the desktop index (ink text, rotated arrow, ink
+     descriptor) plus a 2px gold underline that spans the tab. The transparent
+     2px border is always there, so the underline never shifts layout;
+     padding-bottom drops 1px to keep the tab height identical. */
+  .le-style-link {
+    flex: 0 0 auto;
+    min-width: 150px;
+    white-space: nowrap;
+    font-size: 25px;
+    padding-block: 16px 15px;
+    gap: 15px;
+    scroll-snap-align: center;
+    border-bottom: 2px solid transparent;
+    touch-action: manipulation;
+    transition: color 220ms ease, border-bottom-color 220ms ease;
+  }
+  .le-style-link:first-child { border-top: 0; }
+  .le-style-link small { font-size: 10px; letter-spacing: .8px; margin-top: 6px; transition: color 220ms ease; }
+  .le-style-link > span:last-child { font-size: 16px; }
+  .le-style-link[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--gold); }
+  .le-style-link[aria-selected="true"] small { color: var(--ink); }
+  .le-style-link[aria-selected="true"] > span:last-child { color: var(--gold); }
+  .le-style-link:active { opacity: .6; }
+  .le-wispy-note { order: 3; max-width: 100%; margin: 0; }
+  .le-profiles { order: 2; }
+  .le-profile { padding: 23px 26px 10px; }
+  .le-profile h3 { font-size: 36px; }
+  .le-profile-description { min-height: 0; font-size: 14px; }
+  .le-lash-study { width: 200px; height: 97px; }
+  .le-prices { margin-top: 23px; }
+  .le-service-foot { margin-top: 28px; }
+  .le-pricing-action .button { width: 100%; }
+  .le-results { padding-block: 60px; }
+  .le-results .le-section-head { margin-bottom: 30px; }
+  /* All three results on one screen — no carousel. The lead spans the full
+     width at its native 600/548 ratio (uncropped); below it, the portrait and
+     detail sit side by side in ratio-proportional columns (0.803 : 1.333), so
+     they share one height with no cropping. */
+  .le-result-grid { display: grid; grid-template-columns: .803fr 1.333fr; gap: 12px; }
+  .le-result-lead { grid-column: 1 / -1; }
+  .le-result-lead .le-result-frame { aspect-ratio: 600 / 548; }
+  .le-result figcaption { font-size: 11px; }
+  .le-result-badge { top: 12px; left: 12px; padding: 7px 11px; font-size: 10px; }
+  .le-result-badge--after { left: calc(50% + 12px); }
+  .le-result-bar { flex-direction: column; align-items: start; gap: 26px; margin-top: 12px; padding-top: 30px; }
+  .le-care { column-gap: 8%; padding-block: 65px 30px; }
+  .le-care-intro { font-size: 11px; }
+  .le-questions { column-gap: 8%; padding-block: 30px 60px; }
+  .le-questions h2 { font-size: 36px; }
+  .le-booking { padding-block: 60px 36px; }
+  .le-booking h2 { font-size: 64px; margin-block: 26px 40px; }
+  .le-booking-bottom { flex-wrap: wrap; }
+  .le-booking-bottom p:last-child { display: none; }
+}
+@media (max-width: 540px) {
+  .le-hero-body .le-text-link { min-height: 44px; }
+  .le-section-head { display: block; }
+  .le-intro { margin-top: 24px; max-width: 100%; }
+  .le-page h2 { font-size: 43px; }
+  .le-profile { padding-inline: 20px; }
+  .le-profile-top { gap: 4px; }
+  .le-profile-top .le-label { font-size: 10px; }
+  .le-profile h3 { font-size: 34px; }
+  .le-study-label { font-size: 10px; }
+  .le-prices dt { font-size: 10px; letter-spacing: .7px; }
+  .le-prices dt small { font-size: 10px; }
+  .le-prices dd { font-size: 21px; }
+  .le-refills-heading { letter-spacing: .6px; font-size: 10px; }
+  .le-service-foot { align-items: start; font-size: 10px; }
+  .le-service-foot strong { display: block; margin: 4px 0 0; text-align: right; }
+  .le-pricing-action { align-items: stretch; gap: 15px; margin-top: 28px; }
+  .le-pricing-action > p { max-width: none; }
+  .le-result-badge { top: 10px; left: 10px; padding: 6px 10px; font-size: 9px; }
+  .le-result-badge--after { left: calc(50% + 10px); }
+  .le-care, .le-questions { grid-template-columns: 1fr; gap: 30px; }
+  .le-care-body { max-width: 46ch; }
+  .le-care .le-label { margin-bottom: 16px; }
+  .le-questions { padding-top: 38px; }
+  .le-questions h2 { font-size: 36px; }
+  .le-question-list summary { min-height: 64px; font-size: 10px; }
+  .le-booking h2 { font-size: 46px; line-height: 1.05; }
+  .le-booking-bottom { flex-direction: column; align-items: start; gap: 25px; }
+  .le-booking-bottom .button { width: 100%; }
+}
+@media (max-width: 360px) {
+  .le-style-link { font-size: 22px; min-width: 140px; }
+  .le-style-link small { font-size: 10px; letter-spacing: .4px; }
+  .le-style-nav { gap: 20px; }
+  .le-profile { padding-inline: 16px; }
+  .le-profile h3 { font-size: 30px; }
+  .le-booking h2 { font-size: 40px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .le-page *, .le-page *::after { transition: none; animation: none; scroll-behavior: auto; }
+}
