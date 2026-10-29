@@ -350,25 +350,34 @@ html.motion-armed .faq-cta-inner { opacity: 0 }
 }
 
 @media (max-width:800px) {
-  /* Hero · the base rules already render the hero as a full-bleed photographic
-     band, so mobile only tightens the scene height and the copy rhythm. The
-     safety statement stays a compact ivory band flush under the scene (the
-     scene is ≈ 750px tall at 390x844). #content, aria-labelledby and the
-     html.motion-armed targets are unchanged. */
+  /* Show the complete wide collage above the copy on narrow screens. */
   .faq-hero {
-    min-height: clamp(620px, calc(100svh - 144px), 700px)
+    min-height: 0
   }
   .faq-hero-inner {
     width: 100%;
-    max-width: none
+    max-width: none;
+    align-content: start
   }
-  /* Wide 4-panel collage under a tall full-bleed frame: cover crops the sides,
-     never the top/bottom, so the eye line stays fully visible. 62% centres one
-     complete eye panel. */
-  .faq-hero-media img { object-position: 62% 50% }
+  .faq-hero-media {
+    position: relative;
+    inset: auto;
+    grid-row: 1
+  }
+  .faq-hero-media img {
+    display: block;
+    height: auto
+  }
+  .faq-hero-media:after {
+    background: rgba(20,20,19,.18)
+  }
   .faq-hero-copy {
-    padding: 118px 5.9% 0
+    grid-row: 2;
+    padding: 32px 0 0
   }
+  .faq-hero-copy .faq-eyebrow,
+  .faq-hero-title,
+  .faq-hero-support { margin-left: 5.9%; margin-right: 5.9% }
   .faq-hero-copy .faq-eyebrow { color: var(--gold) }
   .faq-hero-title {
     font-size: clamp(42px,12vw,54px);
@@ -385,7 +394,7 @@ html.motion-armed .faq-cta-inner { opacity: 0 }
   }
   /* Compact ivory band directly under the scene — same words, no seam. */
   .faq-hero-statement {
-    margin: 26px -5.9% 0;
+    margin: 26px 0 0;
     padding: 24px 5.9% 28px;
     background: var(--ivory);
     font-size: 14px;
@@ -453,9 +462,7 @@ html.motion-armed .faq-cta-inner { opacity: 0 }
 }
 
 @media (max-width:540px) {
-  /* Scene refinement · matches PMU's ≤540 rhythm; the title keeps the
-     clamp(42px,12vw,54px) sizing from the ≤800 block. */
-  .faq-hero-copy { padding-top: 108px }
+  /* The title keeps the clamp sizing from the ≤800 block. */
   .faq-services-title { font-size: 32px }
   .faq-service-title { font-size: 22px }
   .faq-service-title-lg { font-size: 27px }
