@@ -10,24 +10,21 @@
    ========================================================================== */
 
 /* --------------------------------------------------------------------------
-   HEADER - the journal opens on ivory, so the shared header ink flips to
-   the page's text colour. Structure and mobile behaviour are untouched.
+   HEADER - matches the established FAQ and service-route dark header. The
+   shared stylesheet owns the dimensions, typography and interaction; this
+   route supplies the dark surface and light ink used sitewide.
    -------------------------------------------------------------------------- */
-.blog-page .site-header { color: var(--ink) }
-.blog-page .menu-toggle { border-color: rgba(38,38,32,.24); background: transparent }
-.blog-page .menu-toggle span { background: var(--ink) }
-@media (max-width:800px) {
-  .blog-page .enhanced .main-navigation a,
-  .blog-page .main-navigation.is-open a { color:#f5ede0 }
-}
+.blog-page .header-shell { background: var(--dark) }
+.blog-page .site-header { color: #f4eee5 }
+.blog-page .menu-toggle { border-color: rgba(244,238,229,.34); background: transparent }
+.blog-page .menu-toggle span { background: #f4eee5 }
 
-/* The added Journal destination makes the compact header slightly denser.
-   Tighten only the narrow desktop range so the row never wraps. */
-@media (min-width:801px) and (max-width:900px) {
-  .blog-page .site-header { gap:8px }
+/* The extra Journal destination needs a little more room in the narrow
+   desktop band. Only the inter-link and header gaps tighten; type, height,
+   alignment and the booking button keep the shared values. */
+@media (min-width:801px) and (max-width:910px) {
   .blog-page .main-navigation { gap:4px }
-  .blog-page .main-navigation a { font-size:10px; letter-spacing:0 }
-  .blog-page .header-cta { width:130px; padding-inline:6px; font-size:10px }
+  .blog-page .site-header { gap:clamp(4px, calc(4px + (100vw - 801px) * .33), 20px) }
 }
 
 /* Long-form copy reads in its natural case; the brand's tracked caps stay on
