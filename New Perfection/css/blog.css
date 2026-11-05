@@ -1,0 +1,399 @@
+/* ==========================================================================
+   BEAUTY JOURNAL - /blog/
+   Page-local layer for the editorial journal landing page. Loaded AFTER
+   css/styles.css, which remains the design-system authority. Scope:
+   body.blog-page only.
+
+   Reuses the existing tokens (--ivory, --card, --ink, --dark, --gold,
+   --muted, --line), the Cormorant / Jost pairing, the shared header,
+   navigation, buttons, footer and motion vocabulary. No new dependencies.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   HEADER - the journal opens on ivory, so the shared header ink flips to
+   the page's text colour. Structure and mobile behaviour are untouched.
+   -------------------------------------------------------------------------- */
+.blog-page .site-header { color: var(--ink) }
+.blog-page .menu-toggle { border-color: rgba(38,38,32,.24); background: transparent }
+.blog-page .menu-toggle span { background: var(--ink) }
+@media (max-width:800px) {
+  .blog-page .enhanced .main-navigation a,
+  .blog-page .main-navigation.is-open a { color:#f5ede0 }
+}
+
+/* The added Journal destination makes the compact header slightly denser.
+   Tighten only the narrow desktop range so the row never wraps. */
+@media (min-width:801px) and (max-width:900px) {
+  .blog-page .site-header { gap:8px }
+  .blog-page .main-navigation { gap:4px }
+  .blog-page .main-navigation a { font-size:10px; letter-spacing:0 }
+  .blog-page .header-cta { width:130px; padding-inline:6px; font-size:10px }
+}
+
+/* Long-form copy reads in its natural case; the brand's tracked caps stay on
+   navigation, labels, buttons and headings. */
+.blog-deck,
+.blog-note-aside p:not(.blog-label),
+.blog-note-body p,
+.blog-section-note,
+.blog-empty-copy,
+.journal-card-summary {
+  text-transform:none
+}
+
+/* The shared footer keeps its structure; only the journal route raises the
+   muted ink to full AA contrast on the ivory ground. */
+.blog-page .site-footer { color:#6d6a62 }
+.blog-page .footer-bottom { color:#6d6a62 }
+
+/* --------------------------------------------------------------------------
+   SHARED EDITORIAL LABEL - a tracked label with a short leading rule.
+   -------------------------------------------------------------------------- */
+.blog-label {
+  display:flex;
+  align-items:center;
+  gap:12px;
+  font-size:11px;
+  font-weight:500;
+  letter-spacing:2px;
+  line-height:1.5;
+  color:var(--muted)
+}
+.blog-label:before {
+  content:'';
+  flex:0 0 auto;
+  width:32px;
+  height:1px;
+  background:currentColor;
+  opacity:.5
+}
+.blog-label-light { color:#c9bda8 }
+
+/* --------------------------------------------------------------------------
+   MASTHEAD - an asymmetric editorial opening: oversized serif title on the
+   left, a framed real studio photograph on the right. No issue number, date
+   or article pretends to exist.
+   -------------------------------------------------------------------------- */
+.blog-masthead {
+  padding:clamp(46px,6vw,86px) 0 clamp(58px,7vw,96px);
+  overflow:hidden
+}
+.blog-masthead-inner {
+  display:grid;
+  grid-template-columns:minmax(0,1.08fr) minmax(0,.92fr);
+  gap:clamp(36px,6vw,92px);
+  align-items:start
+}
+.blog-masthead-copy { padding-top:10px }
+.blog-masthead h1 {
+  font-size:clamp(66px,9.2vw,132px);
+  line-height:.82;
+  letter-spacing:-2.4px
+}
+.blog-masthead h1 span {
+  display:block;
+  padding-left:clamp(0px,4.5vw,58px)
+}
+.blog-masthead h1:after {
+  content:'';
+  display:block;
+  width:96px;
+  height:1px;
+  margin-top:clamp(26px,3vw,38px);
+  background:var(--gold)
+}
+.blog-deck {
+  max-width:44ch;
+  margin-top:28px;
+  font-size:clamp(15px,1.35vw,18px);
+  line-height:1.85;
+  letter-spacing:.55px;
+  color:var(--muted)
+}
+.blog-masthead-media {
+  margin:0;
+  padding:11px;
+  border:1px solid var(--line);
+  background:var(--card)
+}
+.blog-masthead-media img {
+  width:100%;
+  aspect-ratio:4/5;
+  object-fit:cover;
+  object-position:50% 38%
+}
+
+/* --------------------------------------------------------------------------
+   JOURNAL NOTE - a quiet two-column passage that sets the editorial tone
+   without inventing entries, authors or publication dates.
+   -------------------------------------------------------------------------- */
+.blog-note {
+  padding:clamp(56px,7vw,88px) 0;
+  border-top:1px solid var(--line)
+}
+.blog-note-grid {
+  display:grid;
+  grid-template-columns:minmax(0,.42fr) minmax(0,.58fr);
+  gap:clamp(32px,6vw,96px)
+}
+.blog-note-aside p:not(.blog-label) {
+  max-width:26ch;
+  margin-top:22px;
+  font-size:12px;
+  line-height:1.9;
+  letter-spacing:.8px;
+  color:var(--muted)
+}
+.blog-note-body h2 {
+  max-width:15ch;
+  font-size:clamp(40px,5vw,66px);
+  line-height:.98;
+  letter-spacing:-.02em
+}
+.blog-note-body p {
+  max-width:62ch;
+  margin-top:24px;
+  font-size:14px;
+  line-height:1.95;
+  letter-spacing:.55px
+}
+.blog-note-body p + p { margin-top:14px }
+.blog-text-link {
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+  min-height:44px;
+  margin-top:26px;
+  padding-bottom:4px;
+  border-bottom:1px solid var(--gold);
+  font-size:11px;
+  font-weight:500;
+  letter-spacing:1.6px
+}
+.blog-text-link .icon {
+  width:18px;
+  height:18px;
+  transition:transform var(--duration-normal) var(--ease-premium)
+}
+@media (hover:hover) and (pointer:fine) {
+  .blog-text-link:hover .icon { transform:translateX(4px) }
+}
+
+/* --------------------------------------------------------------------------
+   JOURNAL INDEX - the empty state the first real entries will replace.
+   The reusable .journal-grid / .journal-card layout is already in place.
+   -------------------------------------------------------------------------- */
+.blog-entries {
+  padding:clamp(56px,7vw,88px) 0 clamp(64px,8vw,100px);
+  border-top:1px solid var(--line)
+}
+.blog-section-head {
+  display:flex;
+  align-items:baseline;
+  justify-content:space-between;
+  gap:24px;
+  padding-bottom:26px;
+  border-bottom:1px solid var(--line)
+}
+.blog-section-head h2 {
+  font-size:clamp(38px,4.6vw,58px);
+  line-height:1;
+  letter-spacing:-1px
+}
+.blog-section-note {
+  max-width:34ch;
+  font-size:11px;
+  line-height:1.7;
+  letter-spacing:1.2px;
+  color:var(--muted);
+  text-align:right
+}
+.blog-empty {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:32px;
+  align-items:end;
+  padding-top:42px
+}
+.blog-empty-title {
+  font-family:var(--serif);
+  font-size:clamp(26px,3vw,38px);
+  font-weight:400;
+  line-height:1.05;
+  letter-spacing:-.4px
+}
+.blog-empty-copy {
+  max-width:48ch;
+  margin-top:14px;
+  font-size:13px;
+  line-height:1.9;
+  letter-spacing:.6px;
+  color:var(--muted)
+}
+.blog-empty-actions {
+  display:flex;
+  flex-wrap:wrap;
+  gap:14px
+}
+
+/* Future article cards: three columns on desktop, two on tablet, one on
+   mobile. A card is text-led, with an optional media area that stays empty
+   until a real article supplies an image. */
+.journal-grid {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:34px 28px;
+  padding-top:42px
+}
+.journal-grid[hidden] { display:none }
+.journal-card { min-width:0 }
+.journal-card-link {
+  display:flex;
+  flex-direction:column;
+  height:100%;
+  padding-top:18px;
+  border-top:1px solid var(--line)
+}
+.journal-card-media {
+  aspect-ratio:4/3;
+  overflow:hidden;
+  background:var(--card)
+}
+.journal-card-media img {
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  transition:transform var(--duration-slow) var(--ease-premium)
+}
+.journal-card-category {
+  margin-top:18px;
+  font-size:11px;
+  letter-spacing:1.8px;
+  color:var(--muted)
+}
+.journal-card-title {
+  margin-top:10px;
+  font-family:var(--serif);
+  font-size:clamp(26px,2.4vw,34px);
+  font-weight:400;
+  line-height:1.05;
+  letter-spacing:-.4px
+}
+.journal-card-summary {
+  margin-top:12px;
+  font-size:12px;
+  line-height:1.85;
+  letter-spacing:.5px;
+  color:var(--muted)
+}
+.journal-card-more {
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  margin-top:auto;
+  padding-top:20px;
+  font-size:11px;
+  font-weight:500;
+  letter-spacing:1.6px
+}
+.journal-card-more .icon { width:16px; height:16px }
+@media (hover:hover) and (pointer:fine) {
+  .journal-card-link:hover .journal-card-media img { transform:scale(1.025) }
+  .journal-card-link:hover .journal-card-more { color:#6e4e28 }
+}
+
+/* --------------------------------------------------------------------------
+   TOPICS - real internal links to the service pages that will sit behind
+   future journal stories. Rows, not cards, to keep the page quiet.
+   -------------------------------------------------------------------------- */
+.blog-topics { padding:clamp(58px,7vw,86px) 0 }
+.blog-topics .blog-section-head { border-bottom-color:rgba(244,238,229,.2) }
+.blog-topics .blog-section-note { color:#c9bda8 }
+.blog-topic-list {
+  list-style:none;
+  margin:0;
+  padding:0;
+  border-top:1px solid rgba(244,238,229,.16)
+}
+.blog-topic-list li { border-bottom:1px solid rgba(244,238,229,.16) }
+.blog-topic-link {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto 24px;
+  gap:24px;
+  align-items:center;
+  padding:24px 0
+}
+.blog-topic-name {
+  font-family:var(--serif);
+  font-size:clamp(28px,3vw,38px);
+  font-weight:400;
+  line-height:1;
+  letter-spacing:-.3px
+}
+.blog-topic-desc {
+  font-size:11px;
+  letter-spacing:1.6px;
+  color:#c9bda8;
+  text-align:right
+}
+.blog-topic-arrow {
+  width:20px;
+  height:20px;
+  color:var(--gold);
+  transition:transform var(--duration-normal) var(--ease-premium)
+}
+@media (hover:hover) and (pointer:fine) {
+  .blog-topic-link:hover .blog-topic-arrow { transform:translateX(4px) }
+}
+
+/* --------------------------------------------------------------------------
+   RESPONSIVE - one composition from desktop to mobile, never a squeezed
+   copy of the desktop grid.
+   -------------------------------------------------------------------------- */
+@media (max-width:1050px) {
+  .blog-masthead-inner { gap:40px }
+  .blog-masthead h1 { font-size:clamp(60px,8.5vw,96px) }
+}
+@media (max-width:900px) {
+  .blog-masthead-inner {
+    grid-template-columns:1fr;
+    align-items:start
+  }
+  .blog-masthead h1 span { padding-left:0 }
+  .blog-masthead-media {
+    width:100%;
+    max-width:520px
+  }
+  .blog-masthead-media img { aspect-ratio:4/3 }
+  .blog-note-grid { grid-template-columns:1fr; gap:28px }
+  .blog-empty {
+    grid-template-columns:1fr;
+    align-items:start
+  }
+  .journal-grid { grid-template-columns:repeat(2,minmax(0,1fr)) }
+}
+@media (max-width:600px) {
+  .blog-masthead { padding-top:34px }
+  .blog-masthead h1 {
+    font-size:clamp(54px,15vw,72px);
+    letter-spacing:-1.4px
+  }
+  .blog-deck { font-size:14px }
+  .blog-masthead-media { padding:8px }
+  .blog-section-head { display:block }
+  .blog-section-note {
+    margin-top:12px;
+    text-align:left
+  }
+  .blog-empty-actions {
+    flex-direction:column;
+    align-items:stretch
+  }
+  .blog-empty-actions .button { width:100% }
+  .journal-grid { grid-template-columns:1fr }
+  .blog-topic-link {
+    grid-template-columns:minmax(0,1fr) 20px;
+    gap:16px
+  }
+  .blog-topic-desc { display:none }
+}
