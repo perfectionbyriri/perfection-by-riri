@@ -1,0 +1,38 @@
+
+name: OpenCode DeepSeek Agent
+
+on:
+  issue_comment:
+    types: [created]
+
+jobs:
+  opencode:
+    if: >-
+      github.actor == 'perfectionbyriri' &&
+      contains(github.event.comment.body, '/opencode')
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Run OpenCode with DeepSeek
+        uses: anomalyco/opencode/github@latest
+        env:
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          model: deepseek/deepseek-flash
+          use_github_token: true
+          share: false
