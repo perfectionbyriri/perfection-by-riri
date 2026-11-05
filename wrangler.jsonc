@@ -1,0 +1,9 @@
+{
+  "$schema": "https://unpkg.com/wrangler/config-schema.json",
+  "name": "perfection-by-riri",
+  "compatibility_date": "2026-11-05",
+  "workers_dev": false,
+  "assets": {
+    "directory": "./New Perfection"
+  }
+}
