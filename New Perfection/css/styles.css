@@ -4055,3 +4055,19 @@ html:not(.enhanced) .review-nav {
     transform:none !important
   }
 }
+
+/* Refine the original wordmark consistently at every breakpoint. */
+.brand .brand-name {
+  font-weight:400;
+  letter-spacing:.17em;
+  margin-right:-.17em
+}
+
+.brand .brand-by {
+  font-weight:400;
+  letter-spacing:.27em
+}
+
+.brand .brand-tagline {
+  font-weight:400
+}
