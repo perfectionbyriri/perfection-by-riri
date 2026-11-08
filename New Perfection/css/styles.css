@@ -2763,11 +2763,15 @@ html[data-input=pointer] .detail-dialog button:focus-visible { outline:none; }
 .about-portrait {
   margin:0;
   overflow:hidden;
+  border-radius:12px;
   background:#1d1b18
 }
 .about-portrait img {
   width:100%;
-  height:auto
+  height:auto;
+  aspect-ratio:.61;
+  object-fit:cover;
+  object-position:center bottom
 }
 .about-copy {
   max-width:560px
