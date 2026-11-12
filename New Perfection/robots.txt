@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /diagnostics/
 
-Sitemap: https://perfectionbyriri.beauty/sitemap.xml
+Sitemap: https://perfectionbyriri.com/sitemap.xml
