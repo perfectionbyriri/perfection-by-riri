@@ -1,0 +1,24 @@
+@font-face{font-family:Jost;src:url("../images/branding/jost.woff2") format("woff2");font-display:swap}
+@font-face{font-family:Cormorant;src:url("../images/branding/cormorant-garamond.woff2") format("woff2");font-display:swap}
+:root{color-scheme:light;--paper:#f5f2ef;--ink:#262620;--muted:#625e57;--line:#d2cbc3}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:Jost,"Helvetica Neue",Arial,sans-serif;font-size:18px;line-height:1.7}
+.wrap{width:min(100% - 40px,780px);margin-inline:auto}
+header{padding:32px 0;border-bottom:1px solid var(--line)}
+.brand{font-size:15px;letter-spacing:.12em;text-transform:uppercase}
+nav{display:flex;gap:12px 24px;flex-wrap:wrap;margin-top:12px;font-size:16px}
+a{color:inherit;text-decoration:underline;text-underline-offset:.2em;overflow-wrap:anywhere}
+a:hover{text-decoration-thickness:2px}
+a:focus-visible{outline:3px solid #795b31;outline-offset:5px}
+.skip{position:absolute;top:8px;left:20px;padding:8px 12px;background:var(--paper);transform:translateY(-200%)}
+.skip:focus{transform:translateY(0)}
+main{padding-block:48px 64px}
+h1,h2{font-family:Cormorant,Georgia,serif;font-weight:500;line-height:1.15}
+h1{font-size:clamp(36px,7vw,52px);margin:10px 0 24px;overflow-wrap:anywhere}
+h2{font-size:30px;margin:36px 0 14px}
+p,ul{margin:0 0 20px}
+li+li{margin-top:10px}
+.kicker,.date{color:var(--muted);font-size:15px}
+.kicker{letter-spacing:.1em;text-transform:uppercase}
+footer{border-top:1px solid var(--line);padding:24px 0 40px;font-size:16px}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
