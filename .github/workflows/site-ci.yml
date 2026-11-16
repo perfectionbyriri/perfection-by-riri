@@ -33,6 +33,9 @@ jobs:
           done < <(find "New Perfection" -type f -name '*.js' -print0)
           echo "Checked $count JavaScript file(s)."
 
+      - name: Test PMU trackpad gestures
+        run: node --test tests/pmu-results.test.cjs
+
       - name: Check for conflict markers
         shell: bash
         run: |
