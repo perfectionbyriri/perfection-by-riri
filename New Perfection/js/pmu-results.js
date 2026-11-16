@@ -66,35 +66,31 @@
   if (nextButton) nextButton.addEventListener('click', stepNext);
 
   /* Treat a horizontal wheel/trackpad gesture like one arrow click instead
-     of letting the device's velocity drive the carousel. Keep consuming the
-     inertial tail until the gesture is quiet; a minimum pause also prevents
-     closely spaced bursts from repeatedly restarting the smooth transition.
+     of letting the device's velocity drive the carousel. Pace transitions
+     with a fixed cooldown measured from the last accepted step. Ignored
+     wheel events must never extend it: continuous input should keep moving.
      Vertical page scrolling and pinch-to-zoom retain their native behavior. */
   let lastWheelTime = -Infinity;
   let wheelLockedUntil = -Infinity;
   let wheelDistance = 0;
-  let wheelStepped = false;
   track.addEventListener('wheel', (event) => {
     if (event.ctrlKey || !event.cancelable) return;
     const horizontal = event.shiftKey && event.deltaX === 0 ? event.deltaY : event.deltaX;
     if (!horizontal || (!event.shiftKey && Math.abs(horizontal) <= Math.abs(event.deltaY))) return;
 
     const now = performance.now();
-    if (now - lastWheelTime > 200 && now >= wheelLockedUntil) {
-      wheelDistance = 0;
-      wheelStepped = false;
-    }
+    if (now - lastWheelTime > 200) wheelDistance = 0;
     lastWheelTime = now;
     event.preventDefault();
-    if (wheelStepped) return;
+    if (now < wheelLockedUntil) return;
 
     const unit = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? track.clientWidth : 1;
     wheelDistance += horizontal * unit;
     if (Math.abs(wheelDistance) < 24) return;
-    wheelStepped = true;
     wheelLockedUntil = now + 600;
     if (wheelDistance > 0) stepNext();
     else stepPrev();
+    wheelDistance = 0;
   }, { passive: false });
 
   /* The track is a focusable region: ArrowLeft/ArrowRight step one slide. */
