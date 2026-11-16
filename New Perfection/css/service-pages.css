@@ -879,7 +879,8 @@ html.motion-armed .svc-pmu .pmu-cta-copy { opacity: 0 }
 }
 .svc-pmu .pmu-results-track::-webkit-scrollbar { display: none }
 .svc-pmu .pmu-results-track:focus-visible { outline: 2px solid var(--gold); outline-offset: -2px }
-.svc-pmu .pmu-result { flex: 0 0 auto; scroll-snap-align: start }
+/* Stop at each result so a fast trackpad swipe cannot skip photographs. */
+.svc-pmu .pmu-result { flex: 0 0 auto; scroll-snap-align: start; scroll-snap-stop: always }
 .svc-pmu .pmu-result figure { display: flex; flex-direction: column; margin: 0 }
 .svc-pmu .pmu-result-media {
   height: var(--pmu-slide-h);
