@@ -35,13 +35,38 @@ function setup({ reduced = false, left = 0 } = {}) {
   return { wheel, calls, track, listeners };
 }
 
-test('a long inertial burst starts just one smooth transition', () => {
+test('continuous input resumes at a bounded pace without pointer movement', () => {
   const h = setup();
-  for (let t = 0; t <= 1500; t += 30) assert.equal(h.wheel(t).prevented, true);
-  assert.equal(h.calls.length, 1);
+  for (let t = 0; t <= 1500; t += 30) {
+    h.track.scrollLeft = Math.min(400 * Math.floor(t / 600), 1200);
+    assert.equal(h.wheel(t).prevented, true);
+  }
+  assert.equal(h.calls.length, 3);
   assert.equal(h.calls[0].left, 400);
+  assert.equal(h.calls[1].left, 800);
+  assert.equal(h.calls[2].left, 1200);
   assert.equal(h.calls[0].behavior, 'smooth');
   assert.equal(h.listeners.wheel.options.passive, false);
+});
+
+test('ignored wheel events do not extend the cooldown', () => {
+  const h = setup();
+  h.wheel(0);
+  for (let t = 50; t < 600; t += 50) h.wheel(t);
+  h.track.scrollLeft = 400;
+  h.wheel(600);
+  assert.equal(h.calls.length, 2);
+  assert.equal(h.calls[1].left, 800);
+});
+
+test('direction can reverse after cooldown even while events keep arriving', () => {
+  const h = setup({ left: 400 });
+  h.wheel(0);
+  h.track.scrollLeft = 800;
+  for (let t = 30; t < 600; t += 30) h.wheel(t, { deltaX: -30 });
+  h.wheel(600, { deltaX: -30 });
+  assert.equal(h.calls.length, 2);
+  assert.equal(h.calls[1].left, 400);
 });
 
 test('new gesture after quiet time steps again; early bursts are swallowed', () => {
