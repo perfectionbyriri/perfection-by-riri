@@ -1,7 +1,7 @@
-## Что сделано
+## What Changed
 
-## Допущения
+## Assumptions
 
-## Доказательства (команда и вывод или ID прогона CI)
+## Evidence (command and output, or CI run ID)
 
-## Не проверено
+## Not Verified
