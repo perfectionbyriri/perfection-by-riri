@@ -635,6 +635,22 @@
   }
   initHomeServices();
 
+  // Short looping clips: muted, play only while on screen, never for reduced motion
+  // (the poster frame stays instead).
+  function initLoopVideos() {
+    const videos = Array.prototype.slice.call(document.querySelectorAll('video[data-loop-video]'));
+    if (!videos.length || reducedMotion.matches || !('IntersectionObserver' in window)) return;
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        const video = entry.target;
+        if (entry.isIntersecting) { const playing = video.play(); if (playing && playing.catch) playing.catch(() => {}); }
+        else video.pause();
+      });
+    }, { threshold: 0.2 });
+    videos.forEach((video) => { video.muted = true; observer.observe(video); });
+  }
+  initLoopVideos();
+
   if ('IntersectionObserver' in window) {
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
