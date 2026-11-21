@@ -2416,6 +2416,7 @@ button:disabled {
    only: no geometry changes before the reveal begins. */
 html.motion-armed .hero-content > *,
 html.motion-armed .site-header,
+html.motion-armed .trust-item,
 html.motion-armed .signature-head,
 html.motion-armed .signature-item,
 html.motion-armed .about-portrait,

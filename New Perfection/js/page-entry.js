@@ -31,19 +31,22 @@
       clearTimeout(window.__perfectionMotionFallback);
       return;
     }
-    // One unhurried language for every page: long, soft deceleration and
-    // modest travel. Only opacity, transform and clip-path animate.
+    // One language for every page: text comes into focus — from a soft blur to
+    // sharp, with a short rise. Brisk, never slow. Only opacity, transform and
+    // filter animate, and only once per element.
     const motion = {
-      ease: 'cubic-bezier(.16,1,.3,1)',
-      header: 900,
-      group: 700,
-      heading: 1200,
-      section: 1050,
-      media: 1300,
-      mediaSettle: 2000,
-      rise: 28,
-      headingRise: 42,
-      step: 90
+      ease: 'cubic-bezier(.22,1,.36,1)',
+      header: 600,
+      group: 450,
+      heading: 720,
+      section: 650,
+      media: 900,
+      mediaSettle: 1400,
+      rise: 16,
+      headingRise: 18,
+      blur: 10,
+      textBlur: 6,
+      step: 70
     };
     const animations = new Set();
     window.addEventListener('pagehide', () => animations.forEach((animation) => animation.finish()));
@@ -75,7 +78,8 @@
       if (reducedMotion.matches || !element.animate) { settle(element); return; }
       const animation = element.animate(frames, { duration: duration, delay: delay, easing: easing, fill: 'forwards' });
       animations.add(animation);
-      const done = () => { animations.delete(animation); settle(element); };
+      // Write the final state inline, then drop the held animation (and its filter).
+      const done = () => { animations.delete(animation); settle(element); animation.cancel(); };
       if (animation.finished && typeof animation.finished.then === 'function') animation.finished.then(done, done);
       else done();
     };
@@ -97,14 +101,17 @@
         animated(element, [{ opacity: 0 }, { opacity: 1 }], motion.group, delay, motion.ease);
         Array.prototype.forEach.call(element.children, (child, index) => {
           const headline = /^H[1-3]$/.test(child.tagName);
-          const at = delay + index * motion.step * 1.4;
+          const at = delay + index * motion.step;
           if (headline) {
             play(child, [
-              { opacity: 0, transform: 'translateY(' + motion.headingRise + 'px)', clipPath: 'inset(0 0 100% 0)' },
-              { opacity: 1, transform: 'none', clipPath: 'inset(0 0 -25% 0)' }
+              { opacity: 0, transform: 'translateY(' + motion.headingRise + 'px)', filter: 'blur(' + motion.blur + 'px)' },
+              { opacity: 1, transform: 'none', filter: 'blur(0px)' }
             ], motion.heading, at);
           } else {
-            play(child, [{ opacity: 0, transform: 'translateY(' + motion.rise / 2 + 'px)' }, { opacity: 1, transform: 'none' }], motion.section, at);
+            play(child, [
+              { opacity: 0, transform: 'translateY(' + motion.rise / 2 + 'px)', filter: 'blur(' + motion.textBlur + 'px)' },
+              { opacity: 1, transform: 'none', filter: 'blur(0px)' }
+            ], motion.section, at);
           }
         });
         return;
@@ -124,8 +131,8 @@
         return;
       }
       animated(element, [
-        { opacity: 0, transform: 'translateY(' + motion.rise + 'px)' },
-        { opacity: 1, transform: 'none' }
+        { opacity: 0, transform: 'translateY(' + motion.rise + 'px)', filter: 'blur(' + motion.textBlur + 'px)' },
+        { opacity: 1, transform: 'none', filter: 'blur(0px)' }
       ], motion.section, delay, motion.ease);
     };
 
