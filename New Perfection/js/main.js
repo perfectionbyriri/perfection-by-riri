@@ -448,8 +448,8 @@
   if (motionEnabled && window.PerfectionPageEntry) {
     window.PerfectionPageEntry.init({
       headingTargets: '.pmu-hero-lead, .pmu-intro-grid, .home-services-head, .about-copy, .result-head, .reviews .section-intro, .pmu-cta-copy',
-      targets: '.pmu-hero-lead, .pmu-hero-media, .pmu-hero-body, .trust-item, .pmu-intro-grid, .home-services-head, .home-services, .about-portrait, .about-copy, .result-head, .result-item, .reviews .section-intro, .review-feature, .pmu-cta-copy',
-      staggerClasses: ['result-item', 'trust-item'],
+      targets: '.pmu-hero-lead, .pmu-hero-media, .pmu-hero-body, .pmu-intro-grid, .home-services-head, .home-services, .about-portrait, .about-copy, .result-head, .result-item, .reviews .section-intro, .review-feature, .pmu-cta-copy',
+      staggerClasses: ['result-item'],
       finishOnFocus: true
     });
   } else {
