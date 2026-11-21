@@ -443,105 +443,17 @@
     }
   });
 
-  if (motionEnabled) {
-    const imageReveal = '.about-portrait, .transformation';
-    const headingReveal = '.signature-head, .result-head, .reviews .section-intro, .offer';
-    const uiReveal = '.trust-grid';
-    const heroGroups = document.querySelectorAll('.hero-content > *');
-    const revealTargets = document.querySelectorAll('.trust-grid, .signature-head, .signature-item, .experience-grid, .about-portrait, .about-copy, .result-head, .result-item, .transformation, .reviews .section-intro, .review-feature, .offer');
-    // Persist the settled state inline so visibility never depends on animation
-    // fill semantics. No animated container owns an author transform, so `none`
-    // matches the frozen design; child hover transforms and the independent
-    // `scale` press property on controls are untouched.
-    let settledCount = 0;
-    const settleTotal = 2 + heroGroups.length + revealTargets.length;
-    function settle(element) {
-      if (!element) return;
-      element.style.opacity = '1';
-      element.style.transform = 'none';
-      settledCount += 1;
-      if (settledCount >= settleTotal) document.documentElement.classList.remove('motion-armed');
-    }
-    // Plays the reveal and writes its final state once it settles; if the finish
-    // hook is unavailable, the `forwards` fill still holds the settled values.
-    function animated(element, frames, duration, delay, easing) {
-      const animation = animate(element, frames, duration, delay, 'site', easing, 'forwards');
-      if (!animation) { settle(element); return; }
-      const done = () => settle(element);
-      if (animation.finished && typeof animation.finished.then === 'function') animation.finished.then(done, done);
-      else { try { animation.onfinish = done; } catch (error) { done(); } }
-    }
-    // One reveal language for the page. Text families settle with opacity plus a
-    // short rise on the reveal curve; images settle a touch softer, slower, and
-    // with a subtle scale. Only opacity/transform are animated.
-    function reveal(element, delay = 0) {
-      if (!element) return;
-      if (element.matches(imageReveal)) {
-        animated(element, [
-          { opacity: 0, transform: 'translateY(' + motion.riseImage + 'px) scale(' + motion.riseScale + ')' },
-          { opacity: 1, transform: 'none' }
-        ], motion.revealGallery, delay, motion.easeRevealImage);
-        return;
-      }
-      const isHeading = element.matches(headingReveal);
-      const isUI = element.matches(uiReveal);
-      const rise = isHeading ? motion.riseHeading : isUI ? motion.riseUI : motion.riseSection;
-      const duration = isHeading ? motion.revealHeading : isUI ? motion.revealUI : motion.revealSection;
-      animated(element, [
-        { opacity: 0, transform: 'translateY(' + rise + 'px)' },
-        { opacity: 1, transform: 'none' }
-      ], duration, delay, motion.easeReveal);
-    }
-    // Initial load, one composition: image -> header/brand -> eyebrow -> headline
-    // -> supporting copy -> CTA group. The hero image overlaps the text sequence.
-    animated(document.querySelector('.hero-image'), [{ opacity: 0, transform: 'scale(' + motion.riseScale + ')' }, { opacity: 1, transform: 'none' }], motion.revealImage, 0, motion.easeRevealImage);
-    animated(document.querySelector('.site-header'), [{ opacity: 0 }, { opacity: 1 }], motion.revealHero, 60, motion.easeReveal);
-    heroGroups.forEach((element, index) => {
-      const isHeading = element.matches('h1');
-      const duration = isHeading ? motion.revealHeading : motion.revealHero;
-      const rise = isHeading ? motion.riseHeading : motion.riseHero;
-      animated(element, [{ opacity: 0, transform: 'translateY(' + rise + 'px)' }, { opacity: 1, transform: 'none' }], duration, 140 + index * motion.staggerHero, motion.easeReveal);
+  // Home entrance: the same shared reveal language as every other page
+  // (js/page-entry.js); Home supplies only its own targets.
+  if (motionEnabled && window.PerfectionPageEntry) {
+    window.PerfectionPageEntry.init({
+      headingTargets: '.pmu-hero-lead, .pmu-intro-grid, .home-services-head, .pmu-standard-head, .about-copy, .result-head, .reviews .section-intro, .pmu-cta-copy',
+      targets: '.pmu-hero-lead, .pmu-hero-media, .pmu-hero-body, .pmu-intro-grid, .home-services-head, .home-services, .pmu-standard-head, .pmu-standard-list, .about-portrait, .about-copy, .result-head, .result-item, .reviews .section-intro, .review-feature, .pmu-cta-copy',
+      staggerClasses: ['result-item'],
+      finishOnFocus: true
     });
-    // Compact viewports read as they scroll, so the init boundary and observer
-    // are gated once here; desktop keeps its certified predicate and params.
-    const mobileInit = innerWidth <= 800;
-    if ('IntersectionObserver' in window) {
-      const reveals = new IntersectionObserver(entries => {
-        entries.forEach(entry => {
-          if (!entry.isIntersecting) return;
-          reveals.unobserve(entry.target);
-          const element = entry.target;
-          // Layer separation stays restrained: logical groups ~90ms apart,
-          // closely related children ~55ms. No serialised module waits.
-          const delay = element.classList.contains('signature-item') ? motion.staggerGroup + Math.min([...element.parentElement.children].indexOf(element), 3) * motion.staggerChild
-            : element.classList.contains('about-copy') ? motion.staggerGroup
-            : element.classList.contains('transformation') || element.classList.contains('result-item') ? motion.staggerGroup
-            : element.classList.contains('review-feature') ? motion.staggerGroup
-            : 0;
-          reveal(element, delay);
-        });
-      }, mobileInit
-        ? { rootMargin: '0px 0px -8% 0px', threshold: .12 }
-        : { rootMargin: '0px 0px -12% 0px', threshold: .15 });
-      revealTargets.forEach(element => {
-        // Category C: targets sitting in the lower 30% of the viewport at init
-        // still take the observer so their entrance plays as the page is read;
-        // targets genuinely in the upper band reveal at once and never strand.
-        // On compact viewports only content fully scrolled off the top settles
-        // instantly, so restored/hash loads still get a perceptible entrance.
-        const top = element.getBoundingClientRect();
-        if (mobileInit ? top.bottom > 0 : top.top >= innerHeight * 0.7) reveals.observe(element);
-        else reveal(element, 0);
-      });
-      reducedMotion.addEventListener('change', () => {
-        if (!reducedMotion.matches) return;
-        reveals.disconnect();
-        document.documentElement.classList.remove('motion-armed');
-      });
-    } else {
-      revealTargets.forEach(element => reveal(element, 0));
-    }
-    // Setup is complete and synchronous; the safety timer can now be retired.
+  } else {
+    document.documentElement.classList.remove('motion-armed');
     clearTimeout(window.__perfectionMotionFallback);
   }
 
@@ -685,6 +597,23 @@
     schedule();
   }
   initReviews();
+
+  // Signature services: hovering or focusing a service shows its photo.
+  function initHomeServices() {
+    const root = document.querySelector('[data-home-services]');
+    if (!root) return;
+    const items = Array.prototype.slice.call(root.querySelectorAll('.home-svc-item'));
+    const panels = Array.prototype.slice.call(root.querySelectorAll('.home-svc-panel'));
+    const activate = (key) => {
+      items.forEach((item) => item.classList.toggle('is-active', item.dataset.svc === key));
+      panels.forEach((panel) => panel.classList.toggle('is-active', panel.dataset.panel === key));
+    };
+    items.forEach((item) => {
+      item.addEventListener('mouseenter', () => activate(item.dataset.svc));
+      item.addEventListener('focusin', () => activate(item.dataset.svc));
+    });
+  }
+  initHomeServices();
 
   if ('IntersectionObserver' in window) {
     const observer = new IntersectionObserver((entries) => {

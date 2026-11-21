@@ -1,20 +1,5 @@
-/* Motion layer — loaded on every page. Choreography lives in js/motion.js. */
-
-/* Lenis smooth scrolling (base rules from the Lenis package) */
-html.lenis, html.lenis body { height: auto; }
-.lenis.lenis-smooth { scroll-behavior: auto !important; }
-.lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
-.lenis.lenis-stopped { overflow: clip; }
-
-/* Page headlines wait (max ~2 s, see the head script) until they are split
-   into lines, so they never flash before their entrance. */
-html.motion-pending main h1 { visibility: hidden; }
-
-/* Split headline lines: masks clip each line; keep serif descenders. */
-.m-line-mask { padding-bottom: .1em; margin-bottom: -.1em; }
-
-/* Images animated by motion.js are driven inline; CSS transitions would lag. */
-html.motion-on main img[data-motion] { transition: none !important; }
+/* Interaction polish — loaded on every page. Entrance motion lives in
+   js/page-entry.js. Nothing here is tied to scrolling. */
 
 /* Buttons: a fill sweeps up from the bottom edge on hover. */
 .button { position: relative; overflow: hidden; isolation: isolate; }
@@ -25,38 +10,46 @@ html.motion-on main img[data-motion] { transition: none !important; }
   z-index: -1;
   background: var(--dark);
   transform: translateY(101%);
-  transition: transform 700ms cubic-bezier(.19, 1, .22, 1);
+  transition: transform 700ms cubic-bezier(.16, 1, .3, 1);
 }
 .button-outline-light::before { background: var(--ivory); }
 @media (hover: hover) and (pointer: fine) {
   .button:hover::before { transform: none; }
-  .button-gold:hover { background: #ad8c60; color: var(--ivory); transition-delay: 0s, 120ms; }
+  .button-gold:hover { background: #ad8c60; color: var(--ivory); }
   .button-outline-light:hover { color: var(--dark); }
 }
 
 /* Text links: an underline draws in from the left. */
 .result-action,
 .result-explore,
-.signature-action,
+.home-svc-explore,
 .le-text-link {
   background: linear-gradient(currentColor, currentColor) 0 100% / 0 1px no-repeat;
-  transition: background-size 650ms cubic-bezier(.19, 1, .22, 1);
+  transition: background-size 650ms cubic-bezier(.16, 1, .3, 1);
 }
 @media (hover: hover) and (pointer: fine) {
   .result-action:hover,
   .result-explore:hover,
-  .signature-item:hover .signature-action,
+  .home-svc-explore:hover,
   .le-text-link:hover { background-size: 100% 1px; }
 }
 
-/* Page-to-page transitions (browsers with cross-document view transitions). */
+/* Photos ease in a touch closer on hover. */
+@media (hover: hover) and (pointer: fine) {
+  .result-media img,
+  .about-portrait img { transition: transform 1200ms cubic-bezier(.16, 1, .3, 1); }
+  .result-item:hover .result-media img,
+  .about-portrait:hover img { transform: scale(1.035); }
+}
+
+/* Page-to-page: a soft crossfade (browsers with cross-document view transitions). */
 @view-transition { navigation: auto; }
-::view-transition-old(root) { animation: motion-page-out 420ms cubic-bezier(.7, 0, .84, 0) both; }
-::view-transition-new(root) { animation: motion-page-in 900ms cubic-bezier(.16, 1, .3, 1) both; }
-@keyframes motion-page-out { to { opacity: 0; transform: translateY(-20px); } }
-@keyframes motion-page-in { from { opacity: 0; transform: translateY(28px); } }
+::view-transition-old(root) { animation: motion-fade-out 260ms ease both; }
+::view-transition-new(root) { animation: motion-fade-in 520ms cubic-bezier(.16, 1, .3, 1) both; }
+@keyframes motion-fade-out { to { opacity: 0; } }
+@keyframes motion-fade-in { from { opacity: 0; } }
 
 @media (prefers-reduced-motion: reduce) {
   @view-transition { navigation: none; }
-  .button::before, .result-action, .result-explore, .signature-action, .le-text-link { transition: none; }
+  .button::before, .result-action, .result-explore, .home-svc-explore, .le-text-link { transition: none; }
 }

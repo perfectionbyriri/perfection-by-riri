@@ -1,0 +1,165 @@
+/* Home — built from the service-page components (service-pages.css, scoped by
+   body.svc-pmu). This file adds only what Home needs beyond them. */
+
+html.motion-armed .home .home-services-head,
+html.motion-armed .home .home-services { opacity: 0; }
+
+/* Signature services: a list on the left, the chosen service's photo on the right */
+.home-services-section { padding: 120px 0 130px; }
+.home-services-head { margin-bottom: 56px; }
+.home-services-head .pmu-kicker { margin-bottom: 20px; }
+.home-services-head h2 {
+  font-size: clamp(52px, 5vw, 72px);
+  line-height: .98;
+  letter-spacing: -1.6px;
+}
+.home-services {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+  gap: 0 clamp(40px, 6vw, 96px);
+  align-items: start;
+}
+.home-svc-list { list-style: none; margin: 0; padding: 0; border-bottom: 1px solid var(--line); }
+.home-svc-item { border-top: 1px solid var(--line); }
+.home-svc-link {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 28px 0;
+  color: inherit;
+  text-decoration: none;
+}
+.home-svc-text { display: flex; flex-direction: column; gap: 8px; flex: 1; min-width: 0; }
+.home-svc-name {
+  font-family: var(--serif);
+  font-size: clamp(26px, 2.3vw, 34px);
+  line-height: 1.05;
+  letter-spacing: -.3px;
+  text-transform: uppercase;
+  color: #8f897f;
+  transition: color 500ms cubic-bezier(.16, 1, .3, 1);
+}
+.home-svc-desc {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.home-svc-arrow {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.4;
+  color: #8f897f;
+  transform: rotate(-45deg);
+  transition: transform 600ms cubic-bezier(.16, 1, .3, 1), color 500ms cubic-bezier(.16, 1, .3, 1);
+}
+.home-svc-item.is-active .home-svc-name,
+.home-svc-link:focus-visible .home-svc-name { color: var(--ink); }
+.home-svc-item.is-active .home-svc-arrow { color: var(--ink); transform: none; }
+.home-svc-thumb,
+.home-svc-note { display: none; }
+
+.home-svc-stage { display: grid; }
+.home-svc-panel {
+  grid-area: 1 / 1;
+  margin: 0;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 900ms cubic-bezier(.16, 1, .3, 1), visibility 0s 900ms;
+}
+.home-svc-panel.is-active { opacity: 1; visibility: visible; transition: opacity 900ms cubic-bezier(.16, 1, .3, 1), visibility 0s; }
+.home-svc-panel img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1.5;
+  object-fit: cover;
+  transform: scale(1.05);
+  transition: transform 1600ms cubic-bezier(.16, 1, .3, 1);
+}
+.home-svc-panel.is-active img { transform: none; }
+.home-svc-panel { overflow: hidden; }
+.home-svc-panel figcaption {
+  text-transform: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 32px;
+  padding-top: 22px;
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--muted);
+}
+.home-svc-explore {
+  flex: none;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+@media (max-width: 900px) {
+  .home-services-section { padding: 84px 0 90px; }
+  .home-services-head { margin-bottom: 36px; }
+  .home-services-head h2 { font-size: 48px; }
+  .home-services { display: block; }
+  .home-svc-stage { display: none; }
+  .home-svc-item { padding-bottom: 30px; }
+  .home-svc-link { padding: 24px 0 18px; }
+  .home-svc-name { color: var(--ink); }
+  .home-svc-arrow { color: var(--ink); transform: none; }
+  .home-svc-thumb { display: block; margin: 0; overflow: hidden; }
+  .home-svc-thumb img { display: block; width: 100%; aspect-ratio: 1.5; object-fit: cover; }
+  .home-svc-note { display: block; margin-top: 14px; font-size: 14px; line-height: 1.7; color: var(--muted); }
+}
+
+/* About: the second line of the heading in italic, like the service pages */
+.about-copy h2 em { font-style: italic; font-weight: 400; }
+
+/* Real results: heading, hairline and caption on one line */
+.home-results-head {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px 32px;
+}
+.home-results-head h2 { margin: 0; }
+.home-results-rule { flex: 1; min-width: 60px; height: 1px; background: var(--line); }
+.home-results-head .result-lead { margin: 0; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); }
+@media (max-width: 700px) {
+  .home-results-rule { display: none; }
+  .home-results-head { flex-direction: column; align-items: flex-start; }
+}
+
+/* Reviews: italic quotes and a Google rating in the intro column */
+.review-slide blockquote { font-style: italic; }
+.review-google {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 34px;
+  color: #efe7da;
+  text-decoration: none;
+}
+.review-google .icon { width: 22px; height: 22px; }
+.review-google-score { font-family: var(--serif); font-size: 42px; line-height: 1; }
+.review-google-label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 11px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: #bfb5a5;
+}
+.review-google-cta { width: fit-content; padding-bottom: 2px; color: #efe7da; border-bottom: 1px solid #5a5244; }
+
+/* "Transformation?" is the longest word on the page; keep it inside small screens. */
+@media (max-width: 560px) {
+  .svc-pmu.home .pmu-cta-copy h2 { font-size: clamp(34px, 10.4vw, 52px); }
+}
+.home-svc-panel figcaption > span:first-child { text-transform: none; letter-spacing: .005em; }
