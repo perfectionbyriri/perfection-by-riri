@@ -182,3 +182,13 @@ h2,
 @media (max-width: 800px) {
   .le-care-intro { font-size: 14px; }
 }
+
+/* Bodoni Moda tuning. Its display optical size has hairline strokes that
+   vanish on photos and phones, so the serif uses a sturdier optical size
+   everywhere; and its capitals need a touch of air instead of the tight
+   negative tracking tuned for the previous face. */
+body { font-variation-settings: 'opsz' 24; }
+h1, h2 { letter-spacing: .01em !important; }
+@media (max-width: 560px) {
+  .svc-pmu .pmu-hero h1 { font-size: clamp(28px, 9.2vw, 50px); }
+}
