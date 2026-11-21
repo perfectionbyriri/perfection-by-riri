@@ -119,6 +119,7 @@ html.motion-armed .home .home-services { opacity: 0; }
 .home-svc-panel img {
   display: block;
   width: 100%;
+  height: auto;
   aspect-ratio: 1.5;
   object-fit: cover;
   transform: scale(1.05);
@@ -177,7 +178,7 @@ html.motion-armed .home .home-services { opacity: 0; }
   }
   .home-svc-item::before { display: none; }
   .home-svc-thumb { display: block; order: -1; margin: 0; overflow: hidden; }
-  .home-svc-thumb img { display: block; width: 100%; aspect-ratio: 1.5; object-fit: cover; }
+  .home-svc-thumb img { display: block; width: 100%; height: auto; aspect-ratio: 1.5; object-fit: cover; }
   .home-svc-link,
   .home-svc-item.is-active .home-svc-link { padding: 22px 20px 10px; gap: 16px; }
   .home-svc-name { font-size: 26px; color: var(--ink); }
