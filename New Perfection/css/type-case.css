@@ -192,3 +192,6 @@ h1, h2 { letter-spacing: .01em !important; }
 @media (max-width: 560px) {
   .svc-pmu .pmu-hero h1 { font-size: clamp(28px, 9.2vw, 50px); }
 }
+
+/* Footer link lists read as titles: every word starts with a capital. */
+.footer-grid ul a { text-transform: capitalize; }
