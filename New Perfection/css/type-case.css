@@ -1,0 +1,184 @@
+/* Capitalisation system — loaded last on every page.
+
+   Rule: uppercase is reserved for short labels (navigation, buttons, eyebrows,
+   badges, price labels, footer headings) and for the serif display headings,
+   which carry the brand's editorial voice. Anything people read — paragraphs,
+   descriptions, questions, answers, quotes — is set in sentence case, without
+   the extra tracking that only uppercase needs.
+
+   Text now defaults to sentence case (body no longer forces uppercase), so a new
+   label must opt in here. */
+
+/* Labels */
+.announcement,
+.brand,
+.main-navigation a,
+.nav-trigger,
+.nav-dropdown-label,
+.nav-dropdown-desc,
+.button,
+.eyebrow,
+.faq-eyebrow,
+.contact-eyebrow,
+.ll-edit-eyebrow,
+.brow-eyebrow,
+.pmu-kicker,
+.le-label,
+.pmu-intro-signature,
+.trust-value,
+.trust-label,
+.signature-trigger,
+.signature-action,
+.result-title,
+.result-action,
+.result-explore,
+.result-more-label,
+.experience-item h3,
+.review-name,
+.review-service,
+.review-source,
+.le-study-label,
+.le-refills-heading,
+.le-text-link,
+.le-hero-caption,
+.le-result-badge,
+.le-style-link small,
+.le-prices dt,
+.le-service-foot strong,
+.ll-profile-top,
+.ll-result-caption,
+.svc-head-note,
+.contact-textlink,
+.contact-info-label,
+.contact-info-note,
+.faq-subsection-title,
+.faq-services-note,
+.brow-list-title,
+.brow-result-caption,
+.brow-results-label,
+.brow-services-note,
+.footer-heading,
+.footer-bottom button,
+.social-coming,
+caption,
+figcaption,
+th {
+  text-transform: uppercase;
+}
+
+/* Serif display headings */
+h1,
+h2,
+.brow-service-name,
+.faq-service-title,
+.contact-column-title,
+.le-result-quote,
+.pmu-price-copy strong,
+.le-profile h3,
+.le-style-link > span:first-child,
+#ll-profile-natural-title,
+#ll-profile-tint-title,
+.svc-pmu h3 {
+  text-transform: uppercase;
+}
+
+/* Running text: sentence case, natural tracking, readable size */
+.hero-description,
+.signature-lead,
+.signature-note,
+.result-lead,
+.result-note,
+.review-slide blockquote,
+.review-disclaimer,
+.offer-support,
+.pmu-touchups-intro,
+.svc-pmu .pmu-price-copy small,
+.ll-profile-description,
+.ll-edit-intro,
+.le-intro,
+.le-care-intro,
+.le-profile-description,
+.le-styles-stat-label,
+.le-question-list summary,
+.faq-hero-support,
+.faq-hero-statement,
+.faq-question-text,
+.faq-disclaimer,
+.brow-list-note,
+.brow-service-desc,
+.brow-why-lead {
+  text-transform: none;
+  letter-spacing: .005em;
+}
+
+.pmu-touchups-intro,
+.ll-profile-description,
+.ll-edit-intro,
+.le-question-list summary,
+.faq-question-text {
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.le-styles-stat-label,
+.faq-disclaimer,
+.svc-pmu .pmu-price-copy small {
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+@media (max-width: 800px) {
+  .faq-question-text { font-size: 15px; letter-spacing: .005em; }
+}
+
+/* Running text inside service-page components (selectors mirror the
+   originals' specificity so this later file wins). */
+.le-hero-body p:not([class]),
+.pmu-hero-body p:not([class]),
+.pmu-intro-copy p:not([class]),
+.pmu-pricing-head p:not([class]),
+.svc-pmu .pmu-touchups-intro,
+.le-service-foot p,
+.le-wispy-note > p:last-of-type,
+.le-refills > p,
+.ll-edit-action > p,
+.pmu-pricing-action p:not([class]),
+.brow-pricing-action p:not([class]) {
+  text-transform: none;
+  letter-spacing: .005em;
+}
+
+.le-wispy-note > p:last-of-type,
+.le-refills > p,
+.ll-edit-action > p,
+.pmu-pricing-action p:not([class]),
+.brow-pricing-action p:not([class]),
+.le-service-foot p {
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.faq-hero-statement { font-size: 14px; }
+
+@media (max-width: 800px) {
+  .result-note { font-size: 13px; }
+}
+
+.le-process dd,
+.svc-pmu .pmu-process-head > p:last-child,
+.svc-pmu .pmu-cta-copy > p:not(.pmu-kicker),
+.le-question-list details p,
+.le-booking-bottom p,
+.pmu-process-item figcaption {
+  text-transform: none;
+  letter-spacing: .005em;
+}
+.pmu-process-item figcaption span { text-transform: uppercase; }
+.le-process dd,
+.le-question-list details p,
+.le-booking-bottom p,
+.svc-pmu .pmu-process-head > p:last-child,
+.svc-pmu .pmu-touchups-intro { font-size: 14px; line-height: 1.65; }
+@media (max-width: 800px) {
+  .le-care-intro { font-size: 14px; }
+}

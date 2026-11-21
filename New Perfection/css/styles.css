@@ -34,7 +34,15 @@
   --price-weight:300;
   --price-numeric:tabular-nums lining-nums;
   --page-width:1272px;
-  --header-height:120px
+  --header-height:120px;
+  /* Type scale (homepage story; service pages keep their own sizes) */
+  --fs-display:clamp(48px,6.4vw,92px);
+  --fs-h2:clamp(36px,4.2vw,60px);
+  --fs-h3:clamp(22px,2vw,28px);
+  --fs-lead:clamp(17px,1.35vw,19px);
+  --fs-body:16px;
+  --fs-label:12px;
+  --measure:68ch
 }
 
 /* Shared elements and accessible controls */
@@ -56,20 +64,11 @@ body {
   font-family:var(--sans);
   font-size:16px;
   line-height:1.6;
-  -webkit-font-smoothing:antialiased;
-  text-transform:uppercase
+  -webkit-font-smoothing:antialiased
 }
 
-/* The brand typography system is intentionally ALL CAPS for every visible
-   surface. Native controls carry a UA `text-transform:none`, so they are
-   re-asserted explicitly here rather than via per-component patches. */
-button,
-input,
-textarea,
-select,
-option {
-  text-transform:uppercase
-}
+/* Capitalisation lives in css/type-case.css: sentence case by default,
+   uppercase only for labels and serif display headings. */
 
 button,a {
   -webkit-tap-highlight-color:transparent
@@ -783,7 +782,7 @@ button:disabled {
 }
 
 .section-intro .review-disclaimer {
-  font-size:12px!important;
+  font-size:13px!important;
   line-height:1.7!important;
   margin-top:9px!important;
   color:#696359
@@ -1607,7 +1606,7 @@ button:disabled {
     font-size:12px
   }
   .section-intro .review-disclaimer {
-    font-size:10px!important
+    font-size:13px!important
   }
   .story-icon {
     width:43px;
@@ -1947,7 +1946,7 @@ button:disabled {
     font-size:10px
   }
   .section-intro .review-disclaimer {
-    font-size:12px!important
+    font-size:13px!important
   }
   .review-card {
     flex-basis:calc((100% - 36px)/3)
