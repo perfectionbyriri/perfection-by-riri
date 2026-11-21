@@ -320,6 +320,7 @@
   <link rel="preload" href="../images/branding/jost.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="../css/styles.css">
   <link rel="stylesheet" href="../css/faq.css">
+  <link rel="stylesheet" href="../css/motion.css">
   <link rel="stylesheet" href="../css/type-case.css">
   <script>
     /* Arm the faq-page reveal motion before first paint so enhanced content
@@ -329,10 +330,10 @@
     (function () {
       if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
       var root = document.documentElement;
-      root.classList.add('motion-armed');
+      root.classList.add('motion-pending');
       window.__perfectionMotionFallback = window.setTimeout(function () {
         window.__perfectionMotionFallbackFired = true;
-        root.classList.remove('motion-armed');
+        root.classList.remove('motion-pending');
       }, 2000);
     })();
   </script>
@@ -340,6 +341,11 @@
   <script src="../js/page-entry.js" defer></script>
   <script src="../js/faq.js" defer></script>
   <link rel="preconnect" href="https://assets.setmore.com" crossorigin>
+  <script src="../js/vendor/gsap.min.js" defer></script>
+  <script src="../js/vendor/ScrollTrigger.min.js" defer></script>
+  <script src="../js/vendor/SplitText.min.js" defer></script>
+  <script src="../js/vendor/lenis.min.js" defer></script>
+  <script src="../js/motion.js" defer></script>
 </head>
 <body class="faq-page">
   <a class="skip-link" href="#content">Skip to content</a>

@@ -446,9 +446,9 @@
   if (motionEnabled) {
     const imageReveal = '.about-portrait, .transformation';
     const headingReveal = '.signature-head, .result-head, .reviews .section-intro, .offer';
-    const uiReveal = '.hero-trust';
+    const uiReveal = '.trust-grid';
     const heroGroups = document.querySelectorAll('.hero-content > *');
-    const revealTargets = document.querySelectorAll('.signature-head, .signature-item, .about-portrait, .about-copy > *, .result-head, .result-item, .transformation, .reviews .section-intro, .review-feature, .offer');
+    const revealTargets = document.querySelectorAll('.trust-grid, .signature-head, .signature-item, .experience-grid, .about-portrait, .about-copy, .result-head, .result-item, .transformation, .reviews .section-intro, .review-feature, .offer');
     // Persist the settled state inline so visibility never depends on animation
     // fill semantics. No animated container owns an author transform, so `none`
     // matches the frozen design; child hover transforms and the independent
@@ -476,17 +476,6 @@
     // with a subtle scale. Only opacity/transform are animated.
     function reveal(element, delay = 0) {
       if (!element) return;
-      // The About portrait opens from a narrow vertical slit while the photo settles.
-      if (element.matches('.about-portrait')) {
-        animated(element, [
-          { opacity: 0, clipPath: 'inset(0% 46% 0% 46% round 12px)' },
-          { opacity: 1, clipPath: 'inset(0% 40% 0% 40% round 12px)', offset: .18 },
-          { opacity: 1, clipPath: 'inset(0% 0% 0% 0% round 12px)' }
-        ], motion.revealGallery * 1.6, delay, motion.easeRevealImage);
-        const photo = element.querySelector('img');
-        if (photo) animate(photo, [{ transform: 'scale(1.14)' }, { transform: 'none' }], motion.revealGallery * 2, delay, 'site', motion.easeRevealImage);
-        return;
-      }
       if (element.matches(imageReveal)) {
         animated(element, [
           { opacity: 0, transform: 'translateY(' + motion.riseImage + 'px) scale(' + motion.riseScale + ')' },
@@ -505,8 +494,7 @@
     }
     // Initial load, one composition: image -> header/brand -> eyebrow -> headline
     // -> supporting copy -> CTA group. The hero image overlaps the text sequence.
-    // The hero photo is visible from the first paint (it is the LCP image); it only settles in scale.
-    animated(document.querySelector('.hero-image'), [{ transform: 'scale(1.06)' }, { transform: 'none' }], motion.revealImage * 1.8, 0, motion.easeRevealImage);
+    animated(document.querySelector('.hero-image'), [{ opacity: 0, transform: 'scale(' + motion.riseScale + ')' }, { opacity: 1, transform: 'none' }], motion.revealImage, 0, motion.easeRevealImage);
     animated(document.querySelector('.site-header'), [{ opacity: 0 }, { opacity: 1 }], motion.revealHero, 60, motion.easeReveal);
     heroGroups.forEach((element, index) => {
       const isHeading = element.matches('h1');
@@ -526,7 +514,7 @@
           // Layer separation stays restrained: logical groups ~90ms apart,
           // closely related children ~55ms. No serialised module waits.
           const delay = element.classList.contains('signature-item') ? motion.staggerGroup + Math.min([...element.parentElement.children].indexOf(element), 3) * motion.staggerChild
-            : element.parentElement.classList.contains('about-copy') ? motion.staggerGroup + Math.min([...element.parentElement.children].indexOf(element), 4) * motion.staggerGroup
+            : element.classList.contains('about-copy') ? motion.staggerGroup
             : element.classList.contains('transformation') || element.classList.contains('result-item') ? motion.staggerGroup
             : element.classList.contains('review-feature') ? motion.staggerGroup
             : 0;
@@ -617,12 +605,7 @@
       toggleButton.classList.toggle('is-paused', !playing);
       toggleButton.setAttribute('aria-label', playing ? 'Pause automatic reviews' : 'Play automatic reviews');
       stage.setAttribute('aria-live', rotating ? 'off' : 'polite');
-      // Restart the active dot's progress line so it fills in step with the timer.
-      root.classList.remove('is-rotating');
       if (!rotating) return;
-      root.style.setProperty('--slide-ms', slideDuration(index) + 'ms');
-      void root.offsetWidth;
-      root.classList.add('is-rotating');
       timer = setTimeout(() => go(index + 1), slideDuration(index));
     }
     function go(target, manual = false) {

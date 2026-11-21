@@ -107,6 +107,7 @@
   <link rel="stylesheet" href="../../css/styles.css">
   <link rel="stylesheet" href="../../css/service-pages.css">
   <link rel="stylesheet" href="../../css/service-hero.css">
+  <link rel="stylesheet" href="../../css/motion.css">
   <link rel="stylesheet" href="../../css/type-case.css">
   <script>
     /* Arm the service-page reveal motion before first paint so enhanced content
@@ -116,10 +117,10 @@
     (function () {
       if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
       var root = document.documentElement;
-      root.classList.add('motion-armed');
+      root.classList.add('motion-pending');
       window.__perfectionMotionFallback = window.setTimeout(function () {
         window.__perfectionMotionFallbackFired = true;
-        root.classList.remove('motion-armed');
+        root.classList.remove('motion-pending');
       }, 2000);
     })();
   </script>
@@ -127,6 +128,11 @@
   <script src="../../js/page-entry.js" defer></script>
   <script src="../../js/service-page.js" defer></script>
   <link rel="preconnect" href="https://assets.setmore.com" crossorigin>
+  <script src="../../js/vendor/gsap.min.js" defer></script>
+  <script src="../../js/vendor/ScrollTrigger.min.js" defer></script>
+  <script src="../../js/vendor/SplitText.min.js" defer></script>
+  <script src="../../js/vendor/lenis.min.js" defer></script>
+  <script src="../../js/motion.js" defer></script>
 </head>
 <body class="svc-page svc-brow">
   <a class="skip-link" href="#content">Skip to content</a>
