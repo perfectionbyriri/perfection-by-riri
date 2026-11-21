@@ -1,0 +1,242 @@
+/* Homepage story chapters — loaded only by index.html, after styles.css.
+
+   Pinned chapters ([data-story-pin]) are sticky only under html.story-on, which
+   story.js sets when motion is allowed. Without it (reduced motion, no JS)
+   every chapter is ordinary flowing content. `--p` (0–1) is the chapter's
+   reading progress, written by story.js; all scroll-linked motion derives from
+   it. Only transform, opacity, translate and clip-path animate. */
+
+/* Prologue */
+.hero h1 .line {
+  display: block;
+  overflow: hidden;
+  padding-bottom: .08em;
+  margin-bottom: -.08em;
+}
+.hero h1 .line > span { display: block; }
+html.story-on .hero h1 .line > span { animation: story-line-rise 1150ms var(--ease-reveal) 120ms both; }
+html.story-on .hero h1 .line + .line > span { animation-delay: 240ms; }
+@keyframes story-line-rise { from { transform: translateY(108%); } to { transform: none; } }
+
+.hero-trust {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 0;
+  margin: 40px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 11px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: #ddd3c4;
+}
+.hero-trust li { display: flex; align-items: center; }
+.hero-trust li + li::before {
+  content: "";
+  width: 3px;
+  height: 3px;
+  margin: 0 18px;
+  border-radius: 50%;
+  background: var(--gold);
+}
+
+@supports (animation-timeline: scroll()) {
+  html.story-on .hero-image {
+    animation: story-hero-drift linear both;
+    animation-timeline: scroll(root);
+    animation-range: 0 100vh;
+  }
+}
+@keyframes story-hero-drift { to { translate: 0 10%; } }
+
+/* Philosophy — words light up as the chapter is read */
+.story-philosophy {
+  position: relative;
+  background: var(--dark);
+  color: #f3ede4;
+}
+.story-philosophy .story-stage { padding-block: 120px; }
+.story-philosophy .eyebrow {
+  margin: 0;
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: .2em;
+  line-height: 1.4;
+  color: var(--gold);
+}
+.story-quote {
+  max-width: 17ch;
+  margin: 30px 0 0;
+  font-family: var(--serif);
+  font-size: clamp(36px, 5vw, 72px);
+  font-weight: 400;
+  line-height: 1.12;
+  letter-spacing: -.012em;
+  text-wrap: balance;
+}
+.story-signature {
+  margin-top: 40px;
+  font-size: 12px;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: #a79e91;
+}
+html.story-on .story-philosophy { height: 230vh; height: 230svh; }
+html.story-on .story-philosophy .story-stage {
+  position: sticky;
+  top: 0;
+  display: flex;
+  align-items: center;
+  height: 100vh;
+  height: 100svh;
+  padding-block: 0;
+}
+html.story-on .story-quote .w {
+  opacity: calc(.24 + .76 * clamp(0, calc(var(--p, 0) * (var(--n) + 3) - var(--i)), 1));
+  transition: opacity 180ms linear;
+}
+
+/* About — portrait opens from a slit (main.js), paragraphs follow one by one */
+.about-copy p:not(.eyebrow) { max-width: var(--measure); }
+
+/* Services — a horizontal scene on desktop, a vertical stack elsewhere */
+.services-progress { display: none; }
+@media (min-width: 1024px) {
+  html.story-on .services {
+    --panel: min(38vw, calc((100vh - 380px) * 1.5), 620px);
+    --gap: clamp(28px, 3vw, 56px);
+    --edge: max(5vw, calc((100vw - var(--page-width)) / 2));
+    height: calc(100vh + 4 * var(--panel) + 3 * var(--gap) + 2 * var(--edge) - 100vw);
+    padding: 0;
+  }
+  html.story-on .services .story-stage {
+    position: sticky;
+    top: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 44px;
+    height: 100vh;
+    overflow: clip;
+    container-type: inline-size;
+  }
+  html.story-on .services .signature-head { margin: 0; }
+  html.story-on .services .services-track {
+    width: auto;
+    max-width: none;
+    margin: 0;
+    padding: 0 var(--edge);
+  }
+  html.story-on .services .signature-list {
+    display: flex;
+    gap: var(--gap);
+    width: max-content;
+    transform: translate3d(calc(var(--p, 0) * (100cqw - 100% - 2 * var(--edge))), 0, 0);
+    will-change: transform;
+  }
+  html.story-on .services .signature-item {
+    flex: none;
+    width: var(--panel);
+    margin: 0;
+  }
+  html.story-on .services .signature-media { aspect-ratio: 1.6; }
+  html.story-on .services .services-progress {
+    display: block;
+    width: auto;
+    max-width: none;
+    margin: 0 var(--edge);
+    height: 1px;
+    background: var(--line);
+  }
+  html.story-on .services .services-progress span {
+    display: block;
+    height: 100%;
+    background: var(--ink);
+    transform: scaleX(var(--p, 0));
+    transform-origin: left;
+  }
+}
+
+/* Results — portrait frames, distinct from the services photos */
+.result-media { aspect-ratio: 4 / 5; background: #e9e2da; }
+.result-media img { object-position: center 40%; transition: transform 900ms var(--ease-premium); }
+@media (hover: hover) and (pointer: fine) {
+  .result-item:hover .result-media img { transform: scale(1.035); }
+}
+
+/* Voices */
+.review-slide blockquote { font-style: italic; }
+.review-google {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 34px;
+  color: #efe7da;
+  text-decoration: none;
+}
+.review-google .icon { width: 22px; height: 22px; }
+.review-google-score { font-family: var(--serif); font-size: 42px; line-height: 1; }
+.review-google-label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 11px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: #bfb5a5;
+}
+.review-google-cta { color: #efe7da; border-bottom: 1px solid #5a5244; padding-bottom: 2px; width: fit-content; transition: border-color var(--duration-fast) var(--ease-premium); }
+@media (hover: hover) and (pointer: fine) {
+  .review-google:hover .review-google-cta { border-color: var(--gold); }
+}
+.review-dot span { position: relative; overflow: hidden; }
+.review-dot.is-active span { background: #5d564a; }
+.review-dot span::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: #c8b58e;
+  transform: scaleX(0);
+  transform-origin: left;
+}
+.review-dot.is-active span::after { transform: scaleX(1); }
+[data-reviews].is-rotating .review-dot.is-active span::after { animation: story-review-progress var(--slide-ms, 8000ms) linear both; }
+@keyframes story-review-progress { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+/* Finale — the opening portrait returns, dimmed */
+.booking-final { position: relative; isolation: isolate; overflow: hidden; padding-block: 150px; }
+.offer-bg {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: right 42%;
+  opacity: .3;
+}
+.booking-final::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: radial-gradient(ellipse 70% 80% at 50% 50%, rgba(20,20,19,.5), rgba(20,20,19,.94) 75%);
+}
+.button[data-magnetic] {
+  transition: background var(--duration-fast) var(--ease-premium), color var(--duration-fast) var(--ease-premium), border-color var(--duration-fast) var(--ease-premium), transform var(--duration-fast) var(--ease-premium), translate 600ms var(--ease-premium);
+}
+@supports (animation-timeline: view()) {
+  html.story-on .offer-bg {
+    animation: story-offer-settle linear both;
+    animation-timeline: view();
+    animation-range: entry 0% cover 50%;
+  }
+}
+@keyframes story-offer-settle { from { scale: 1.12; opacity: 0; } to { scale: 1; opacity: .3; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .hero h1 .line > span,
+  .hero-image,
+  .offer-bg { animation: none !important; }
+}

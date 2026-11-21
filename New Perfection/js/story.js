@@ -22,7 +22,13 @@
     return Math.min(1, Math.max(0, -top / distance));
   }
 
-  window.PerfectionStory = { progress };
+  // Pointer offset from an element's centre -> a small, capped pull toward it.
+  function magnet(dx, dy) {
+    const pull = value => Math.max(-8, Math.min(8, Math.round(value * 0.2)));
+    return { x: pull(dx) + 0, y: pull(dy) + 0 };
+  }
+
+  window.PerfectionStory = { progress, magnet };
 
   const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (reduced) return;
@@ -76,4 +82,38 @@
   document.querySelectorAll('[data-story-pin]').forEach(section => observer.observe(section));
   window.addEventListener('scroll', schedule, { passive: true });
   window.addEventListener('resize', schedule);
+
+  // Keyboard users: when focus lands on a panel of a horizontal track, scroll the
+  // page to the progress at which that panel is fully in view.
+  document.querySelectorAll('[data-story-track]').forEach(track => {
+    const section = track.closest('[data-story-pin]');
+    track.addEventListener('focusin', event => {
+      const item = event.target.closest('li');
+      const travel = section.offsetHeight - window.innerHeight;
+      const stage = track.parentElement.parentElement;
+      stage.scrollLeft = 0;
+      const shift = track.getBoundingClientRect().width + 2 * parseFloat(getComputedStyle(track.parentElement).paddingLeft) - stage.clientWidth;
+      if (!item || travel <= 0 || shift <= 0) return;
+      const rect = item.getBoundingClientRect();
+      const margin = 24;
+      const delta = rect.right > stage.clientWidth - margin ? rect.right - (stage.clientWidth - margin)
+        : rect.left < margin ? rect.left - margin : 0;
+      if (!delta) return;
+      const current = parseFloat(section.style.getPropertyValue('--p')) || 0;
+      const target = Math.min(1, Math.max(0, current + delta / shift));
+      window.scrollTo({ top: section.offsetTop + target * travel, behavior: 'instant' });
+    });
+  });
+
+  // A gentle magnetic pull on marked buttons, for fine pointers only.
+  if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    document.querySelectorAll('[data-magnetic]').forEach(button => {
+      button.addEventListener('pointermove', event => {
+        const rect = button.getBoundingClientRect();
+        const pull = magnet(event.clientX - rect.left - rect.width / 2, event.clientY - rect.top - rect.height / 2);
+        button.style.translate = pull.x + 'px ' + pull.y + 'px';
+      });
+      button.addEventListener('pointerleave', () => { button.style.translate = ''; });
+    });
+  }
 })();

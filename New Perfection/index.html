@@ -84,6 +84,7 @@
   <link rel="preload" href="images/branding/cormorant-garamond.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="images/branding/jost.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/story.css">
   <link rel="stylesheet" href="css/type-case.css">
   <script>
     /* Arm the Home reveal motion before first paint so enhanced content never
@@ -102,6 +103,7 @@
   </script>
   <script src="js/service-nav.js" defer></script>
   <script src="js/main.js" defer></script>
+  <script src="js/story.js" defer></script>
   <!-- Shared Setmore widget for the existing booking CTAs. -->
   <link rel="preconnect" href="https://assets.setmore.com" crossorigin>
 </head>
@@ -151,23 +153,41 @@
     <div class="hero-shade"></div>
     <div class="hero-content container" id="content" tabindex="-1">
       <p class="eyebrow">LASH · BROW · PERMANENT MAKEUP · LYNNWOOD, WA</p>
-      <h1 id="hero-title">Enhance Your<br>Natural Beauty.</h1>
+      <h1 id="hero-title"><span class="line"><span>Enhance Your</span></span><span class="line"><span>Natural Beauty.</span></span></h1>
       <p class="hero-description">Custom lash extensions, permanent makeup and brow treatments, thoughtfully designed to complement your natural features.</p>
       <div class="hero-actions"><a class="button button-gold" href="https://perfectionbyriri1.setmore.com" data-booking-url="https://perfectionbyriri1.setmore.com" target="_blank" rel="noopener">BOOK APPOINTMENT</a><a class="button button-outline-light" href="#services">View services</a></div>
+      <ul class="hero-trust" aria-label="Why clients choose Perfection by Riri"><li>Google 5.0 client reviews</li><li>10+ years European experience</li><li>English · Russian · Ukrainian</li></ul>
     </div>
   </section>
 
-  <section class="trust-strip" aria-label="The Perfection by Riri approach">
-    <div class="container trust-grid">
-      <div class="trust-item"><span class="icon-ring"><svg class="icon icon-google"><use href="#icon-google"/></svg></span><p class="trust-value">GOOGLE 5.0</p><p class="trust-label">CLIENT REVIEWS</p></div>
-      <div class="trust-item"><span class="icon-ring"><svg class="icon icon-premium"><use href="#icon-premium"/></svg></span><p class="trust-value">LASTING STYLE</p><p class="trust-label">SIGNATURE QUALITY</p></div>
-      <div class="trust-item"><span class="icon-ring"><span class="icon-ring-text" aria-hidden="true">10+</span></span><p class="trust-value">10+ YEARS</p><p class="trust-label">EUROPEAN EXPERIENCE</p></div>
-      <div class="trust-item"><span class="icon-ring"><svg class="icon icon-lash-art"><use href="#icon-lash-art"/></svg></span><p class="trust-value">MADE FOR YOU</p><p class="trust-label">PERSONALIZED DESIGN</p></div>
+  <section class="story-philosophy section-dark" data-story-pin aria-labelledby="philosophy-title">
+    <div class="story-stage">
+      <div class="container">
+        <h2 class="eyebrow" id="philosophy-title">My philosophy</h2>
+        <p class="story-quote" data-story-words>Beauty isn’t about becoming someone else. It’s about being seen more clearly as yourself.</p>
+        <p class="story-signature">Riri · Founder</p>
+      </div>
     </div>
   </section>
 
-  <section class="services section-light" id="services" aria-labelledby="services-title">
-    <div class="container">
+  <section class="about section-dark" id="about" aria-labelledby="about-title">
+    <div class="container about-layout">
+      <figure class="about-portrait">
+        <img src="images/about-riri.webp" alt="Marharyta, founder of Perfection by Riri" width="1080" height="1920" loading="lazy" decoding="async">
+      </figure>
+      <div class="about-copy">
+        <p class="eyebrow">ABOUT RIRI</p>
+        <h2 id="about-title">Beauty is personal.<br>So is my approach.</h2>
+        <p>My name is Marharyta. My path into beauty started with something simple: a fascination with how small, precise details could change the way a person carries themselves. That curiosity turned into a career and, over the past ten-plus years, into real mastery of permanent makeup and lash artistry.</p>
+        <p>I work with European techniques, which focus on soft, natural-looking results and careful, precise execution. I keep refining my craft through continued training and have taken part in several professional beauty competitions, where my work was judged alongside other artists.</p>
+        <p>What hasn’t changed is the belief that started it all: beauty isn’t about becoming someone else, it’s about being seen more clearly as yourself. That’s the experience I try to create for every client who trusts me with her face. I work with clients in English, Russian and Ukrainian.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="services section-light" id="services" aria-labelledby="services-title" data-story-pin>
+    <div class="story-stage">
+      <div class="container">
       <div class="signature-head">
         <p class="eyebrow">MY SIGNATURE SERVICES</p>
         <div class="signature-heading">
@@ -175,7 +195,9 @@
           <p class="signature-lead">Lash, brow and permanent makeup services, each tailored to your features, style and routine.</p>
         </div>
       </div>
-      <ul class="signature-list">
+      </div>
+      <div class="container services-track">
+      <ul class="signature-list" data-story-track>
         <li class="signature-item" data-service="lashExtensions">
           <div class="signature-media"><img src="images/Lash%20Extensions/lash-extensions.webp" alt="Before-and-after view of full classic lash extensions on a brown eye" loading="lazy" decoding="async"></div>
           <div class="signature-body">
@@ -209,27 +231,8 @@
           </div>
         </li>
       </ul>
-      <div class="experience-grid" id="experience">
-        <div class="experience-item"><div><h3>Premium quality</h3><p>A beautiful attention to detail</p></div></div>
-        <div class="experience-item"><div><h3>Thoughtful artistry</h3><p>Every detail, carefully considered</p></div></div>
-        <div class="experience-item"><div><h3>Everyday ease</h3><p>Wake up to your favorite look</p></div></div>
-        <div class="experience-item"><div><h3>Customized looks</h3><p>Tailored to your features</p></div></div>
       </div>
-    </div>
-  </section>
-
-  <section class="about section-dark" id="about" aria-labelledby="about-title">
-    <div class="container about-layout">
-      <figure class="about-portrait">
-        <img src="images/about-riri.webp" alt="Marharyta, founder of Perfection by Riri" width="1080" height="1920" loading="lazy" decoding="async">
-      </figure>
-      <div class="about-copy">
-        <p class="eyebrow">ABOUT RIRI</p>
-        <h2 id="about-title">Beauty is personal.<br>So is my approach.</h2>
-        <p>My name is Marharyta. My path into beauty started with something simple: a fascination with how small, precise details could change the way a person carries themselves. That curiosity turned into a career and, over the past ten-plus years, into real mastery of permanent makeup and lash artistry.</p>
-        <p>I work with European techniques, which focus on soft, natural-looking results and careful, precise execution. I keep refining my craft through continued training and have taken part in several professional beauty competitions, where my work was judged alongside other artists.</p>
-        <p>What hasn’t changed is the belief that started it all: beauty isn’t about becoming someone else, it’s about being seen more clearly as yourself. That’s the experience I try to create for every client who trusts me with her face. I work with clients in English, Russian and Ukrainian.</p>
-      </div>
+      <div class="container services-progress" aria-hidden="true"><span></span></div>
     </div>
   </section>
 
@@ -245,7 +248,7 @@
       </div>
       <div class="result-grid">
         <article class="result-item">
-          <div class="result-media"><img src="images/Lash%20Extensions/lash-extensions.webp" alt="Before-and-after of classic lash extensions on a brown eye" loading="lazy" decoding="async"></div>
+          <div class="result-media"><img src="images/Lash%20Extensions/lashextensions2.webp" alt="Close-up of full, textured volume lash extensions on a blue eye" width="912" height="1136" loading="lazy" decoding="async"></div>
           <div class="result-caption">
             <h3 class="result-title">Lash extensions</h3>
             <p class="result-note">Fine, individually placed extensions for a softly defined lash line.</p>
@@ -253,7 +256,7 @@
           </div>
         </article>
         <article class="result-item">
-          <div class="result-media"><img src="images/PMU/lipblush-results-155.webp" alt="Permanent makeup result: soft, natural lip blush with an even tint" loading="lazy" decoding="async"></div>
+          <div class="result-media"><img src="images/PMU%20Services%20Content/ombre-brows.webp" alt="Before and after ombré powder brows: natural brows above, softly shaded fuller brows below" width="1200" height="1500" loading="lazy" decoding="async"></div>
           <div class="result-caption">
             <h3 class="result-title">Permanent makeup</h3>
             <p class="result-note">Softly diffused color that wakes up the features every morning.</p>
@@ -261,7 +264,7 @@
           </div>
         </article>
         <article class="result-item">
-          <div class="result-media"><img src="images/Lash%20Lift/lash-lift.webp" alt="Before-and-after of a lash lift with relaxed lashes on the left and lifted lashes on the right" loading="lazy" decoding="async"></div>
+          <div class="result-media"><img src="images/Lash%20Lift/lashlift.webp" alt="Before and after a lash lift: straight natural lashes on the left, lifted and curled lashes on the right" width="510" height="510" loading="lazy" decoding="async"></div>
           <div class="result-caption">
             <h3 class="result-title">Lash lift</h3>
             <p class="result-note">A lifted, curled shape that opens the eye without extensions.</p>
@@ -269,7 +272,7 @@
           </div>
         </article>
         <article class="result-item">
-          <div class="result-media"><img src="images/Brow%20Lamination%20%26%20Tint/browlamination.webp" alt="Before-and-after of brow lamination and tint with natural brows on the left and fuller defined brows on the right" loading="lazy" decoding="async"></div>
+          <div class="result-media"><img src="images/Brow%20Lamination%20%26%20Tint/browlamination1.webp" alt="Laminated and tinted brows with smooth, lifted hairs" width="780" height="1200" loading="lazy" decoding="async"></div>
           <div class="result-caption">
             <h3 class="result-title">Brow lamination &amp; tint</h3>
             <p class="result-note">Smooth, redirected hairs and a soft tint for a fuller brow shape.</p>
@@ -282,7 +285,7 @@
 
   <section class="reviews section-dark" id="reviews" aria-labelledby="reviews-title">
     <div class="container reviews-layout">
-      <div class="section-intro"><p class="eyebrow">CLIENT LOVE</p><h2 id="reviews-title">Hear From My<br>Beautiful Clients</h2><p class="review-disclaimer">Real reviews shared by my clients on Google.</p></div>
+      <div class="section-intro"><p class="eyebrow">CLIENT LOVE</p><h2 id="reviews-title">Hear From My<br>Beautiful Clients</h2><p class="review-disclaimer">Real reviews shared by my clients on Google.</p><a class="review-google" href="https://maps.app.goo.gl/2zzJp92GvUAGifaV8" target="_blank" rel="noopener noreferrer"><svg class="icon icon-google" aria-hidden="true" focusable="false"><use href="#icon-google"/></svg><span class="review-google-score">5.0</span><span class="review-google-label">Google rating<span class="review-google-cta">Read all reviews</span></span></a></div>
       <div class="review-feature" data-reviews role="group" aria-roledescription="carousel" aria-label="Client reviews">
         <div class="review-nav">
           <div class="review-arrows">
@@ -321,12 +324,13 @@
   </section>
 
   <section class="booking booking-final section-dark" id="booking" aria-labelledby="booking-title">
+    <img class="offer-bg" src="images/hero/lash-portrait.webp" alt="" width="1536" height="1024" loading="lazy" decoding="async">
     <div class="container">
       <div class="offer">
         <p class="eyebrow">PERFECTION BY RIRI · LYNNWOOD, WA</p>
         <h2 id="booking-title">Ready for your<br>transformation?</h2>
         <p class="offer-support">A little time for you. A look you’ll love.</p>
-        <a class="button button-gold" href="https://perfectionbyriri1.setmore.com" data-booking-url="https://perfectionbyriri1.setmore.com" target="_blank" rel="noopener">BOOK APPOINTMENT</a>
+        <a class="button button-gold" href="https://perfectionbyriri1.setmore.com" data-booking-url="https://perfectionbyriri1.setmore.com" target="_blank" rel="noopener" data-magnetic>BOOK APPOINTMENT</a>
       </div>
     </div>
   </section>

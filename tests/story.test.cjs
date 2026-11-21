@@ -60,3 +60,10 @@ test('reduced motion: no story-on class and no scroll listener', () => {
   assert.ok(!classes.has('story-on'));
   assert.equal(listeners.scroll, undefined);
 });
+
+test('magnet pull is proportional to the pointer offset and capped at 8px', () => {
+  const { api } = load();
+  assert.deepEqual({ ...api.magnet(0, 0) }, { x: 0, y: 0 });
+  assert.deepEqual({ ...api.magnet(20, -10) }, { x: 4, y: -2 });
+  assert.deepEqual({ ...api.magnet(500, -500) }, { x: 8, y: -8 });
+});
