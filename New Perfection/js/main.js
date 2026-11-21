@@ -612,6 +612,26 @@
       item.addEventListener('mouseenter', () => activate(item.dataset.svc));
       item.addEventListener('focusin', () => activate(item.dataset.svc));
     });
+    // Phone: the cards scroll sideways; keep the counter and progress line in step.
+    const list = root.querySelector('.home-svc-list');
+    const current = root.querySelector('[data-svc-current]');
+    const bar = root.querySelector('[data-svc-bar]');
+    if (!list || !current || !bar) return;
+    let queued = false;
+    const sync = () => {
+      queued = false;
+      const max = list.scrollWidth - list.clientWidth;
+      if (max <= 0) return;
+      const progress = list.scrollLeft / max;
+      const index = Math.round(progress * (items.length - 1));
+      current.textContent = String(index + 1).padStart(2, '0');
+      bar.style.transform = 'scaleX(' + (0.25 + 0.75 * progress).toFixed(3) + ')';
+    };
+    list.addEventListener('scroll', () => {
+      if (queued) return;
+      queued = true;
+      requestAnimationFrame(sync);
+    }, { passive: true });
   }
   initHomeServices();
 

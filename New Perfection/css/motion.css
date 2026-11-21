@@ -22,7 +22,6 @@
 /* Text links: an underline draws in from the left. */
 .result-action,
 .result-explore,
-.home-svc-explore,
 .le-text-link {
   background: linear-gradient(currentColor, currentColor) 0 100% / 0 1px no-repeat;
   transition: background-size 650ms cubic-bezier(.16, 1, .3, 1);
@@ -30,7 +29,6 @@
 @media (hover: hover) and (pointer: fine) {
   .result-action:hover,
   .result-explore:hover,
-  .home-svc-explore:hover,
   .le-text-link:hover { background-size: 100% 1px; }
 }
 
@@ -51,7 +49,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   @view-transition { navigation: none; }
-  .button::before, .result-action, .result-explore, .home-svc-explore, .le-text-link { transition: none; }
+  .button::before, .result-action, .result-explore, .le-text-link { transition: none; }
 }
 
 /* Header: black on every page, kept at the top; it tucks away while scrolling
