@@ -1,8 +1,16 @@
 @font-face {
-  font-family:Cormorant;
-  src:url('../images/branding/cormorant-garamond.woff2') format('woff2');
+  font-family:'Bodoni Moda';
+  src:url('../images/branding/bodoni-moda.woff2') format('woff2');
   font-style:normal;
-  font-weight:300 700;
+  font-weight:400 900;
+  font-display:swap
+}
+
+@font-face {
+  font-family:'Bodoni Moda';
+  src:url('../images/branding/bodoni-moda-italic.woff2') format('woff2');
+  font-style:italic;
+  font-weight:400 900;
   font-display:swap
 }
 
@@ -23,7 +31,7 @@
   --gold:#b99a6d;
   --muted:#6d6a62;
   --line:#d2cbc3;
-  --serif:Cormorant,Georgia,'Times New Roman',serif;
+  --serif:'Bodoni Moda',Didot,'Bodoni 72',Georgia,'Times New Roman',serif;
   --sans:Jost,'Helvetica Neue',Arial,sans-serif;
   /* Functional pricing Â· every service price speaks in the clean UI sans
      (Jost) rather than the editorial Cormorant serif. Prices are information:
@@ -34,7 +42,15 @@
   --price-weight:300;
   --price-numeric:tabular-nums lining-nums;
   --page-width:1272px;
-  --header-height:120px
+  --header-height:120px;
+  /* Type scale (homepage story; service pages keep their own sizes) */
+  --fs-display:clamp(48px,6.4vw,92px);
+  --fs-h2:clamp(36px,4.2vw,60px);
+  --fs-h3:clamp(22px,2vw,28px);
+  --fs-lead:clamp(17px,1.35vw,19px);
+  --fs-body:16px;
+  --fs-label:12px;
+  --measure:68ch
 }
 
 /* Shared elements and accessible controls */
@@ -56,20 +72,11 @@ body {
   font-family:var(--sans);
   font-size:16px;
   line-height:1.6;
-  -webkit-font-smoothing:antialiased;
-  text-transform:uppercase
+  -webkit-font-smoothing:antialiased
 }
 
-/* The brand typography system is intentionally ALL CAPS for every visible
-   surface. Native controls carry a UA `text-transform:none`, so they are
-   re-asserted explicitly here rather than via per-component patches. */
-button,
-input,
-textarea,
-select,
-option {
-  text-transform:uppercase
-}
+/* Capitalisation lives in css/type-case.css: sentence case by default,
+   uppercase only for labels and serif display headings. */
 
 button,a {
   -webkit-tap-highlight-color:transparent
@@ -783,7 +790,7 @@ button:disabled {
 }
 
 .section-intro .review-disclaimer {
-  font-size:12px!important;
+  font-size:13px!important;
   line-height:1.7!important;
   margin-top:9px!important;
   color:#696359
@@ -1607,7 +1614,7 @@ button:disabled {
     font-size:12px
   }
   .section-intro .review-disclaimer {
-    font-size:10px!important
+    font-size:13px!important
   }
   .story-icon {
     width:43px;
@@ -1947,7 +1954,7 @@ button:disabled {
     font-size:10px
   }
   .section-intro .review-disclaimer {
-    font-size:12px!important
+    font-size:13px!important
   }
   .review-card {
     flex-basis:calc((100% - 36px)/3)
@@ -2415,13 +2422,11 @@ button:disabled {
    inline head script only when JS runs and reduced motion is not requested, so
    no-JS and reduced-motion visitors always see fully rendered content. Opacity
    only: no geometry changes before the reveal begins. */
-html.motion-armed .hero-image,
 html.motion-armed .hero-content > *,
 html.motion-armed .site-header,
-html.motion-armed .trust-grid,
+html.motion-armed .trust-item,
 html.motion-armed .signature-head,
 html.motion-armed .signature-item,
-html.motion-armed .experience-grid,
 html.motion-armed .about-portrait,
 html.motion-armed .about-copy,
 html.motion-armed .result-head,

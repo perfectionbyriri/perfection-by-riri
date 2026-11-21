@@ -285,7 +285,6 @@
    -------------------------------------------------------------------------- */
 html.motion-armed .svc-page .site-header,
 html.motion-armed .svc-page .le-hero-lead,
-html.motion-armed .svc-page .le-hero-photo,
 html.motion-armed .svc-page .le-hero-body,
 html.motion-armed .svc-page .le-hero-caption,
 html.motion-armed .svc-exp-head,
@@ -418,7 +417,6 @@ html.motion-armed .svc-cta-inner { opacity: 0 }
 /* Motion is opacity-only and uses the shared page-entry controller. The
    2-second head fallback in the document still reveals everything if JS fails. */
 html.motion-armed .svc-pmu .pmu-hero-lead,
-html.motion-armed .svc-pmu .pmu-hero-media,
 html.motion-armed .svc-pmu .pmu-hero-body,
 html.motion-armed .svc-pmu .pmu-intro-grid,
 html.motion-armed .svc-pmu .pmu-pricing-head,
