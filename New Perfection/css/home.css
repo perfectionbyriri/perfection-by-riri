@@ -352,3 +352,11 @@ html.motion-armed .home .home-services { opacity: 0; }
 .svc-pmu.home .header-shell:has(.main-navigation.is-open) { background: var(--dark); }
 .svc-pmu.home .pmu-hero { margin-top: calc(-1 * var(--shell-h, 120px)); min-height: calc(680px + var(--shell-h, 120px)); }
 .svc-pmu.home .pmu-hero-lead { padding-top: calc(var(--shell-h, 120px) + clamp(60px, 6vw, 100px)); }
+
+/* The lash clip keeps its original vertical 9:16 frame. */
+.home-svc-panel:has(video) { justify-self: center; }
+.home-svc-panel video { aspect-ratio: 9 / 16; width: auto; height: min(640px, 72vh); }
+@media (max-width: 900px) {
+  .home-svc-list { align-items: flex-start; }
+  .home-svc-thumb video { aspect-ratio: 9 / 16; }
+}
