@@ -2,9 +2,8 @@
 
 /*
   Shared header behaviour for every page.
-  - The black header stays within reach: it tucks away while scrolling down
-    and returns as soon as the visitor scrolls up (never while the menu is
-    open or the header holds focus).
+  - Publishes the header height (--shell-h) so Home can place its hero
+    photo under the transparent header.
   - On phones the open menu fills the screen below the header, the page
     behind it stays still, and the menu ends with the booking button, the
     phone number and Instagram.
@@ -17,21 +16,10 @@
   const nav = document.querySelector('#main-navigation');
   const menuOpen = () => !!toggle && toggle.getAttribute('aria-expanded') === 'true';
 
-  let lastY = window.scrollY;
-  let queued = false;
-  const update = () => {
-    queued = false;
-    const y = window.scrollY;
-    const deep = y > shell.offsetHeight + 120;
-    if (menuOpen() || shell.matches(':focus-within') || !deep || y < lastY - 6) shell.classList.remove('is-tucked');
-    else if (y > lastY + 6) shell.classList.add('is-tucked');
-    lastY = y;
-  };
-  window.addEventListener('scroll', () => {
-    if (queued) return;
-    queued = true;
-    requestAnimationFrame(update);
-  }, { passive: true });
+  // Home lays its hero under the header; keep the header's height available to CSS.
+  const measure = () => root.style.setProperty('--shell-h', shell.offsetHeight + 'px');
+  measure();
+  window.addEventListener('resize', measure);
 
   if (!toggle || !nav) return;
 
@@ -39,7 +27,6 @@
     const open = menuOpen();
     if (open) root.style.setProperty('--menu-top', Math.max(0, Math.round(shell.getBoundingClientRect().bottom)) + 'px');
     root.classList.toggle('menu-open', open);
-    if (open) shell.classList.remove('is-tucked');
   };
   new MutationObserver(sync).observe(toggle, { attributes: true, attributeFilter: ['aria-expanded'] });
 

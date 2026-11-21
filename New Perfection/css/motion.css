@@ -52,17 +52,6 @@
   .button::before, .result-action, .result-explore, .le-text-link { transition: none; }
 }
 
-/* Header: black on every page, kept at the top; it tucks away while scrolling
-   down and returns on scroll up (js/ui.js). */
-.header-shell {
-  position: sticky;
-  top: 0;
-  z-index: 30;
-  background: var(--dark);
-  transition: transform 420ms cubic-bezier(.22, 1, .36, 1);
-}
-.header-shell.is-tucked { transform: translateY(-100%); }
-
 /* Phone menu: fills the screen under the header; large serif links come into
    focus one after another; booking, phone and Instagram close the list. */
 .nav-extras { display: none; }
@@ -131,6 +120,5 @@
   to { opacity: 1; transform: none; filter: blur(0); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .header-shell { transition: none; }
   .enhanced #main-navigation.is-open > * { animation: none; }
 }

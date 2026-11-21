@@ -144,17 +144,7 @@ html.motion-armed .home .home-services { opacity: 0; }
   line-height: 1.05;
   text-transform: uppercase;
 }
-.home-svc-explore {
-  flex: none;
-  padding: 11px 18px;
-  border: 1px solid rgba(245, 237, 224, .55);
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: #f5ede0;
-  background: none;
-}
+
 
 @media (max-width: 900px) {
   .home-services-section { padding: 80px 0 84px; overflow: hidden; }
@@ -350,3 +340,11 @@ html.motion-armed .home .home-services { opacity: 0; }
   .trust-mq-item { white-space: normal; padding: 14px 0; }
   .trust-mq-item::after { display: none; }
 }
+
+/* Header on Home: transparent over the hero photo, as in the original; it
+   turns black while Services is open (desktop) or the phone menu is open. */
+.svc-pmu.home .header-shell { position: relative; z-index: 20; background: transparent; }
+.svc-pmu.home .header-shell.services-open,
+.svc-pmu.home .header-shell:has(.main-navigation.is-open) { background: var(--dark); }
+.svc-pmu.home .pmu-hero { margin-top: calc(-1 * var(--shell-h, 120px)); min-height: calc(680px + var(--shell-h, 120px)); }
+.svc-pmu.home .pmu-hero-lead { padding-top: calc(var(--shell-h, 120px) + clamp(60px, 6vw, 100px)); }
