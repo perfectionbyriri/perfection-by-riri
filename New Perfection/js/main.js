@@ -163,6 +163,7 @@
 
   const desktopMenu = matchMedia('(min-width: 801px)');
   document.documentElement.classList.add('enhanced');
+  window.__perfectionEnhancedReady = true;
   function setMenu(open) {
     navigation.classList.toggle('is-open', open);
     menuButton.setAttribute('aria-expanded', String(open));

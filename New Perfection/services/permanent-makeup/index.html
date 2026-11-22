@@ -111,6 +111,18 @@
   <link rel="stylesheet" href="../../css/motion.css">
   <link rel="stylesheet" href="../../css/type-case.css">
   <script>
+    /* Enter the enhanced (JS) navigation state before first paint. Adding the
+       class later, from a deferred script, rendered the mobile menu open in the
+       document flow and then collapsed it, shifting the whole page (CLS). If the
+       page script never runs, the class is dropped on load so the no-JS
+       navigation stays usable. */
+    (function () {
+      var root = document.documentElement;
+      root.classList.add('enhanced');
+      window.addEventListener('load', function () {
+        if (!window.__perfectionEnhancedReady) root.classList.remove('enhanced');
+      });
+    })();
     /* Arm the service-page reveal motion before first paint so enhanced content
        never flashes into place: it starts hidden, then service-page.js reveals it.
        No-JS and reduced-motion visitors skip the class and render fully. The
@@ -313,7 +325,7 @@
         <div class="pmu-results-head">
           <div><p class="pmu-kicker">The work, worn beautifully</p><h2 id="pmu-results-title" tabindex="-1">Real results</h2></div>
           <div class="pmu-results-head-side">
-            <a class="pmu-text-link" href="https://www.instagram.com/perfectionbyriri/" target="_blank" rel="noopener noreferrer"><span>View full gallery</span><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#icon-arrow"/></svg></a>
+            <a class="pmu-text-link" href="https://www.instagram.com/perfection.byriri/" target="_blank" rel="noopener noreferrer"><span>View full gallery</span><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#icon-arrow"/></svg></a>
             <div class="pmu-results-arrows">
               <button class="pmu-results-arrow" type="button" aria-label="Previous result" aria-controls="pmu-results-track" data-pmu-prev><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m15 5-7 7 7 7" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
               <button class="pmu-results-arrow" type="button" aria-label="Next result" aria-controls="pmu-results-track" data-pmu-next><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m9 5 7 7-7 7" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/></svg></button>

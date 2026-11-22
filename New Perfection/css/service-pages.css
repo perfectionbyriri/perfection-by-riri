@@ -1526,6 +1526,9 @@ html.motion-armed .svc-pmu .pmu-cta-copy { opacity: 0 }
    labels and two supporting result close-ups. Existing studio imagery only.
    -------------------------------------------------------------------------- */
 .brow-results { padding: 8px 0 92px }
+/* After a two-tone split section the results heading needs real air: the
+   dark half runs to the section edge, so 8px read as the two touching. */
+.brow-combined + .brow-results { padding-top: 72px }
 .brow-results-head { margin-bottom: 40px }
 .brow-results-feature {
   position: relative;
@@ -1783,4 +1786,9 @@ html.motion-armed .svc-brow .brow-cta-copy { opacity: 0 }
     margin-top: 0;
     border-top: 0
   }
+  /* Results spacing below the stacked bands: the dark band ends Brow's
+     section flush, so it needs a gap; Lash Lift ends on its padded light
+     band, which already provides one. */
+  .brow-combined--dark-right + .brow-results { padding-top: 52px }
+  .brow-combined--dark-left + .brow-results { padding-top: 0 }
 }

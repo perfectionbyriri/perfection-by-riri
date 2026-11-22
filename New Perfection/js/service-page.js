@@ -20,6 +20,7 @@
 
   /* The shared stylesheet reveals the mobile toggle only in the enhanced state. */
   root.classList.add('enhanced');
+  window.__perfectionEnhancedReady = true;
 
   /* 1 · Footer year fallback (js/main.js is not loaded here). */
   const year = document.getElementById('year');

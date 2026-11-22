@@ -109,6 +109,18 @@
   <link rel="stylesheet" href="../../css/motion.css">
   <link rel="stylesheet" href="../../css/type-case.css">
   <script>
+    /* Enter the enhanced (JS) navigation state before first paint. Adding the
+       class later, from a deferred script, rendered the mobile menu open in the
+       document flow and then collapsed it, shifting the whole page (CLS). If the
+       page script never runs, the class is dropped on load so the no-JS
+       navigation stays usable. */
+    (function () {
+      var root = document.documentElement;
+      root.classList.add('enhanced');
+      window.addEventListener('load', function () {
+        if (!window.__perfectionEnhancedReady) root.classList.remove('enhanced');
+      });
+    })();
     /* Arm the service-page reveal motion before first paint so enhanced content
        never flashes into place: it starts hidden, then service-page.js reveals it.
        No-JS and reduced-motion visitors skip the class and render fully. The

@@ -90,6 +90,18 @@
   <link rel="stylesheet" href="css/motion.css">
   <link rel="stylesheet" href="css/type-case.css">
   <script>
+    /* Enter the enhanced (JS) navigation state before first paint. Adding the
+       class later, from a deferred script, rendered the mobile menu open in the
+       document flow and then collapsed it, shifting the whole page (CLS). If the
+       page script never runs, the class is dropped on load so the no-JS
+       navigation stays usable. */
+    (function () {
+      var root = document.documentElement;
+      root.classList.add('enhanced');
+      window.addEventListener('load', function () {
+        if (!window.__perfectionEnhancedReady) root.classList.remove('enhanced');
+      });
+    })();
     /* Arm the Home reveal motion before first paint so enhanced content never
        flashes into place: it starts hidden, then main.js reveals it. No-JS and
        reduced-motion visitors skip the class and render fully. The timeout
@@ -112,7 +124,7 @@
   <script src="js/ui.js" defer></script>
 </head>
 <body class="svc-page svc-pmu home">
-  <a class="skip-link" href="#main">Skip to content</a>
+  <a class="skip-link" href="#content">Skip to content</a>
   <svg class="icon-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>
     <symbol id="icon-star" viewBox="0 0 32 32"><path d="m16 3 4 8.4 9.2 1.3-6.6 6.5 1.6 9.1-8.2-4.4-8.2 4.4 1.6-9.1-6.6-6.5 9.2-1.3Z"/></symbol>
     <symbol id="icon-heart" viewBox="0 0 32 32"><path d="M16 28S3 19.8 3 10.9C3 3.7 12 1.5 16 8c4-6.5 13-4.3 13 2.9C29 19.8 16 28 16 28Z"/></symbol>
