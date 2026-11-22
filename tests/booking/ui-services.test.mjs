@@ -51,25 +51,27 @@ test('createState merges patches and notifies subscribers', () => {
   assert.deepEqual(seen, [2]);
 });
 
-test('the card markup has aria-pressed and explicit image size', () => {
+test('the service list markup has aria-pressed, button semantics and no photos', () => {
   const html = renderServices({ groups: GROUPS, selectedId: 'svc_lash_lift' });
   assert.equal(cards(html).length, 43);
   assert.match(cardFor(html, 'svc_lash_lift'), /aria-pressed="true"/);
   assert.match(cardFor(html, 'svc_lash_lift_tinting'), /aria-pressed="false"/);
+  assert.doesNotMatch(html, /<img\b/i, 'booking service menu is text-only without photos');
   for (const card of cards(html)) {
-    assert.match(card, /<img [^>]*width="\d+" height="\d+"/);
     assert.match(card, /type="button"/);
+    assert.match(card, /class="bk-card-indicator"/);
   }
 });
 
-test('the first row loads eagerly with high priority, later cards lazily', () => {
-  const all = cards(renderServices({ groups: GROUPS }));
-  for (const card of all.slice(0, 3)) {
-    assert.match(card, /fetchpriority="high"/);
-    assert.doesNotMatch(card, /loading="lazy"/);
-  }
-  for (const card of all.slice(3)) assert.match(card, /loading="lazy"/);
-  assert.ok(all.every((card) => /decoding="async"/.test(card)));
+test('the service list includes category jump tabs in display order and staggered indices', () => {
+  const html = renderServices({ groups: GROUPS, focusGroup: 'lash-lift' });
+  assert.match(html, /<nav class="bk-group-nav" aria-label="Service categories">/);
+  const tabs = [...html.matchAll(/data-group-jump="([^"]+)"/g)].map((match) => match[1]);
+  assert.equal(tabs.length, 6);
+  assert.equal(tabs[0], 'lash-lift');
+  const all = cards(html);
+  assert.match(all[0], /style="--bk-i: 0"/);
+  assert.match(all[all.length - 1], /style="--bk-i: 10"/);
 });
 
 test('the price is rendered from price_cents as $165 and the duration from minutes', () => {
@@ -88,13 +90,6 @@ test('the deposit line appears only when deposit.required', () => {
   assert.doesNotMatch(cardFor(html, 'svc_lash_removal'), /deposit/i);
 });
 
-test('the photo uses the focal point and the catalog alt text', () => {
-  const card = cardFor(renderServices({ groups: GROUPS }), 'svc_lip_blushing');
-  assert.match(card, /src="\/images\/PMU%20Services%20Content\/lip-blush\.webp"/);
-  assert.match(card, /style="object-position: 50% 50%"/);
-  assert.match(card, /alt="Before and after: natural lips/);
-});
-
 test('catalog text is escaped', () => {
   const groups = [{ ...GROUPS[0], label: 'A & <b>', services: [{ ...GROUPS[0].services[0], name: '<img src=x onerror=alert(1)>', blurb: '"quoted"' }] }];
   const html = renderServices({ groups });
@@ -104,10 +99,10 @@ test('catalog text is escaped', () => {
   assert.match(html, /&quot;quoted&quot;/);
 });
 
-test('each group has a heading and a rule', () => {
+test('each group has a heading, service count and a rule', () => {
   const html = renderServices({ groups: GROUPS });
   assert.equal((html.match(/<h3 class="bk-group-label"/g) ?? []).length, 6);
-  assert.match(html, /<h3 class="bk-group-label"[^>]*>Lash extensions<\/h3>/);
+  assert.match(html, /<h3 class="bk-group-label"[^>]*>Lash extensions<span class="bk-group-count">\d+<\/span><\/h3>/);
 });
 
 test('the catalog-unavailable state offers the phone number', () => {

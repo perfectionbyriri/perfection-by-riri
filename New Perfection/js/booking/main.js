@@ -73,6 +73,26 @@ if (app) {
     elements.banner.innerHTML = '';
   }
 
+  const prefersReducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function animateStep(direction) {
+    elements.step.classList.remove('is-entering-forward', 'is-entering-backward', 'is-entering-confirm');
+    if (prefersReducedMotion()) return;
+    void elements.step.offsetWidth;
+    if (direction === 'backward') elements.step.classList.add('is-entering-backward');
+    else if (direction === 'confirm') elements.step.classList.add('is-entering-confirm');
+    else elements.step.classList.add('is-entering-forward');
+  }
+
+  function setSummaryValue(el, text) {
+    if (!el || el.textContent === text) return;
+    el.textContent = text;
+    if (prefersReducedMotion()) return;
+    el.classList.remove('is-updated');
+    void el.offsetWidth;
+    el.classList.add('is-updated');
+  }
+
   function updateProgress(step) {
     elements.count.textContent = `Step ${step} of 4 — ${STEP_NAMES[step - 1]}`;
     elements.progress.forEach((item, index) => {
@@ -84,17 +104,17 @@ if (app) {
 
   function updateSummary() {
     const service = findService(state.get().serviceId);
-    elements.summary.service.textContent = service
+    setSummaryValue(elements.summary.service, service
       ? `${service.name} · ${formatDuration(service.duration_minutes)} · ${formatPrice(service.price_cents)}`
-      : 'Not chosen yet';
+      : 'Not chosen yet');
     const { startAt, startLabel, week } = state.get();
     const day = week?.days.find((item) => startAt && startAt.startsWith(item.date));
-    elements.summary.time.textContent = startAt && day
+    setSummaryValue(elements.summary.time, startAt && day
       ? `${day.weekday}, ${new Date(`${day.date}T12:00:00Z`).toLocaleDateString('en-US', { month: 'long', day: 'numeric', timeZone: 'UTC' })} · ${startLabel}`
-      : 'Not chosen yet';
-    elements.summary.deposit.textContent = service
+      : 'Not chosen yet');
+    setSummaryValue(elements.summary.deposit, service
       ? (service.deposit.required ? `${formatPrice(service.deposit.total_cents)} due today` : 'No deposit needed')
-      : '—';
+      : '—');
     updateBar();
   }
 
@@ -133,7 +153,7 @@ if (app) {
 
   function focusTitle() {
     const title = elements.step.querySelector('.bk-step-title');
-    if (title) title.focus({ preventScroll: false });
+    if (title) title.focus({ preventScroll: true });
   }
 
   function renderStep1({ focus = false } = {}) {
@@ -181,6 +201,16 @@ if (app) {
   }
 
   elements.step.addEventListener('click', (event) => {
+    const groupTab = event.target.closest('[data-group-jump]');
+    if (groupTab) {
+      const key = groupTab.dataset.groupJump;
+      for (const tab of elements.step.querySelectorAll('[data-group-jump]')) {
+        tab.classList.toggle('is-active', tab === groupTab);
+      }
+      const section = elements.step.querySelector(`.bk-group[data-group="${key}"]`);
+      section?.scrollIntoView({ behavior: prefersReducedMotion() ? 'auto' : 'smooth', block: 'start' });
+      return;
+    }
     const card = event.target.closest('.bk-card');
     if (card) {
       selectService(card.dataset.serviceId);
@@ -377,18 +407,18 @@ if (app) {
   }
 
   // D§4 step 4: Jost is not available inside Square's iframe, so the card
-  // field falls back to a system sans with the site's colours.
+  // field falls back to a system sans tuned to the warm chocolate theme.
   const CARD_STYLE = {
-    input: { backgroundColor: '#f5f2ef', color: '#262620', fontSize: '16px', fontFamily: 'sans-serif' },
-    'input::placeholder': { color: '#6d6a62' },
-    'input.is-error': { color: '#8c2f23' },
-    '.input-container': { borderColor: '#6d6a62', borderRadius: '0px' },
-    '.input-container.is-focus': { borderColor: '#262620' },
-    '.input-container.is-error': { borderColor: '#8c2f23' },
-    '.message-text': { color: '#6d6a62' },
-    '.message-text.is-error': { color: '#8c2f23' },
-    '.message-icon': { color: '#6d6a62' },
-    '.message-icon.is-error': { color: '#8c2f23' }
+    input: { backgroundColor: '#34251c', color: '#f6efe5', fontSize: '16px', fontFamily: 'sans-serif' },
+    'input::placeholder': { color: '#c8b6a1' },
+    'input.is-error': { color: '#f09589' },
+    '.input-container': { borderColor: '#7d6752', borderRadius: '0px' },
+    '.input-container.is-focus': { borderColor: '#dfc094' },
+    '.input-container.is-error': { borderColor: '#f09589' },
+    '.message-text': { color: '#c8b6a1' },
+    '.message-text.is-error': { color: '#f09589' },
+    '.message-icon': { color: '#c8b6a1' },
+    '.message-icon.is-error': { color: '#f09589' }
   };
 
   const UNAVAILABLE_HTML = '<p>Online booking is taking a short break. Please call <a href="tel:+14258450045">(425) 845 0045</a> and we&rsquo;ll book you in.</p>';
@@ -434,7 +464,7 @@ if (app) {
       await loadScript(TURNSTILE_URL);
       const box = elements.step.querySelector('#bk-turnstile');
       if (state.get().step !== 4 || !box) return;
-      widgets.turnstileId = window.turnstile.render(box, { sitekey: siteKey, theme: 'light', size: 'flexible', action: 'booking' });
+      widgets.turnstileId = window.turnstile.render(box, { sitekey: siteKey, theme: 'dark', size: 'flexible', action: 'booking' });
     } catch {
       showBanner(UNAVAILABLE_HTML);
       setControlsLocked(true, { keepBack: true });
@@ -560,6 +590,11 @@ if (app) {
       timeLabel, policyText: state.get().catalog?.checkout?.policy_text
     });
     elements.step.setAttribute('aria-busy', 'false');
+    animateStep('confirm');
+    const head = document.querySelector('.bk-head');
+    if (head && head.getBoundingClientRect().top < 0) {
+      head.scrollIntoView({ behavior: prefersReducedMotion() ? 'auto' : 'smooth', block: 'start' });
+    }
     focusTitle();
     try { window.history.replaceState({ step: 5 }, '', confirmedPath(result.booking.id)); } catch { /* the view is already shown */ }
     window.dataLayer = window.dataLayer || [];
@@ -631,29 +666,42 @@ if (app) {
   function goTo(step, { push = true } = {}) {
     if (step < 1 || step > 4 || guard.busy) return;
     clearTimeout(advanceTimer);
-    if (push && step !== state.get().step) {
+    const prevStep = state.get().step;
+    const direction = step < prevStep ? 'backward' : 'forward';
+    if (push && step !== prevStep) {
       try { window.history.pushState({ step }, '', window.location.href); } catch { /* history is optional */ }
     }
-    if (state.get().step === 4 && step !== 4) {
+    if (prevStep === 4 && step !== 4) {
       unmountWidgets();
       state.set({ idempotencyKey: null }); // A changed choice is a new attempt.
     }
     hideBanner();
     state.set({ step });
     updateProgress(step);
+    const finish = () => {
+      animateStep(direction);
+      const head = document.querySelector('.bk-head');
+      if (head && head.getBoundingClientRect().top < 0) {
+        head.scrollIntoView({ behavior: prefersReducedMotion() ? 'auto' : 'smooth', block: 'start' });
+      }
+    };
     if (step === 1) {
       renderStep1({ focus: true });
+      finish();
       return;
     }
     if (step === 3) {
       renderStep3({ focus: true });
+      finish();
       return;
     }
     if (step === 4) {
       renderStep4({ focus: true });
+      finish();
       return;
     }
     renderStep2({ focus: true });
+    finish();
     if (!state.get().week) loadWeek(state.get().weekStart);
   }
 
