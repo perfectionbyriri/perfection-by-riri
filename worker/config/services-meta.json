@@ -1,0 +1,405 @@
+{
+  "version": 1,
+  "groups": [
+    {
+      "key": "lash-extensions",
+      "label": "Lash extensions",
+      "order": 10,
+      "photo": {
+        "src": "/images/Lash%20Extensions/lash-extensions-classic.webp",
+        "width": 1536,
+        "height": 1024,
+        "alt": "Before and after lash extensions: natural lashes, then full, softly fanned extensions",
+        "focal": "50% 45%"
+      }
+    },
+    {
+      "key": "wispy-lashes",
+      "label": "Wispy lashes",
+      "order": 20,
+      "photo": {
+        "src": "/images/Lash%20Extensions/lash-extensions-results-155.webp",
+        "width": 868,
+        "height": 560,
+        "alt": "Close-up of a lash extensions result",
+        "focal": "50% 50%"
+      }
+    },
+    {
+      "key": "lash-refills",
+      "label": "Lash refills",
+      "order": 30,
+      "photo": {
+        "src": "/images/Lash%20Extensions/lash-extensions.webp",
+        "width": 600,
+        "height": 548,
+        "alt": "Side-by-side close-up showing natural lashes on the left and extensions on the right",
+        "focal": "50% 50%"
+      }
+    },
+    {
+      "key": "lash-lift",
+      "label": "Lash lift",
+      "order": 40,
+      "photo": {
+        "src": "/images/Lash%20Lift/lash-lift.webp",
+        "width": 736,
+        "height": 736,
+        "alt": "Lash lift before and after: relaxed natural lashes, then the same lashes lifted and curled",
+        "focal": "50% 40%"
+      }
+    },
+    {
+      "key": "brows",
+      "label": "Brows",
+      "order": 50,
+      "photo": {
+        "src": "/images/Brow%20Lamination%20%26%20Tint/brow-lamination-tint.webp",
+        "width": 901,
+        "height": 1200,
+        "alt": "Brow lamination and tint result: fuller, defined brows with a natural finish",
+        "focal": "50% 35%"
+      }
+    },
+    {
+      "key": "permanent-makeup",
+      "label": "Permanent makeup",
+      "order": 60,
+      "photo": {
+        "src": "/images/PMU%20Services%20Content/powder-brows.webp",
+        "width": 1200,
+        "height": 1200,
+        "alt": "Side by side: softly shaded, full powder brows next to natural, sparse brows",
+        "focal": "50% 50%"
+      }
+    }
+  ],
+  "services": [
+    {
+      "service_id": "svc_lip_blushing",
+      "group": "permanent-makeup",
+      "order": 10,
+      "photo": {
+        "src": "/images/PMU%20Services%20Content/lip-blush.webp",
+        "width": 735,
+        "height": 695,
+        "alt": "Before and after: natural lips, then the same lips with a brighter rosy lip blush"
+      },
+      "deposit": "standard"
+    },
+    {
+      "service_id": "svc_ombre_powder_eyebrows",
+      "group": "permanent-makeup",
+      "order": 20,
+      "photo": {
+        "src": "/images/PMU%20Services%20Content/ombre-brows.webp",
+        "width": 1200,
+        "height": 1500,
+        "alt": "Before and after: naturally thin brows, then the same brows with a soft, shaded ombré powder finish"
+      },
+      "deposit": "standard"
+    },
+    {
+      "service_id": "svc_eyeliner_tattoo",
+      "group": "permanent-makeup",
+      "order": 30,
+      "photo": {
+        "src": "/images/PMU%20Services%20Content/eyeliner.webp",
+        "width": 1200,
+        "height": 1200,
+        "alt": "Before and after: a bare upper lash line, then the same eye with a fine permanent eyeliner"
+      },
+      "deposit": "standard"
+    },
+    {
+      "service_id": "svc_lash_line_tattoo",
+      "group": "permanent-makeup",
+      "order": 40,
+      "photo": {
+        "src": "/images/PMU%20Services%20Content/eyeliner.webp",
+        "width": 1200,
+        "height": 1200,
+        "alt": "Before and after: a bare upper lash line, then the same eye with a fine permanent eyeliner"
+      },
+      "deposit": "standard"
+    },
+    {
+      "service_id": "svc_bottom_eyeliner_tattoo",
+      "group": "permanent-makeup",
+      "order": 50,
+      "photo": {
+        "src": "/images/PMU%20Services%20Content/eyeliner.webp",
+        "width": 1200,
+        "height": 1200,
+        "alt": "Before and after: a bare upper lash line, then the same eye with a fine permanent eyeliner"
+      },
+      "deposit": "standard"
+    },
+    {
+      "service_id": "svc_lip_blushing_touch_up",
+      "group": "permanent-makeup",
+      "order": 60,
+      "photo": null,
+      "deposit": "standard"
+    },
+    {
+      "service_id": "svc_ombre_powder_eyebrows_touch_up",
+      "group": "permanent-makeup",
+      "order": 70,
+      "photo": null,
+      "deposit": "standard"
+    },
+    {
+      "service_id": "svc_eyeliner_touch_up",
+      "group": "permanent-makeup",
+      "order": 80,
+      "photo": null,
+      "deposit": "standard"
+    },
+    {
+      "service_id": "svc_lash_line_touch_up",
+      "group": "permanent-makeup",
+      "order": 90,
+      "photo": null,
+      "deposit": "standard"
+    },
+    {
+      "service_id": "svc_bottom_eyeliner_touch_up",
+      "group": "permanent-makeup",
+      "order": 100,
+      "photo": null,
+      "deposit": "standard"
+    },
+    {
+      "service_id": "svc_classic_full_extension",
+      "group": "lash-extensions",
+      "order": 10,
+      "photo": null,
+      "deposit": "standard"
+    },
+    {
+      "service_id": "svc_hybrid_full_extension_2d_3d",
+      "group": "lash-extensions",
+      "order": 20,
+      "photo": null,
+      "deposit": "standard"
+    },
+    {
+      "service_id": "svc_volume_full_extension_4d_5d",
+      "group": "lash-extensions",
+      "order": 30,
+      "photo": null,
+      "deposit": "standard"
+    },
+    {
+      "service_id": "svc_mega_volume_full_extension_8d_10d",
+      "group": "lash-extensions",
+      "order": 40,
+      "photo": null,
+      "deposit": "standard"
+    },
+    {
+      "service_id": "svc_wet_effect_full_extension",
+      "group": "lash-extensions",
+      "order": 50,
+      "photo": null,
+      "deposit": "standard"
+    },
+    {
+      "service_id": "svc_lash_removal",
+      "group": "lash-extensions",
+      "order": 60,
+      "photo": null,
+      "deposit": "none"
+    },
+    {
+      "service_id": "svc_classic_wispy",
+      "group": "wispy-lashes",
+      "order": 10,
+      "photo": null,
+      "deposit": "standard"
+    },
+    {
+      "service_id": "svc_hybrid_wispy",
+      "group": "wispy-lashes",
+      "order": 20,
+      "photo": null,
+      "deposit": "standard"
+    },
+    {
+      "service_id": "svc_volume_wispy",
+      "group": "wispy-lashes",
+      "order": 30,
+      "photo": null,
+      "deposit": "standard"
+    },
+    {
+      "service_id": "svc_lash_lift_tinting",
+      "group": "lash-lift",
+      "order": 10,
+      "photo": null,
+      "deposit": "standard"
+    },
+    {
+      "service_id": "svc_lash_lift",
+      "group": "lash-lift",
+      "order": 20,
+      "photo": null,
+      "deposit": "standard"
+    },
+    {
+      "service_id": "svc_eyebrow_lamination_tinting_shaping",
+      "group": "brows",
+      "order": 10,
+      "photo": null,
+      "deposit": "standard"
+    },
+    {
+      "service_id": "svc_eyebrow_lamination",
+      "group": "brows",
+      "order": 20,
+      "photo": null,
+      "deposit": "standard"
+    },
+    {
+      "service_id": "svc_eyebrow_tint_shaping",
+      "group": "brows",
+      "order": 30,
+      "photo": null,
+      "deposit": "standard"
+    },
+    {
+      "service_id": "svc_eyebrow_shaping",
+      "group": "brows",
+      "order": 40,
+      "photo": null,
+      "deposit": "none"
+    },
+    {
+      "service_id": "svc_classic_refill_2_weeks",
+      "group": "lash-refills",
+      "order": 10,
+      "photo": null,
+      "deposit": "standard"
+    },
+    {
+      "service_id": "svc_classic_refill_3_weeks",
+      "group": "lash-refills",
+      "order": 20,
+      "photo": null,
+      "deposit": "standard"
+    },
+    {
+      "service_id": "svc_hybrid_refill_2_weeks",
+      "group": "lash-refills",
+      "order": 30,
+      "photo": null,
+      "deposit": "standard"
+    },
+    {
+      "service_id": "svc_hybrid_refill_3_weeks",
+      "group": "lash-refills",
+      "order": 40,
+      "photo": null,
+      "deposit": "standard"
+    },
+    {
+      "service_id": "svc_volume_refill_2_weeks",
+      "group": "lash-refills",
+      "order": 50,
+      "photo": null,
+      "deposit": "standard"
+    },
+    {
+      "service_id": "svc_volume_refill_3_weeks",
+      "group": "lash-refills",
+      "order": 60,
+      "photo": null,
+      "deposit": "standard"
+    },
+    {
+      "service_id": "svc_mega_volume_refill_2_weeks",
+      "group": "lash-refills",
+      "order": 70,
+      "photo": null,
+      "deposit": "standard"
+    },
+    {
+      "service_id": "svc_mega_volume_refill_3_weeks",
+      "group": "lash-refills",
+      "order": 80,
+      "photo": null,
+      "deposit": "standard"
+    },
+    {
+      "service_id": "svc_wet_effect_refill_2_weeks",
+      "group": "lash-refills",
+      "order": 90,
+      "photo": null,
+      "deposit": "standard"
+    },
+    {
+      "service_id": "svc_wet_effect_refill_3_weeks",
+      "group": "lash-refills",
+      "order": 100,
+      "photo": null,
+      "deposit": "standard"
+    },
+    {
+      "service_id": "svc_classic_wispy_refill_2_weeks",
+      "group": "lash-refills",
+      "order": 110,
+      "photo": null,
+      "deposit": "standard"
+    },
+    {
+      "service_id": "svc_classic_wispy_refill_3_weeks",
+      "group": "lash-refills",
+      "order": 120,
+      "photo": null,
+      "deposit": "standard"
+    },
+    {
+      "service_id": "svc_hybrid_wispy_refill_2_weeks",
+      "group": "lash-refills",
+      "order": 130,
+      "photo": null,
+      "deposit": "standard"
+    },
+    {
+      "service_id": "svc_hybrid_wispy_refill_3_weeks",
+      "group": "lash-refills",
+      "order": 140,
+      "photo": null,
+      "deposit": "standard"
+    },
+    {
+      "service_id": "svc_volume_wispy_refill_2_weeks",
+      "group": "lash-refills",
+      "order": 150,
+      "photo": null,
+      "deposit": "standard"
+    },
+    {
+      "service_id": "svc_volume_wispy_refill_3_weeks",
+      "group": "lash-refills",
+      "order": 160,
+      "photo": null,
+      "deposit": "standard"
+    },
+    {
+      "service_id": "svc_mega_volume_wispy_refill_2_weeks",
+      "group": "lash-refills",
+      "order": 170,
+      "photo": null,
+      "deposit": "standard"
+    },
+    {
+      "service_id": "svc_mega_volume_wispy_refill_3_weeks",
+      "group": "lash-refills",
+      "order": 180,
+      "photo": null,
+      "deposit": "standard"
+    }
+  ]
+}
