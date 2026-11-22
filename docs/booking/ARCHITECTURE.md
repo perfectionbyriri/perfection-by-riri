@@ -158,7 +158,9 @@ BFF rules:
 | Window per request | exactly one studio week: `week_start` 00:00 local → +7 days 00:00 local. The two boundaries can carry **different offsets** across a DST change. |
 | Horizon | `BOOKING_HORIZON_DAYS` (default 56). Windows beyond it return 400 `OUT_OF_RANGE`. |
 | Lead time | `MIN_LEAD_MINUTES` (default 120). Slots earlier than now + lead are removed. |
-| `slot_limit` | 100 (maximum), with `double_booking=false`. If any day returns exactly 100 slots, the response says `may_have_more: true` (the cap is never claimed to be all starts). |
+| `slot_limit` | Sent as 100 with `double_booking=false`, but **not relied on**: in probe run 44990258119, `slot_limit=5` still returned 7 slots in one day and 219 in one week, so its meaning is unclear. `may_have_more` is always `false` unless a future check shows a real cap. |
+| Slot step | Setmore returns starts on a **5-minute grid** (14:00, 14:05, 14:10 …). The BFF keeps only starts on a `SLOT_STEP_MINUTES` boundary (default 15, owner may change) before returning them. |
+| Window keys | Setmore also returns the `end_at` date as an (empty) key. The BFF keeps only `week_start` … `week_start + 6`. |
 | Cache | `SLOTS_TTL_SECONDS` (default 30), keyed by `service_id + week_start`. The fresh check before booking **bypasses** the cache (§8). A successful booking purges that week's key in the local colo. |
 
 ### 6.1 Time zone helpers (pure, unit-tested, no dependencies)
@@ -179,11 +181,24 @@ DST transitions the tests must cover (computed with Python `zoneinfo`, 2026-11-2
 
 Required cases: a week window spanning 2026-11-01 (start offset −07:00, end offset −08:00); a window spanning 2027-03-14; 02:30 on 2027-03-14 rejected; 01:30 on 2027-11-07 resolves to −07:00; a booking at 23:30 UTC still on the previous studio date.
 
-### 6.2 Slot shape (partly verified)
+### 6.2 Slot shape (verified)
 
-Observed (probe run 44989221725, attempt 2): `GET /slots` returned 200 with `{ "data": { "days": { "<yyyy-MM-dd>": [] , … } } }`. For `start_at=2026-11-23T00:00:00-08:00`, `end_at=2026-11-30T00:00:00-08:00` it returned **8** date keys, 2026-11-23 … **2026-11-30**, so the end date appears as a key. The BFF must drop keys outside `[week_start, week_start + 6]`.
+Probe run [44990258119](https://github.com/perfectionbyriri/perfection-by-riri/actions/runs/44990258119), 2026-11-22, `provider_id=b0bfa3b4-b043-4cec-b841-017a716974fd`, `duration=60`:
 
-**Every day was empty** for the query used: `provider_id` = the first staff record (the account owner's user id), `duration=120`, `slot_limit=5`, default `working_hours=false`. The element format inside `days[...]` is therefore **still unknown**. Likely causes, in order: (1) the services are provided by the other staff record, (2) a `working_hours` or `slot_limit` effect, (3) the week is fully booked. The probe redacted `provider_ids`, so cause (1) could not be checked. Until a follow-up run pins it (V2b), the adapter accepts RFC 3339 strings or objects with `start_at`; anything else fails closed (`UPSTREAM_INVALID`).
+```json
+{ "data": { "days": {
+  "2026-11-30": [ { "start_at": "2026-11-30T14:00:00-08:00", "end_at": "2026-11-30T15:00:00-08:00" },
+                  { "start_at": "2026-11-30T14:05:00-08:00", "end_at": "2026-11-30T15:05:00-08:00" } ],
+  "2026-12-01": [ … ]
+} } }
+```
+
+- Each element is an object `{ start_at, end_at }`, RFC 3339 with the studio offset. `end_at - start_at` equals the requested `duration`.
+- Each 7-day window returns 8 date keys (the `end_at` date included, empty).
+- Window 2026-11-23 → 11-30 returned **0** slots for every day (the week before the window starts is fully booked or closed; not investigated further). Window 2026-11-30 → 12-07 returned **219** slots.
+- `slot_limit=5` did not cap the result (see the §6 table).
+- The second staff record `f20db4f9-…` returns **400** on `/slots` and provides no services. It is not a bookable provider.
+- The first run's empty week came from the same fully booked week, not from a wrong provider.
 
 ---
 
@@ -264,7 +279,7 @@ A Worker Cron Trigger (`*/15 * * * *`) scans `idem:*` records whose `updated_at`
 |---|---|---|
 | `started` | No payment yet | Mark `failed`. Nothing to cancel. |
 | `payment_authorized` | Authorized; the Setmore request was **never sent** (state is advanced before sending) | `CancelPayment` → `failed`; log `orphan_authorization_cancelled`. |
-| `booking_requested` | Request sent, outcome unknown | Look up the booking: `GET /bookings/staffs/{provider}` for that day, match `service_id` + `start_at` (by instant) + `consumer_ids` containing `customer_id`. **Found** → set `booking_created` with `booking_id`, then handle as the next row. **Not found or lookup failed** → **no cancel**; set `needs_review`, alert `booking_outcome_unknown` once; the authorization stays (48 h) for the salon to decide. |
+| `booking_requested` | Request sent, outcome unknown | Look up the booking: `GET /bookings/staffs/{provider}?start_at=<day 00:00>&end_at=<next day 00:00>` (verified to filter by provider and date, probe run 44990258119), follow `cursor`, match `service_id` + `start_at` (by instant) + `consumer_ids` containing `customer_id`, and `status` ≠ `CANCELLED`. **Found** → set `booking_created` with `booking_id`, then handle as the next row. **Not found or lookup failed** → **no cancel**; set `needs_review`, alert `booking_outcome_unknown` once; the authorization stays (48 h) for the salon to decide. |
 | `booking_created` or `capture_pending` | Booking exists; capture not confirmed | **Never cancel.** Retry `CompletePayment` (Square-idempotent), at most 3 attempts across runs (`complete_attempts`). Success → `done`. A failure alerts `capture_failed_booking_kept` once, so the salon can capture by hand within 48 h. |
 | `done`, `failed`, `needs_review` | Final or waiting for a human | Skip. |
 
@@ -490,8 +505,9 @@ Secrets are set with `wrangler secret put` in Cloudflare. Plain vars go in `wran
 | `SETMORE_MOCK_429_COUNT` | var | `3` | For `rate_limited` |
 | `SETMORE_API_BASE` | var | `https://developer.setmore.com/api/v2` | API base |
 | `SETMORE_REFRESH_TOKEN` | **secret** | — | Permanent refresh token |
-| `SETMORE_ACCOUNT_ID` | var | — | `account_id` for slots and bookings (V1) |
-| `SETMORE_PROVIDER_ID` | var | — | Riri's staff id (V1) |
+| `SETMORE_ACCOUNT_ID` | var | `1a47bbdd-c70e-402d-9bcb-1c739d6752ae` | `account_id` for slots and bookings (verified V1) |
+| `SETMORE_PROVIDER_ID` | var | `b0bfa3b4-b043-4cec-b841-017a716974fd` | The only provider of all 44 services (verified V2b) |
+| `SLOT_STEP_MINUTES` | var | `15` | Keep slot starts on this boundary (Setmore returns a 5-minute grid) |
 | `TOKEN_REFRESH_MARGIN_SECONDS` | var | `60` | Token margin |
 | `CATALOG_TTL_SECONDS` | var | `600` | Catalog cache |
 | `SLOTS_TTL_SECONDS` | var | `30` | Slot cache |
@@ -569,7 +585,8 @@ Findings (2026-11-22):
 |---|---|---|---|
 | V1 | **Resolved 2026-11-22** (probe run [44989221725](https://github.com/perfectionbyriri/perfection-by-riri/actions/runs/44989221725), attempt 2, conclusion `v2_ok`). The owner's refresh token works with **v2** (token, `/staff`, `/services`, `/categories`, `/slots` all 200) and also with the v1 token endpoint (200). `SETMORE_ACCOUNT_ID=1a47bbdd-c70e-402d-9bcb-1c739d6752ae` (from `services[].account_id`). Staff ids: `b0bfa3b4-b043-4cec-b841-017a716974fd` (account owner, equals the token `user_id`) and `f20db4f9-53d7-4b34-97de-0d49d4edae0d`. Which one is `SETMORE_PROVIDER_ID` is open (V2b). | — | — |
 | V2 | **Mostly resolved** (same run): service, category and staff fields in §5; token body in §7; `/slots` envelope in §6.2. Create-customer required fields are not probed (no write calls); they are pinned in Task 23's approved live test. | — | — |
-| V2b | Open: (a) which staff id is in services' `provider_ids`; (b) slot element format (all days empty in the first run); (c) `visibility` values. | Slots adapter, `SETMORE_PROVIDER_ID` | One more read-only probe run after the probe's redaction fix: un-redact `provider_ids` / `category_ids` / `service_ids` (ids only), drop `first_name` from the allowlist, add `visibility`, and query slots for **each** staff id with a 60-minute service over two consecutive 7-day windows (the API maximum per request). |
+| V2b | **Resolved 2026-11-22** (probe run [44990258119](https://github.com/perfectionbyriri/perfection-by-riri/actions/runs/44990258119); its logs were deleted after recording). (a) `SETMORE_PROVIDER_ID=b0bfa3b4-b043-4cec-b841-017a716974fd`: all 44 services list only this id in `provider_ids`; the other staff record returns 400 on `/slots`. (b) Slot element = `{start_at, end_at}` objects on a 5-minute grid (§6.2). (c) `visibility` is `PUBLIC` for all 44 services and all 9 categories, so it hides nothing today; the whitelist in `services-meta.json` stays the only filter. (d) **Bookings lookup:** `GET /bookings/staffs/{id}?start_at&end_at&limit` returns 200 with `cursor` paging. Fields: `id`, `type`, `calendar_id`, `account_id`, `provider_id`, `consumer_ids[]`, `service_id`, `start_at`, `end_at`, `booking_id`, `cost`, `title`, `status`, `label`, `location`, `created_at`, `source`, `meta_data{reminders[], consumerTimezone, bookingId, tc[]}`. Only types and the count were printed. | — | — |
+| V6 | Can `POST /bookings` store our own marker (for example the hashed idempotency key in `meta_data` or `label`) and return it on lookup? This would make the cron's match exact. | Cron matching (nice to have; the service + time + customer match already works) | The owner-approved live test in Task 23. |
 | V3 | Customer notifications for API-created bookings. | Confirmation copy | One owner-approved live test booking on the owner's email, then `DELETE /bookings/{id}`. |
 | V4 | ~~Card fee surcharge compliance~~ **Resolved 2026-11-22:** default fee 0% (owner). Re-open only if the fee is ever enabled. | — | — |
 | V5 | Square delayed capture: `delay_duration` minimum and default, `delay_action=CANCEL` behaviour, current `Square-Version`. Also confirm Wrangler supports the `run_worker_first` array form and the `ratelimits` binding in the pinned version. | Payments adapter, deploy config | Square API reference and Cloudflare Workers docs, checked at implementation time. |
@@ -580,7 +597,9 @@ Findings (2026-11-22):
 
 Owner-approved 2026-11-22: Turnstile + rate limiting, alerts by e-mail, `PT48H` authorization with immediate cancel, fee 0%.
 
-Calls I made (kept because the owner's reply left these blank; the owner can override): `MIN_LEAD_MINUTES=120`, `BOOKING_HORIZON_DAYS=56`, `MEGA Volume Wispy` hidden (43 of 44), 30-minute mock slot grid, catalog TTL 10 min, slots TTL 30 s, customer scan cap 2,000, 15-minute reconciliation cron.
+Owner-approved 2026-11-22 (second reply): `MIN_LEAD_MINUTES=120`, `BOOKING_HORIZON_DAYS=56`, `MEGA Volume Wispy` hidden (43 of 44).
+
+Calls I made (the owner can override): `SLOT_STEP_MINUTES=15`, mock slots on the real 5-minute grid, catalog TTL 10 min, slots TTL 30 s, customer scan cap 2,000, 15-minute reconciliation cron.
 
 ---
 

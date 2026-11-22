@@ -176,9 +176,9 @@ Re-run the latest `Setmore API probe (read-only)` run. Expected: the conclusion 
 
 Before this branch merges to `main`, remove the `push` trigger from `setmore-probe.yml` and keep `workflow_dispatch` (Task 23).
 
-**Status 2026-11-22:** Steps 1–8 done. Run 44989221725 (attempt 2) concluded `v2_ok`; results are in A§5, A§6.2, A§7 and A§20.
+**Status 2026-11-22:** Steps 1–9 done. Run 44990258119 closed V2b (A§6.2, A§20); its logs were deleted. The `push` trigger is removed; the workflow is `workflow_dispatch` only. Run 44989221725 (attempt 2) concluded `v2_ok`; results are in A§5, A§6.2, A§7 and A§20.
 
-- [ ] **Step 9 (only with the owner's go-ahead): Close V2b with a follow-up probe run.** Test-first changes to the probe:
+- [x] **Step 9 (only with the owner's go-ahead): Close V2b with a follow-up probe run.** Test-first changes to the probe:
   - remove `first_name` from the value allowlist (a staff first name reached the public log in run 44989221725);
   - add `provider_ids`, `category_ids` and `service_ids` to the id keys, and add `visibility` to the value keys;
   - query `/slots` for every staff id with `duration=60` over two consecutive 7-day windows.
@@ -289,11 +289,11 @@ Approach: the `Intl.DateTimeFormat` offset-correction loop, as in `virtual-phone
 
 **Interfaces — Produces:** `createMockSetmoreFetch({ scenario = 'normal', now, rateLimitCount = 3, state = createMockState() }): typeof fetch`. It implements the token, `/services`, `/categories`, `/staff`, `/slots`, `/customers` (GET, list, POST), `/bookings` (POST) and `/bookings/staffs/{id}` routes with v2 shapes. `createMockState()` holds customers and bookings in memory. A scenario may come from the request header `X-Mock-Scenario`.
 
-Fixtures: the 44 services from D§6.4 with ids `svc_<slug>`, prices in cents, durations in minutes; 7 categories; staff `staff_riri`; hours Monday–Saturday 10:00–17:00, Sunday closed; slots every 30 minutes where the service fits before 17:00.
+Fixtures use the verified v2 shapes (A§5, A§6.2): the 44 services from D§6.4 with ids `svc_<slug>`, `title`, `cost` in dollars, `duration` in minutes, `provider_ids: ['staff_riri']`, `category_ids`, `visibility: 'PUBLIC'`; 9 categories with `service_ids`; staff `staff_riri` plus a non-provider record that returns 400 on `/slots`; hours Monday–Saturday 10:00–17:00, Sunday closed. Slots are `{start_at, end_at}` objects on a 5-minute grid where the service fits before 17:00. Each window also returns the `end_at` date as an empty key.
 
 - [ ] **Step 1: Failing tests** (run through the real `createSetmoreClient` + `createTokenManager`, not raw fetch):
   - `lists 44 services and one staff member`
-  - `generates no slots on Sunday and none ending after 17:00` — Classic Full (120 min) on Monday 2026-11-23: last slot `15:00`.
+  - `generates no slots on Sunday and none ending after 17:00` — Classic Full (120 min) on Monday 2026-11-23: last slot starts `15:00`; slots are `{start_at,end_at}` objects 5 minutes apart.
   - `a booked slot disappears from later slot queries`
   - `slot_taken: first availability check passes, second shows the slot taken` — two `getSlots` calls for the same week; the second lacks the first returned slot.
   - `slot_taken_on_create: createBooking throws SetmoreConflict`
@@ -347,7 +347,8 @@ Fixtures: the 44 services from D§6.4 with ids `svc_<slug>`, prices in cents, du
   - `removes slots earlier than now + 120 minutes`
   - `rejects week_start beyond the 56-day horizon with OUT_OF_RANGE`
   - `rejects week_start before the current studio week with OUT_OF_RANGE`
-  - `sets may_have_more when a day returns 100 slots`
+  - `keeps only starts on the 15-minute SLOT_STEP_MINUTES boundary` — upstream 14:00, 14:05 … 14:55 → 14:00, 14:15, 14:30, 14:45
+  - `drops the extra end_at date key` — upstream returns 8 keys; the response has 7 days
   - `serves cached week within 30 s and refetches after`
   - `isSlotAvailable bypasses the cache` — the cached week shows the slot, the fresh upstream lacks it → `available:false`.
   - `isSlotAvailable matches 2026-11-27T21:00:00Z to the 1:00 PM PST slot`
@@ -568,7 +569,7 @@ New content must state: the booking form collects first and last name, email, ph
 
 ### Task 23: Live verification, passport, PR
 
-- [ ] **Step 1:** Remove the `push` trigger from `setmore-probe.yml` (keep `workflow_dispatch`).
+- [x] **Step 1:** Remove the `push` trigger from `setmore-probe.yml` (keep `workflow_dispatch`). Done in Task 1.
 - [ ] **Step 2 (owner approval required):** V3 notification check. Create one booking through the deployed preview in live mode, on the owner's own email. Check for the Setmore email, then cancel it in Setmore. Record the result in A§17 and set the confirmation copy (D§4 step 5) accordingly.
 - [ ] **Step 3:** Fill in the real `service_id` values in `services-meta.json` from the Task 1 output (O4). Run the full tests.
 - [ ] **Step 4:** Open the PR using `.github/pull_request_template.md` (What Changed / Assumptions / Evidence / Not Verified). Include CI run IDs.
