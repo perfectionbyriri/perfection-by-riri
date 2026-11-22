@@ -85,3 +85,8 @@ test('the misconfiguration message never echoes a secret value', () => {
     assert.doesNotMatch(String(err.message), /SECRET-LOOKING-VALUE/);
   }
 });
+
+test('Square-Version is pinned to the version verified at implementation, and an override wins', () => {
+  assert.equal(loadConfig({}).squareVersion, '2026-11-18');
+  assert.equal(loadConfig({ SQUARE_VERSION: '2027-01-15' }).squareVersion, '2027-01-15');
+});

@@ -76,7 +76,8 @@ export function loadConfig(env = {}) {
     squareApplicationId: text(env, 'SQUARE_APPLICATION_ID'),
     squareLocationId: text(env, 'SQUARE_LOCATION_ID'),
     squareAccessToken: text(env, 'SQUARE_ACCESS_TOKEN'),
-    squareVersion: text(env, 'SQUARE_VERSION'),
+    // Square-Version confirmed in the Square API reference on 2026-11-22.
+    squareVersion: text(env, 'SQUARE_VERSION', '2026-11-18'),
     squareDelayDuration: delayDuration(env),
     depositAmountCents: int(env, 'DEPOSIT_AMOUNT_CENTS', 5000),
     cardFeeBasisPoints: int(env, 'CARD_FEE_BASIS_POINTS', 0),
