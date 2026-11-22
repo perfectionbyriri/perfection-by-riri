@@ -174,6 +174,123 @@
 .bk-banner:focus-visible { outline: 2px solid #8a6c44; outline-offset: 5px; }
 .bk-banner .button { margin-top: 16px; }
 
+/* Step 1 · service cards (§4). The whole card is one button. */
+.bk-group + .bk-group { margin-top: 40px; }
+
+.bk-group-label {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 0 0 20px;
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 1.7px;
+  line-height: 1.5;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+.bk-group-label::after {
+  content: "";
+  flex: 1;
+  border-top: 1px solid var(--line);
+}
+
+.bk-card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 30px 20px;
+}
+
+.bk-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  text-transform: none;
+  cursor: pointer;
+}
+
+.bk-card:focus-visible { outline: 2px solid #8a6c44; outline-offset: 2px; }
+
+.bk-card-photo {
+  display: block;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  background: var(--card);
+}
+
+.bk-card-photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.bk-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px 12px 12px;
+  border-top: 2px solid transparent;
+}
+
+.bk-card-name {
+  font-family: var(--serif);
+  font-size: 22px;
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+.bk-card-blurb { font-size: 14px; line-height: 1.5; color: var(--muted); }
+
+.bk-card-meta {
+  font-family: var(--price-font);
+  font-size: 16px;
+  font-weight: var(--price-weight);
+  font-variant-numeric: var(--price-numeric);
+}
+
+.bk-card-deposit { font-size: 13px; color: var(--muted); }
+
+/* Selected: inset --ink outline plus a gold top rule above the text. The
+   heavier outline carries the state; colour is never the only signal. */
+.bk-card[aria-pressed="true"] { box-shadow: none; outline: 1px solid var(--ink); outline-offset: -1px; }
+.bk-card[aria-pressed="true"] .bk-card-body { border-top-color: var(--gold); }
+.bk-card[aria-pressed="true"]:focus-visible { outline: 2px solid #8a6c44; outline-offset: 2px; }
+
+@media (hover: hover) and (pointer: fine) {
+  .bk-card:hover .bk-card-name { text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .bk-card-photo img { transition: transform var(--duration-slow, 560ms) var(--ease-premium, ease); }
+  .bk-card:hover .bk-card-photo img { transform: scale(1.02); }
+}
+
+/* Step actions */
+.bk-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 16px;
+  margin-top: 40px;
+  padding-top: 30px;
+  border-top: 1px solid var(--line);
+}
+
+.bk-actions .button { min-width: 200px; }
+.bk-actions [data-action="back"] { margin-right: auto; }
+.bk-hint { margin: 0; font-size: 13px; color: var(--muted); }
+
 /* Loading skeletons in the card fill; animated only when motion is welcome. */
 .bk-skeleton-card {
   aspect-ratio: 4 / 5;
@@ -196,14 +313,23 @@
 
 .bk-noscript p { margin: 0; }
 
+@media (max-width: 1049px) {
+  .bk-card-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
 @media (max-width: 800px) {
   .book-page .bk { padding-block: 30px 40px; }
+  .bk-actions { justify-content: stretch; }
+  .bk-actions .button { flex: 1 1 100%; }
+  .bk-hint { flex: 1 1 100%; }
   .bk-layout { grid-template-columns: minmax(0, 1fr); gap: 40px; }
   .bk-summary { position: static; padding: 25px 20px; }
   .bk-progress-label { font-size: 12px; }
 }
 
 @media (max-width: 540px) {
+  .bk-card-grid { grid-template-columns: minmax(0, 1fr); }
+  .bk-card-photo { aspect-ratio: 3 / 2; }
   .bk-progress-label {
     position: absolute;
     width: 1px;

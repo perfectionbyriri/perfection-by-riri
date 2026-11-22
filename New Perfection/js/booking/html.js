@@ -1,0 +1,7 @@
+// Small HTML helpers shared by the booking renderers.
+
+const ENTITIES = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+
+export function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, (char) => ENTITIES[char]);
+}
