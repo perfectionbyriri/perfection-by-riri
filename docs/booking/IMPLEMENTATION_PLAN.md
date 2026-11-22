@@ -96,7 +96,7 @@ Probe sequence (`runProbe`):
 5. Conclusion: `v2_ok` if the v2 token and all v2 reads returned 2xx; `v2_token_ok_reads_failed` if the v2 token worked but a read failed; `v1_only` if the v2 token failed and v1 returned 2xx; otherwise `neither`.
 6. Every request uses `method: 'GET'`, `redirect: 'error'`, `AbortSignal.timeout(10000)`. URLs in the report omit the query string.
 
-- [ ] **Step 1: Write the failing tests** in `tests/booking/setmore-probe.test.mjs`:
+- [x] **Step 1: Write the failing tests** in `tests/booking/setmore-probe.test.mjs`:
 
 ```js
 test('schemaOf describes nested objects and arrays by type only', () => {
@@ -140,25 +140,25 @@ test('runProbe reports v1_only when v2 token fails and v1 succeeds', async () =>
 
 The `runProbe` tests use a fake `fetch` that records `{method, url}` and routes by pathname to canned v2 and v1 bodies in the shapes documented in A§7 and A§6.
 
-- [ ] **Step 2: Run the tests to verify they fail**
+- [x] **Step 2: Run the tests to verify they fail**
 
 Run: `node --test tests/booking/setmore-probe.test.mjs`
 Expected: FAIL — `Cannot find module '…/worker/tools/setmore-probe.js'`.
 
-- [ ] **Step 3: Implement** `worker/package.json` and `worker/tools/setmore-probe.js` with the exports and rules above. The CLI entry runs only when `import.meta.url === pathToFileURL(process.argv[1]).href`.
+- [x] **Step 3: Implement** `worker/package.json` and `worker/tools/setmore-probe.js` with the exports and rules above. The CLI entry runs only when `import.meta.url === pathToFileURL(process.argv[1]).href`.
 
-- [ ] **Step 4: Run the tests to verify they pass**
+- [x] **Step 4: Run the tests to verify they pass**
 
 Run: `node --test tests/*.test.cjs tests/booking/*.test.mjs`
 Expected: all pass, including the existing `pmu-results` tests.
 
-- [ ] **Step 5: Add the workflow and CI changes**
+- [x] **Step 5: Add the workflow and CI changes**
 
 `.github/workflows/setmore-probe.yml`: `workflow_dispatch` plus `push` on branch `claude/dazzling-shannon-7jkxc1` with paths `worker/tools/setmore-probe.js` and `.github/workflows/setmore-probe.yml`. `permissions: contents: read`, `timeout-minutes: 5`, `actions/checkout@v7`, `actions/setup-node@v7` (`lts/*`), step `node worker/tools/setmore-probe.js` with `env: SETMORE_REFRESH_TOKEN: ${{ secrets.SETMORE_REFRESH_TOKEN }}`.
 
 `site-ci.yml`: the syntax step also checks `worker/**/*.js`. The unit-test step runs `node --test tests/*.test.cjs tests/booking/*.test.mjs`.
 
-- [ ] **Step 6: Commit and push**
+- [x] **Step 6: Commit and push**
 
 ```bash
 git add worker/package.json worker/tools/setmore-probe.js tests/booking/setmore-probe.test.mjs .github/workflows/setmore-probe.yml .github/workflows/site-ci.yml
@@ -168,13 +168,22 @@ git push -u origin claude/dazzling-shannon-7jkxc1
 
 Expected: the probe run concludes `skipped` until the secret exists.
 
-- [ ] **Step 7 (owner): Add the secret.** In GitHub → `perfectionbyriri/perfection-by-riri` → Settings → Secrets and variables → Actions, add a new repository secret `SETMORE_REFRESH_TOKEN`. The repo is public, so Actions logs are public; the probe prints only schemas and allowlisted, non-personal values.
+- [x] **Step 7 (owner): Add the secret.** In GitHub → `perfectionbyriri/perfection-by-riri` → Settings → Secrets and variables → Actions, add a new repository secret `SETMORE_REFRESH_TOKEN`. The repo is public, so Actions logs are public; the probe prints only schemas and allowlisted, non-personal values.
 
-- [ ] **Step 8: Re-run the probe and record the results**
+- [x] **Step 8: Re-run the probe and record the results**
 
 Re-run the latest `Setmore API probe (read-only)` run. Expected: the conclusion is `v2_ok`, `v1_only` or `neither`. Write the run ID, conclusion, `account_id` source, field names for service price and duration, and the slot element format into A§20 (V1, V2) and A§6.2. Commit `docs(booking): record Setmore probe results`. **Stop for the owner.**
 
 Before this branch merges to `main`, remove the `push` trigger from `setmore-probe.yml` and keep `workflow_dispatch` (Task 23).
+
+**Status 2026-11-22:** Steps 1–8 done. Run 44989221725 (attempt 2) concluded `v2_ok`; results are in A§5, A§6.2, A§7 and A§20.
+
+- [ ] **Step 9 (only with the owner's go-ahead): Close V2b with a follow-up probe run.** Test-first changes to the probe:
+  - remove `first_name` from the value allowlist (a staff first name reached the public log in run 44989221725);
+  - add `provider_ids`, `category_ids` and `service_ids` to the id keys, and add `visibility` to the value keys;
+  - query `/slots` for every staff id with `duration=60` over two consecutive 7-day windows.
+
+  New tests: `redact hides first_name`, `redact keeps provider_ids`, and `runProbe queries slots for each staff id`. Push, then record the result in A§6.2 and A§20.
 
 ---
 
@@ -403,14 +412,18 @@ Before coding, confirm in the Square API reference (A§20 V5): the `delay_durati
   - `validateAppointmentInput(raw): AppointmentInput` — throws `BookingError('VALIDATION_FAILED', {fields})` (D§4 step 3 limits). Unknown fields are dropped.
   - `createAppointmentService({ client, catalog, slots, customers, payments, kv, alerts, config, now, log }) → { create(raw): Promise<{ status: 200|201, body }> }`. The body follows A§14, including `deposit.payment_id`.
 
-Order of operations: A§8.1. Idempotency record `idem:<sha256(key)>`, TTL 86400 s. Write `payment_id` right after authorize and `booking_id` right after create.
+Order of operations: A§8.1. Idempotency record `idem:<sha256(key)>`, TTL 259200 s (72 h), with the state machine of A§8.3: `started` → `payment_authorized` → `booking_requested` (written **before** the Setmore POST) → `booking_created` → `done`, plus `failed`, `capture_pending`, `needs_review`.
 
 - [ ] **Step 1: Failing tests:**
   - `happy path: authorize → customer → re-check → booking → complete → 201 with payment_id`
   - `slot gone at first check: 409 SLOT_TAKEN with refreshed_week, no authorize call`
   - `slot gone at second check (mock slot_taken): cancel called once, 409 SLOT_TAKEN`
   - `Setmore conflict on create: cancel called, 409 SLOT_TAKEN`
-  - `Setmore 503 on create: cancel called, 502/503 error`
+  - `Setmore 4xx rejection on create (parameter_invalid): cancel called, record failed`
+  - `Setmore 429 on create: cancel called, 503 UPSTREAM_BUSY`
+  - `Setmore 503 on create: NO cancel, 503 BOOKING_PENDING_CONFIRMATION, record stays booking_requested`
+  - `Setmore timeout on create: NO cancel, record stays booking_requested`
+  - `state is booking_requested in KV before the Setmore POST is sent` (the fake client reads KV at call time)
   - `customer resolution fails: cancel called`
   - `payment declined: 402 PAYMENT_DECLINED, no customer created, no booking`
   - `complete fails: 201 with deposit.status pending_capture and capture_failed_booking_kept alert`
@@ -434,9 +447,19 @@ Order of operations: A§8.1. Idempotency record `idem:<sha256(key)>`, TTL 86400 
 
 **Interfaces — Produces:**
 - `createAlerts({ sendEmail, from, to, log }) → { notify(type, { bookingId, paymentId, extra }): Promise<void> }`. Types: `double_booking_detected | capture_failed_booking_kept | payment_cancel_failed | upstream_auth_failed | orphan_authorization_cancelled`. Never throws (a failed send is logged).
-- `reconcileStaleAuthorizations({ kv, payments, alerts, now, olderThanMs = 600000 }): Promise<{ cancelled, alerted }>` (A§8.4).
+- `reconcileStaleAuthorizations({ kv, payments, client, alerts, config, now, olderThanMs = 600000 }): Promise<{ cancelled, completed, reviewed, alerted }>` (A§8.4). Cancels **only** records in `payment_authorized`.
 
-- [ ] **Step 1: Failing tests:** the alert body has ids only (no email, phone or name); a `sendEmail` rejection is swallowed and logged; an in-progress record older than 10 min with `payment_id` and no `booking_id` → `cancel` and state `failed`; a record with both ids → one `capture_failed_booking_kept` alert, no cancel, and no repeat alert on the next run; a fresh record (5 min) is untouched; a cancel failure → `payment_cancel_failed` alert.
+- [ ] **Step 1: Failing tests:**
+  - `alert body has ids only (no email, phone or name)`; `sendEmail rejection is swallowed and logged`
+  - `payment_authorized older than 10 min: cancel called, state failed`
+  - `booking_requested and Setmore lookup finds the booking: complete called, never cancel, state done`
+  - `booking_requested and lookup finds nothing: NO cancel, state needs_review, booking_outcome_unknown alert once`
+  - `booking_requested and lookup fails (503): NO cancel, state needs_review`
+  - `booking_created: complete retried, never cancel; success → done`
+  - `capture_pending with complete failing 3 times: never cancel, capture_failed_booking_kept alert sent once, complete_attempts capped at 3`
+  - `cancel is never called for any state except payment_authorized` (loop over every state with a recording fake)
+  - `fresh record (5 min) is untouched`; `done, failed and needs_review are skipped`
+  - `cancel failure raises payment_cancel_failed`
 - [ ] **Step 2:** Run → FAIL.
 - [ ] **Step 3:** Implement.
 - [ ] **Step 4:** Full test command → PASS.

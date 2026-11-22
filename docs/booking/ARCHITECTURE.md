@@ -109,10 +109,20 @@ Static assets keep being served without invoking the Worker. Only `/api/*` runs 
 
 Setmore v2 endpoints used: `GET /services`, `GET /categories`, `GET /staff`. All list responses use the envelope `{ "data": [...], "cursor": "..." }`, and the cursor is omitted on the last page. The client follows the cursor to the end. If more than 10 pages are needed, it stops with a fail-closed error rather than serving a partial catalog (the voice agent has the same rule).
 
+**Observed v2 shapes** (probe run [44989221725](https://github.com/perfectionbyriri/perfection-by-riri/actions/runs/44989221725), attempt 2, 2026-11-22; all 200, one page each, no `cursor` returned):
+
+| Endpoint | Count | Fields |
+|---|---|---|
+| `GET /services` | 44 | `id`, `account_id`, `title` (display name, e.g. "Hybrid Full Extension 2D-3D"), `provider_ids[]`, `type` (`"SERVICE"`), `cost` (USD **dollars** as a number, e.g. `180`), `duration` (minutes, e.g. `120`), `color_code`, `buffer{before,after}`, `visibility`, `location{}`, `category_ids[]`, `currency` (`"USD"`) |
+| `GET /categories` | 9 (the public page shows 7) | `id`, `account_id`, `title`, `service_ids[]`, `visibility` |
+| `GET /staff` | 2 | `id`, `first_name`, `last_name`, `avatar_url`, `phone_numbers[{id,value,primary}]`, `email_addresses[{id,value,primary}]`, `urls{}`, `social{}`, `location{}` (second record), `custom_fields{}` |
+
+Consequences for the adapter: the service name field is `title` (not `service_name`); `price_cents = Math.round(cost × 100)`; the staff link is `provider_ids[]`; the category link exists both ways (`category_ids[]` and `service_ids[]`). `visibility` is used to skip hidden categories and services (exact values still to be read, see V2b). Staff contact fields are never stored or logged.
+
 Merge (pure function, unit-tested):
 
 1. Keep only services whose `id` is in `services-meta.json` (whitelist).
-2. Drop services not offered by `SETMORE_PROVIDER_ID`, if the service object exposes its staff list (field name to be confirmed in verification V2).
+2. Drop services whose `provider_ids` does not contain `SETMORE_PROVIDER_ID`.
 3. Join meta: group, order, `display_name`, blurb, photo (service photo, or the group photo as fallback), deposit rule.
 4. Compute a **deposit quote** per service on the server (§11). The browser never computes money.
 5. Log `meta_service_missing` for meta ids absent from Setmore, and `deposit_meta_overridden` when the price is at or below the deposit.
@@ -169,9 +179,11 @@ DST transitions the tests must cover (computed with Python `zoneinfo`, 2026-11-2
 
 Required cases: a week window spanning 2026-11-01 (start offset −07:00, end offset −08:00); a window spanning 2027-03-14; 02:30 on 2027-03-14 rejected; 01:30 on 2027-11-07 resolves to −07:00; a booking at 23:30 UTC still on the previous studio date.
 
-### 6.2 Slot shape (to verify)
+### 6.2 Slot shape (partly verified)
 
-The docs do not show the element format inside `days[...]`. The adapter accepts RFC 3339 strings, or objects with `start_at`. Anything else makes the response fail closed (`UPSTREAM_INVALID`). Verification V2 pins the real shape.
+Observed (probe run 44989221725, attempt 2): `GET /slots` returned 200 with `{ "data": { "days": { "<yyyy-MM-dd>": [] , … } } }`. For `start_at=2026-11-23T00:00:00-08:00`, `end_at=2026-11-30T00:00:00-08:00` it returned **8** date keys, 2026-11-23 … **2026-11-30**, so the end date appears as a key. The BFF must drop keys outside `[week_start, week_start + 6]`.
+
+**Every day was empty** for the query used: `provider_id` = the first staff record (the account owner's user id), `duration=120`, `slot_limit=5`, default `working_hours=false`. The element format inside `days[...]` is therefore **still unknown**. Likely causes, in order: (1) the services are provided by the other staff record, (2) a `working_hours` or `slot_limit` effect, (3) the week is fully booked. The probe redacted `provider_ids`, so cause (1) could not be checked. Until a follow-up run pins it (V2b), the adapter accepts RFC 3339 strings or objects with `start_at`; anything else fails closed (`UPSTREAM_INVALID`).
 
 ---
 
@@ -181,7 +193,8 @@ Setmore v2 auth (developers.setmore.com, "Authentication"):
 
 - `GET https://developer.setmore.com/api/v2/o/oauth2/token?refreshToken={SETMORE_REFRESH_TOKEN}`
 - Response: `{ "response": true, "data": { "token": { "access_token", "token_type": "BEARER", "expires_in", "user_id" } } }`
-- Use as `Authorization: Bearer <access_token>`. An expired token returns error code `token_expired`. The docs' example `expires_in` is 604799 s.
+- Use as `Authorization: Bearer <access_token>`. An expired token returns error code `token_expired`. The docs' example `expires_in` is 604799 s, but the **observed** value is `7199` s (about 2 hours; probe run 44989221725). The 60 s margin and 401 refresh handle both.
+- Observed v2 token body: `{ response, code, data: { token: { access_token, type: "user", token_type: "BEARER", expires, issued_to, scopes[], access_type, user_id, proj_id, ok, expires_in } } }`, identical in shape to the v1 token body.
 
 Design:
 
@@ -210,7 +223,10 @@ validate input + Turnstile
                                            → declined? 402 PAYMENT_DECLINED (no booking, no Setmore contact)
   3  resolve customer (§9)                   → find or create in Setmore; fail? CancelPayment → 502/503
   4  fresh slot check again (cache bypass)   → gone?  Square CancelPayment → 409 SLOT_TAKEN
-  5  Setmore POST /bookings                  → fail?  Square CancelPayment → 502/503
+  5  KV state → booking_requested; Setmore POST /bookings
+        definite rejection (4xx error body, 429)  → CancelPayment → 409 / 503
+        outcome unknown (timeout, network, 5xx)   → NO cancel; 503 BOOKING_PENDING_CONFIRMATION; cron resolves (§8.4)
+        success                                   → KV state → booking_created (+ booking_id)
   6  Square CompletePayment                  → fail?  keep booking, alert salon, 201 with deposit_status="pending_capture"
   7  post-check: GET /bookings/staffs/{provider} for that day; overlap? → alert salon (no auto-cancel)
   8  store result in KV idem:<key> (24 h), purge slot cache → 201
@@ -219,8 +235,9 @@ validate input + Turnstile
 - The customer is resolved **after** card authorization, so declined cards and card-testing bots never create Setmore contacts.
 - Steps 2–6 use **delayed capture**. The card is authorized first and captured only after Setmore confirms the booking.
 - **Authorization lifetime (owner decision): `delay_duration=PT48H`** (allowed config range `PT24H`–`PT48H`), with `delay_action=CANCEL`. The long window gives the salon time to complete the capture by hand in the Square Dashboard if a network failure happens *after* the Setmore booking exists (step 6). Square's limits for `delay_duration` are confirmed in V5.
-- **Any failure before or at Setmore booking creation (steps 3, 4, 5) calls `CancelPayment` immediately.** The 48 h window is never relied on to release a client's hold in normal error paths.
-- The payment id is written to the idempotency record right after step 2. If the Worker dies between steps 2 and 5, the **reconciliation cron** (§8.4) cancels the orphaned authorization within 15 minutes, so the client's hold is not left for 48 h.
+- **Cancel rule (owner decision 2026-11-22): the deposit authorization is cancelled only when the Setmore booking was certainly not created.** That holds for failures at steps 3 and 4 (no booking request was sent), and for a *definite* rejection at step 5: a 4xx response with a Setmore error body (`resource_conflict`, `parameter_invalid`, `out_of_range`, …) or a 429 (the request was refused, not processed). These call `CancelPayment` immediately.
+- When the outcome of step 5 is **unknown** (timeout, connection reset, 5xx), the booking may exist. The BFF does **not** cancel. It returns 503 `BOOKING_PENDING_CONFIRMATION` ("We couldn't confirm your booking yet. Your card has not been charged. The studio will confirm with you shortly.") and leaves the record in `booking_requested` for the cron (§8.4).
+- The payment id is written to the idempotency record right after step 2. The state is advanced to `booking_requested` **before** the Setmore request is sent, and to `booking_created` right after a success. The cron relies on this order.
 - Services with `deposit: "none"` skip steps 2 and 6 and the payment cancels.
 - Setmore `POST /bookings` body: `type: "APPOINTMENT"`, `account_id`, `provider_id`, `consumer_ids: [customerId]`, `service_id`, `start_at`, `end_at` (start + duration, RFC 3339 with offset), `cost` (Setmore price), `notes` (client notes + `"Deposit paid online via Square: $50.00. Square payment <id>. Booked on perfectionbyriri.com."`; a fee clause is appended only when a fee is configured).
 
@@ -234,17 +251,25 @@ validate input + Turnstile
 ### 8.3 Idempotency
 
 - The browser creates `idempotency_key` (UUID v4) when it enters step 4 and keeps it for every resubmit of that attempt.
-- KV `idem:<sha256(key)>`: `{state: "in_progress"|"done"|"failed", result, created_at}`, TTL 24 h. It is written as `in_progress` before step 1.
+- KV `idem:<sha256(key)>`: `{state, payment_id, booking_id, customer_id, service_id, start_at, result, created_at, updated_at, complete_attempts, alerted}`, TTL 72 h (longer than the 48 h authorization). No email, phone or name.
+- States, in order: `started` (before step 1) → `payment_authorized` (after step 2, `payment_id` set) → `booking_requested` (just before step 5) → `booking_created` (after step 5, `booking_id` set) → `done` (after step 6). Side branches: `failed` (definite failure, authorization cancelled or never made), `capture_pending` (step 6 failed, booking kept), `needs_review` (cron could not prove the booking's state).
 - Square `idempotency_key` = the same UUID, so Square deduplicates CreatePayment on retries.
 - KV is eventually consistent. Two simultaneous submits with the same key in different colos are additionally protected by Square's idempotency (one payment) and by the step 4/7 checks. Acceptable for a single-salon volume.
 
 ### 8.4 Reconciliation cron
 
-A Worker Cron Trigger (`*/15 * * * *`) lists `idem:*` records with `state: "in_progress"` that are older than 10 minutes.
+A Worker Cron Trigger (`*/15 * * * *`) scans `idem:*` records whose `updated_at` is older than 10 minutes and whose state is not final. **It cancels an authorization only when the record proves no Setmore booking request was ever sent.**
 
-- Record has a `payment_id` but no `booking_id`: call `CancelPayment`, set the state to `failed`, and log `orphan_authorization_cancelled`.
-- Record has both ids: the booking exists but capture was not confirmed. Do **not** cancel. Alert the salon once (`capture_failed_booking_kept`) so they can complete the capture by hand within the 48 h window.
+| State found | Meaning | Cron action |
+|---|---|---|
+| `started` | No payment yet | Mark `failed`. Nothing to cancel. |
+| `payment_authorized` | Authorized; the Setmore request was **never sent** (state is advanced before sending) | `CancelPayment` → `failed`; log `orphan_authorization_cancelled`. |
+| `booking_requested` | Request sent, outcome unknown | Look up the booking: `GET /bookings/staffs/{provider}` for that day, match `service_id` + `start_at` (by instant) + `consumer_ids` containing `customer_id`. **Found** → set `booking_created` with `booking_id`, then handle as the next row. **Not found or lookup failed** → **no cancel**; set `needs_review`, alert `booking_outcome_unknown` once; the authorization stays (48 h) for the salon to decide. |
+| `booking_created` or `capture_pending` | Booking exists; capture not confirmed | **Never cancel.** Retry `CompletePayment` (Square-idempotent), at most 3 attempts across runs (`complete_attempts`). Success → `done`. A failure alerts `capture_failed_booking_kept` once, so the salon can capture by hand within 48 h. |
+| `done`, `failed`, `needs_review` | Final or waiting for a human | Skip. |
+
 - A `CancelPayment` failure raises a `payment_cancel_failed` alert.
+- Each alert type is sent at most once per record (`alerted` list).
 
 ### 8.5 Abuse protection
 
@@ -342,6 +367,7 @@ Match priority: email first, then phone. If the email matches customer X and the
 | `UPSTREAM_BUSY` | 503 | Setmore 429 after retries or during cooldown; `retry_after_seconds` set |
 | `UPSTREAM_UNAVAILABLE` | 502 | Setmore or Square error or timeout |
 | `UPSTREAM_AUTH` | 502 | Token refresh failing |
+| `BOOKING_PENDING_CONFIRMATION` | 503 | Setmore booking outcome unknown (timeout or 5xx at step 5); authorization kept, cron resolves |
 | `MISCONFIGURED` | 500 | Invalid config, or mock mode in production |
 
 Messages are safe English. They never echo upstream bodies.
@@ -522,7 +548,7 @@ Findings (2026-11-22):
 ## 18. Observability and alerts
 
 - Structured JSON logs (Workers observability is already enabled in `wrangler.jsonc`): `event`, `request_id`, `route`, `upstream`, `status`, `duration_ms`, `scenario` (mock). There is no PII.
-- Salon alert e-mail (Cloudflare `send_email` binding to `SALON_ALERT_EMAIL`), sent for `double_booking_detected`, `capture_failed_booking_kept` (complete the capture by hand in Square within 48 h), `payment_cancel_failed`, and `upstream_auth_failed`. Each alert has booking and payment ids only, plus a link to the Setmore calendar.
+- Salon alert e-mail (Cloudflare `send_email` binding to `SALON_ALERT_EMAIL`), sent for `double_booking_detected`, `capture_failed_booking_kept` (complete the capture by hand in Square within 48 h), `booking_outcome_unknown` (check the Setmore calendar, then capture or cancel in Square), `payment_cancel_failed`, and `upstream_auth_failed`. Each alert has booking and payment ids only, plus a link to the Setmore calendar.
 - Requires Cloudflare Email Routing enabled on the zone, with a verified destination address. This is an owner action (O3).
 
 ---
@@ -541,8 +567,9 @@ Findings (2026-11-22):
 
 | Id | Item | Blocks | Evidence that resolves it |
 |---|---|---|---|
-| V1 | Does the owner's token work with **v2**? What are `account_id` and `provider_id`? (The voice agent uses **v1** `/api/v1/bookingapi`; v2 is "not backwards compatible", and token compatibility is not stated.) | Live mode | One read-only `GET /o/oauth2/token` + `GET /staff` against v2, run from a GitHub Actions `workflow_dispatch` job using a repository secret. Output: HTTP status and the ids (no PII). If it fails, request v2 access via api@setmore.com. |
-| V2 | Real v2 shapes: service price and duration fields, staff-to-service link, slot element format, create-customer required fields. | Live mode adapter | Same read-only job: redacted JSON samples of `/services`, `/categories`, `/slots` (one week). |
+| V1 | **Resolved 2026-11-22** (probe run [44989221725](https://github.com/perfectionbyriri/perfection-by-riri/actions/runs/44989221725), attempt 2, conclusion `v2_ok`). The owner's refresh token works with **v2** (token, `/staff`, `/services`, `/categories`, `/slots` all 200) and also with the v1 token endpoint (200). `SETMORE_ACCOUNT_ID=1a47bbdd-c70e-402d-9bcb-1c739d6752ae` (from `services[].account_id`). Staff ids: `b0bfa3b4-b043-4cec-b841-017a716974fd` (account owner, equals the token `user_id`) and `f20db4f9-53d7-4b34-97de-0d49d4edae0d`. Which one is `SETMORE_PROVIDER_ID` is open (V2b). | — | — |
+| V2 | **Mostly resolved** (same run): service, category and staff fields in §5; token body in §7; `/slots` envelope in §6.2. Create-customer required fields are not probed (no write calls); they are pinned in Task 23's approved live test. | — | — |
+| V2b | Open: (a) which staff id is in services' `provider_ids`; (b) slot element format (all days empty in the first run); (c) `visibility` values. | Slots adapter, `SETMORE_PROVIDER_ID` | One more read-only probe run after the probe's redaction fix: un-redact `provider_ids` / `category_ids` / `service_ids` (ids only), drop `first_name` from the allowlist, add `visibility`, and query slots for **each** staff id with a 60-minute service over two consecutive 7-day windows (the API maximum per request). |
 | V3 | Customer notifications for API-created bookings. | Confirmation copy | One owner-approved live test booking on the owner's email, then `DELETE /bookings/{id}`. |
 | V4 | ~~Card fee surcharge compliance~~ **Resolved 2026-11-22:** default fee 0% (owner). Re-open only if the fee is ever enabled. | — | — |
 | V5 | Square delayed capture: `delay_duration` minimum and default, `delay_action=CANCEL` behaviour, current `Square-Version`. Also confirm Wrangler supports the `run_worker_first` array form and the `ratelimits` binding in the pinned version. | Payments adapter, deploy config | Square API reference and Cloudflare Workers docs, checked at implementation time. |

@@ -368,6 +368,7 @@ Category-to-group mapping: Permanent Makeup → `permanent-makeup`; Eyelash Exte
 | Busy / rate limited (503 `UPSTREAM_BUSY`) | "Our booking calendar is busy right now. Please try again in a minute, or call (425) 845 0045." + `Try again` (outline) |
 | Payment declined (402) | Inline under the card field: Square's decline category mapped to plain text ("Your card was declined. Please try another card."). No booking is made. |
 | Booking failed after authorization | "We couldn't complete your booking and your card was not charged. Please try again or call (425) 845 0045." |
+| Booking outcome unknown (503 `BOOKING_PENDING_CONFIRMATION`) | "We couldn't confirm your booking yet. Your card has not been charged. The studio will confirm with you shortly, or call (425) 845 0045." No retry button (prevents a duplicate request). |
 | No deposit service | The card block is hidden; the button reads `BOOK APPOINTMENT` |
 
 ---
