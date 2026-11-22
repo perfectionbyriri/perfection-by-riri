@@ -222,3 +222,16 @@ test('POST sends a JSON body with the bearer token', async () => {
   assert.equal(recorder.calls[0].init.headers['Content-Type'], 'application/json');
   assert.equal(recorder.calls[0].init.headers.Authorization, 'Bearer token-1');
 });
+
+test('a customer-scan page 429 with cooldown off does not block the next calls', async () => {
+  const { client, recorder } = setup({
+    'GET /api/v2/customers': TOO_MANY,
+    'POST /api/v2/customers': { status: 201, body: { data: { id: 'cus_1' } } }
+  });
+  await assert.rejects(client.listCustomersPage(undefined, 100, { cooldown: false }), SetmoreBusy);
+  assert.equal(recorder.calls.length, 3, 'GET retries still apply');
+  assert.equal((await client.createCustomer({ first_name: 'A' })).id, 'cus_1');
+  await assert.rejects(client.listCustomersPage(), SetmoreBusy);
+  await assert.rejects(client.createCustomer({ first_name: 'B' }), SetmoreBusy, 'the default still enters cooldown');
+  assert.equal(recorder.calls.filter((call) => call.method === 'POST').length, 1);
+});

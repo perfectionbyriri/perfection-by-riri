@@ -7,7 +7,8 @@
 //     processed). A POST timeout, network error or 5xx is an UNKNOWN outcome
 //     and is reported as SetmoreUnavailable; callers must not assume failure.
 //   - 401 on any call: invalidate the token, refresh once, retry once.
-//   - After a final 429 the client refuses calls for `cooldownSeconds`.
+//   - After a final 429 the client refuses calls for `cooldownSeconds`
+//     (unless the caller passes `cooldown: false`).
 
 import {
   SetmoreAuthError, SetmoreBusy, SetmoreConflict, SetmoreInvalidResponse, SetmoreNotFound,
@@ -53,7 +54,7 @@ export function createSetmoreClient({
     return Math.round(BACKOFF_MS[retryIndex] * (0.8 + 0.4 * random()));
   }
 
-  async function request(method, path, { query, body } = {}) {
+  async function request(method, path, { query, body, cooldown = true } = {}) {
     const remaining = cooldownUntil - now().getTime();
     if (remaining > 0) throw new SetmoreBusy(Math.ceil(remaining / 1000));
 
@@ -101,7 +102,7 @@ export function createSetmoreClient({
           retries += 1;
           continue;
         }
-        cooldownUntil = now().getTime() + cooldownSeconds * 1000;
+        if (cooldown) cooldownUntil = now().getTime() + cooldownSeconds * 1000;
         const header = retryAfterMs(response);
         throw new SetmoreBusy(header !== null ? Math.ceil(header / 1000) : cooldownSeconds);
       }
@@ -173,8 +174,10 @@ export function createSetmoreClient({
       return dataOf(await request('GET', `/customers/${encodeURIComponent(id)}`));
     },
 
-    async listCustomersPage(cursor, limit = 100) {
-      const body = await request('GET', '/customers', { query: { cursor, limit } });
+    // `cooldown: false` lets the bounded customer scan give up on a 429 without
+    // blocking the customer and booking POSTs that follow (ARCHITECTURE §9 step 4).
+    async listCustomersPage(cursor, limit = 100, { cooldown = true } = {}) {
+      const body = await request('GET', '/customers', { query: { cursor, limit }, cooldown });
       if (!Array.isArray(body?.data)) throw new SetmoreInvalidResponse();
       return { items: body.data, cursor: body.cursor || null };
     },
