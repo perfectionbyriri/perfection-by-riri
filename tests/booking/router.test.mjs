@@ -80,6 +80,7 @@ test('catalog 200 with Cache-Control: public, max-age=60 and the checkout block'
   assert.equal(body.groups.length, 6);
   assert.equal(body.checkout.phone, '+14258450045');
   assert.equal(body.checkout.square.environment, 'sandbox');
+  assert.equal(body.checkout.square.mock, true);
   assert.match(body.checkout.policy_text, /^Cancellations made on the same day as your appointment will result in the forfeiture of your \$50 deposit\./);
 });
 

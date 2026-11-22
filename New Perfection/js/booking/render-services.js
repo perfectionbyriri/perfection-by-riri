@@ -4,9 +4,8 @@
 // Text-only editorial accordion menu (no photos) matching the four categories
 // of the site navigation menu (Lash Extensions, Permanent Makeup, Lash Lift,
 // Brow Lamination & Tint). Categories start collapsed unless deep-linked or
-// holding the chosen service. Services inside each category are grouped and
-// sorted logically by treatment type. Names, prices and durations come
-// strictly from the catalog API (Setmore).
+// holding the chosen service. Multi-part categories (Lash Extensions, PMU)
+// use compact sub-tabs so each view stays short and easy to scan.
 
 import { escapeHtml } from './html.js';
 
@@ -139,7 +138,6 @@ function organizeCategoryServices(categoryKey, services) {
   }
 
   if (categoryKey === 'lash-lift') {
-    // Base lift first, then lift + tinting.
     const sorted = [...services].sort((a, b) => (
       Number(/tint/i.test(a.name)) - Number(/tint/i.test(b.name))
       || (a.price_cents ?? 0) - (b.price_cents ?? 0)
@@ -148,7 +146,6 @@ function organizeCategoryServices(categoryKey, services) {
   }
 
   if (categoryKey === 'brows') {
-    // Full lamination package -> lamination -> tint & shaping -> shaping.
     const rank = (name) => {
       const lower = name.toLowerCase();
       if (lower.includes('lamination') && lower.includes('tint')) return 10;
@@ -217,6 +214,22 @@ function card(service, selected, index) {
     + '</button>';
 }
 
+function defaultSubgroupKey(category, selectedId, focusGroup) {
+  if (selectedId) {
+    const match = category.subgroups.find((sub) => sub.services.some((s) => s.service_id === selectedId));
+    if (match) return match.key;
+  }
+  if (focusGroup === 'wispy-lashes') {
+    const wispy = category.subgroups.find((sub) => sub.key === 'wispy-sets');
+    if (wispy) return wispy.key;
+  }
+  if (focusGroup === 'lash-refills') {
+    const refills = category.subgroups.find((sub) => sub.key === 'refills');
+    if (refills) return refills.key;
+  }
+  return category.subgroups[0]?.key ?? null;
+}
+
 export function renderServices({ groups, selectedId = null, focusGroup = null, openGroup = undefined }) {
   const categories = buildMenuCategories(groups);
   const focusCategoryKey = focusGroup
@@ -246,30 +259,38 @@ export function renderServices({ groups, selectedId = null, focusGroup = null, o
     const subtitle = category.subtitle
       ? `<span class="bk-cat-desc">${escapeHtml(category.subtitle)}</span>`
       : '';
+    const mobileMeta = `<span class="bk-cat-meta-mobile">${metaText}</span>`;
     const chosenNote = selectedService
       ? `<span class="bk-cat-chosen">Selected · ${escapeHtml(selectedService.name)}</span>`
       : '';
 
-    let rowIndex = 0;
-    const showSubheads = category.subgroups.length > 1;
+    const hasSubtabs = category.subgroups.length > 1;
+    const activeSubKey = defaultSubgroupKey(category, selectedId, focusGroup);
+    const subtabs = hasSubtabs
+      ? `<div class="bk-subtabs" role="group" aria-label="${escapeHtml(category.title)} sections">`
+        + category.subgroups.map((sub) => {
+          const active = sub.key === activeSubKey;
+          return `<button type="button" class="bk-subtab" data-subtab="${escapeHtml(sub.key)}" aria-pressed="${active ? 'true' : 'false'}">${escapeHtml(sub.label)}<span class="bk-subtab-count">${sub.services.length}</span></button>`;
+        }).join('')
+        + '</div>'
+      : '';
+
     const listMarkup = category.subgroups.map((sub) => {
-      const heading = showSubheads && sub.label
-        ? `<p class="bk-subhead">${escapeHtml(sub.label)}</p>`
-        : '';
-      const rows = sub.services.map((service) => card(service, service.service_id === selectedId, rowIndex++)).join('');
-      return `${heading}<div class="bk-card-grid">${rows}</div>`;
+      const hidden = hasSubtabs && sub.key !== activeSubKey ? ' hidden' : '';
+      const rows = sub.services.map((service, idx) => card(service, service.service_id === selectedId, idx)).join('');
+      return `<div class="bk-subpanel" data-subpanel="${escapeHtml(sub.key)}"${hidden}><div class="bk-card-grid">${rows}</div></div>`;
     }).join('');
 
     return `<section class="bk-group${isOpen ? ' is-open' : ''}${selectedService ? ' has-selected' : ''}" data-group="${key}" style="--bk-g: ${Math.min(groupIndex, 8)}">`
       + `<h3 class="bk-group-label" id="${headingId}">`
       + `<button type="button" class="bk-cat-trigger" data-group-toggle="${key}" aria-expanded="${isOpen ? 'true' : 'false'}" aria-controls="${panelId}">`
       + `<span class="bk-cat-num" aria-hidden="true">${numeral}</span>`
-      + `<span class="bk-cat-copy"><span class="bk-cat-title">${escapeHtml(category.title)}</span>${subtitle}${chosenNote}</span>`
+      + `<span class="bk-cat-copy"><span class="bk-cat-title">${escapeHtml(category.title)}</span>${subtitle}${mobileMeta}${chosenNote}</span>`
       + `<span class="bk-cat-right"><span class="bk-cat-meta">${metaText}</span>`
       + '<span class="bk-cat-icon" aria-hidden="true"><span></span><span></span></span></span>'
       + '</button></h3>'
       + `<div class="bk-cat-panel" id="${panelId}" role="region" aria-labelledby="${headingId}"${isOpen ? '' : ' inert'}>`
-      + `<div class="bk-cat-panel-inner">${listMarkup}</div>`
+      + `<div class="bk-cat-panel-inner">${subtabs}${listMarkup}</div>`
       + '</div></section>';
   }).join('');
 

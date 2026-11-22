@@ -164,7 +164,12 @@ export function buildApp(env = {}, deps = {}) {
           stale,
           groups,
           checkout: {
-            square: { application_id: config.squareApplicationId, location_id: config.squareLocationId, environment: config.squareEnvironment },
+            square: {
+              application_id: config.squareApplicationId,
+              location_id: config.squareLocationId,
+              environment: config.squareEnvironment,
+              ...(config.paymentsMockMode && config.environment !== 'production' ? { mock: true } : {})
+            },
             turnstile_site_key: config.turnstileSiteKey,
             policy_text: POLICY_TEXT,
             phone: config.studioPhone

@@ -131,6 +131,17 @@ test('categories use the exact website Services menu titles and sort treatments 
 
   // Lash Lift: base lift before lift + tinting.
   assert.ok(html.indexOf('svc_lash_lift"') < html.indexOf('svc_lash_lift_tinting"'));
+
+  // Multi-part categories render compact sub-tabs with only the first subpanel visible by default.
+  assert.match(html, /data-subtab="full-sets" aria-pressed="true"/);
+  assert.match(html, /data-subtab="refills" aria-pressed="false"/);
+  assert.match(html, /data-subpanel="full-sets"><div/);
+  assert.match(html, /data-subpanel="refills" hidden>/);
+
+  // Selecting a refill activates the refills subtab automatically.
+  const refillSelected = renderServices({ groups: GROUPS, selectedId: 'svc_classic_refill_2_weeks' });
+  assert.match(refillSelected, /data-subtab="refills" aria-pressed="true"/);
+  assert.match(refillSelected, /data-subpanel="refills"><div/);
 });
 
 test('the catalog-unavailable state offers the phone number', () => {

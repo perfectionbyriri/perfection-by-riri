@@ -30,10 +30,13 @@ if (app) {
     status: document.getElementById('bk-status'),
     alert: document.getElementById('bk-alert'),
     count: document.getElementById('bk-step-count'),
+    progressList: document.querySelector('.bk-progress'),
     progress: [...document.querySelectorAll('.bk-progress-item')],
     bar: document.getElementById('bk-bar'),
     barSummary: document.getElementById('bk-bar-summary'),
     barAction: document.getElementById('bk-bar-action'),
+    summaryCta: document.getElementById('bk-summary-cta'),
+    summaryAction: document.getElementById('bk-summary-action'),
     sheet: document.getElementById('bk-sheet'),
     sheetList: document.getElementById('bk-sheet-list'),
     summaryList: document.getElementById('bk-summary-list'),
@@ -96,11 +99,38 @@ if (app) {
   function updateProgress(step) {
     elements.count.textContent = `Step ${step} of 4 — ${STEP_NAMES[step - 1]}`;
     elements.progress.forEach((item, index) => {
-      if (index + 1 === step) item.setAttribute('aria-current', 'step');
+      const target = index + 1;
+      const done = target < step;
+      if (target === step) item.setAttribute('aria-current', 'step');
       else item.removeAttribute('aria-current');
-      item.classList.toggle('is-done', index + 1 < step);
+      item.classList.toggle('is-done', done);
+      if (done) {
+        item.setAttribute('role', 'button');
+        item.setAttribute('tabindex', '0');
+        item.dataset.gotoStep = String(target);
+      } else {
+        item.removeAttribute('role');
+        item.removeAttribute('tabindex');
+        delete item.dataset.gotoStep;
+      }
     });
   }
+
+  function navigateFromProgress(target) {
+    const stepNum = Number(target?.dataset.gotoStep);
+    if (stepNum >= 1 && stepNum < state.get().step && !state.get().booking) goTo(stepNum);
+  }
+
+  elements.progressList?.addEventListener('click', (event) => {
+    navigateFromProgress(event.target.closest('.bk-progress-item[data-goto-step]'));
+  });
+  elements.progressList?.addEventListener('keydown', (event) => {
+    if (event.key !== 'Enter' && event.key !== ' ') return;
+    const item = event.target.closest('.bk-progress-item[data-goto-step]');
+    if (!item) return;
+    event.preventDefault();
+    navigateFromProgress(item);
+  });
 
   function updateSummary() {
     const service = findService(state.get().serviceId);
@@ -118,9 +148,8 @@ if (app) {
     updateBar();
   }
 
-  // Mobile sticky bar (docs/booking/DESIGN_SPEC.md §5). It shows the choice so
-  // far and stands in for the step's own primary button, which CSS hides at
-  // 800px and below while the bar is up. Clicking it clicks that button.
+  // Mobile sticky bar and desktop sticky summary CTA stand in for the step's
+  // own primary button so Continue stays visible even on long lists.
   const primaryButton = () => elements.step.querySelector('.bk-pay')
     ?? elements.step.querySelector('.bk-actions .button-gold');
 
@@ -129,14 +158,25 @@ if (app) {
     const show = Boolean(serviceId) && step < 5 && !booking && Boolean(catalog);
     elements.bar.hidden = !show;
     document.documentElement.classList.toggle('bk-has-bar', show);
+    const button = primaryButton();
+    const label = (button?.dataset.label ?? button?.textContent ?? 'Continue').trim().toUpperCase();
+    const disabled = !button || button.disabled;
+    if (elements.summaryCta && elements.summaryAction) {
+      const showDesktopCta = show && step < 4;
+      elements.summaryCta.hidden = !showDesktopCta;
+      if (showDesktopCta) {
+        elements.summaryAction.textContent = label;
+        elements.summaryAction.disabled = disabled;
+      }
+    }
     if (!show) return;
     elements.barSummary.textContent = summaryLine({ service: findService(serviceId), week, startAt, startLabel });
-    const button = primaryButton();
-    elements.barAction.textContent = (button?.dataset.label ?? button?.textContent ?? 'Continue').trim().toUpperCase();
-    elements.barAction.disabled = !button || button.disabled;
+    elements.barAction.textContent = label;
+    elements.barAction.disabled = disabled;
   }
 
   elements.barAction.addEventListener('click', () => primaryButton()?.click());
+  elements.summaryAction?.addEventListener('click', () => primaryButton()?.click());
 
   // Step content is re-rendered in many places; one observer keeps the bar's
   // label and disabled state in step with whichever button is on screen.
@@ -232,6 +272,20 @@ if (app) {
     const groupToggle = event.target.closest('[data-group-toggle]');
     if (groupToggle) {
       toggleGroup(groupToggle.dataset.groupToggle);
+      return;
+    }
+    const subtab = event.target.closest('[data-subtab]');
+    if (subtab) {
+      const section = subtab.closest('.bk-group');
+      const targetKey = subtab.dataset.subtab;
+      if (section && targetKey) {
+        for (const tab of section.querySelectorAll('[data-subtab]')) {
+          tab.setAttribute('aria-pressed', tab === subtab ? 'true' : 'false');
+        }
+        for (const panel of section.querySelectorAll('[data-subpanel]')) {
+          panel.hidden = panel.dataset.subpanel !== targetKey;
+        }
+      }
       return;
     }
     const card = event.target.closest('.bk-card');
@@ -458,6 +512,18 @@ if (app) {
     if (!service.deposit.required) return;
     const square = state.get().catalog?.checkout?.square;
     try {
+      if (square?.mock && (!square.application_id || !square.location_id)) {
+        const box = elements.step.querySelector('#bk-card');
+        if (state.get().step !== 4 || !box) return;
+        box.innerHTML = '<div class="bk-mock-card"><span class="bk-mock-card-badge">Test mode</span>'
+          + '<span class="bk-mock-card-num">Simulated Visa &bull;&bull;&bull;&bull; 4242 &middot; 12/29</span>'
+          + '<span class="bk-mock-card-note">Mock payments are active locally — no real card will be charged.</span></div>';
+        widgets.card = {
+          tokenize: async () => ({ status: 'OK', token: 'cnon:card-nonce-ok' }),
+          destroy: () => { box.innerHTML = ''; }
+        };
+        return;
+      }
       if (!square?.application_id || !square?.location_id) throw new Error('square config missing');
       await loadScript(squareSdkUrl(square.environment));
       if (state.get().step !== 4 || !elements.step.querySelector('#bk-card')) return;
@@ -607,7 +673,14 @@ if (app) {
     hideBanner();
     elements.count.textContent = 'Booking confirmed';
     if (result.deposit?.status === 'captured') elements.summary.deposit.textContent = `${formatMoney(result.deposit.total_cents)} paid`;
-    elements.progress.forEach((item) => { item.removeAttribute('aria-current'); item.classList.add('is-done'); });
+    if (elements.summaryCta) elements.summaryCta.hidden = true;
+    elements.progress.forEach((item) => {
+      item.removeAttribute('aria-current');
+      item.removeAttribute('role');
+      item.removeAttribute('tabindex');
+      delete item.dataset.gotoStep;
+      item.classList.add('is-done');
+    });
     elements.step.innerHTML = renderConfirmation({
       result, firstName: state.get().details.first_name, email: state.get().details.email,
       timeLabel, policyText: state.get().catalog?.checkout?.policy_text
