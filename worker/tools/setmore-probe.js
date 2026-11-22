@@ -5,7 +5,8 @@
 //   2. What do the real v2 responses look like (field names, slot format)?
 //
 // Safety rules:
-//   - GET requests only. Never calls /customers or /bookings.
+//   - GET requests only. Never calls /customers. Reads bookings only through
+//     GET /bookings/staffs/{id} and reports status, count and type schema only.
 //   - The report holds type schemas and allowlisted, non-personal values only.
 //     It runs in a public repository's Actions log, so tokens, emails, phones
 //     and unknown string values are always redacted.
@@ -23,12 +24,14 @@ const ARRAY_SAMPLE = 3;
 
 const ID_KEYS = new Set([
   'id', 'key', 'account_id', 'provider_id', 'staff_id', 'service_id', 'category_id',
-  'user_id', 'staff_ids', 'staff_keys', 'service_ids'
+  'user_id', 'staff_ids', 'staff_keys', 'service_ids', 'provider_ids', 'category_ids'
 ]);
 const VALUE_KEYS = new Set([
-  'name', 'service_name', 'category_name', 'title', 'first_name', 'duration',
+  // Person names (first_name, last_name) are deliberately absent.
+  'name', 'service_name', 'category_name', 'title', 'duration',
   'duration_minutes', 'cost', 'price', 'currency', 'type', 'status', 'token_type',
-  'expires_in', 'timezone', 'start_at', 'end_at', 'start_time', 'end_time', 'slot'
+  'expires_in', 'timezone', 'start_at', 'end_at', 'start_time', 'end_time', 'slot',
+  'visibility'
 ]);
 const SAFE_ID = /^[A-Za-z0-9_\-:.]{1,128}$/;
 const PHONE_LIKE = /^\+?[\d\s().-]{7,}$/;
@@ -108,12 +111,12 @@ function localMidnight(utcDate) {
   return `${date}T00:00:00${midnightOffset(year, month, day)}`;
 }
 
-export function studioWeekAfter(now) {
+export function studioWeekAfter(now, offsetWeeks = 0) {
   const { year, month, day } = studioDateParts(now);
   const today = new Date(Date.UTC(year, month - 1, day));
   const daysToMonday = ((1 - today.getUTCDay() + 7) % 7) || 7;
   const start = new Date(today);
-  start.setUTCDate(start.getUTCDate() + daysToMonday);
+  start.setUTCDate(start.getUTCDate() + daysToMonday + 7 * offsetWeeks);
   const end = new Date(start);
   end.setUTCDate(end.getUTCDate() + 7);
   return { startAt: localMidnight(start), endAt: localMidnight(end) };
@@ -150,8 +153,38 @@ function summarize(result) {
   return summary;
 }
 
-function firstItem(body) {
-  return Array.isArray(body?.data) ? body.data[0] : undefined;
+function listOf(body) {
+  return Array.isArray(body?.data) ? body.data : [];
+}
+
+function countBy(items, pick) {
+  const counts = {};
+  for (const item of items) {
+    for (const value of pick(item)) {
+      if (typeof value === 'string' && SAFE_ID.test(value)) counts[value] = (counts[value] ?? 0) + 1;
+    }
+  }
+  return counts;
+}
+
+function visibilityCounts(items) {
+  return countBy(items, (item) => [item?.visibility]);
+}
+
+function summarizeSlotWindow(result, window) {
+  const days = result.body?.data?.days;
+  const entries = days && typeof days === 'object' ? Object.entries(days) : [];
+  const nonEmpty = entries.filter(([, slots]) => Array.isArray(slots) && slots.length).sort(([a], [b]) => a.localeCompare(b));
+  const summary = { start_at: window.startAt, end_at: window.endAt, status: result.status, ok: result.ok };
+  if (result.error) summary.error = result.error;
+  summary.day_keys = entries.map(([date]) => date).filter((date) => /^\d{4}-\d{2}-\d{2}$/.test(date)).sort();
+  summary.day_count = entries.length;
+  summary.slot_count = entries.reduce((total, [, slots]) => total + (Array.isArray(slots) ? slots.length : 0), 0);
+  summary.first_non_empty_day = nonEmpty.length
+    ? { date: nonEmpty[0][0], sample: redact(nonEmpty[0][1], 'slot'), element_schema: schemaOf(nonEmpty[0][1][0]) }
+    : null;
+  if (!entries.length) summary.schema = schemaOf(result.body);
+  return summary;
 }
 
 function findAccountId(tokenData, staff, service) {
@@ -203,29 +236,68 @@ export async function runProbe({ env, fetch, now = () => new Date(), log = conso
     report.v2.services = summarize(services);
     report.v2.categories = summarize(categories);
 
-    const firstStaff = firstItem(staff.body);
-    const firstService = firstItem(services.body);
-    const account = findAccountId(tokenData, firstStaff, firstService);
-    const window = studioWeekAfter(now());
-    const query = {
-      provider_id: firstStaff?.id ?? firstStaff?.key ?? '',
-      duration: findDuration(firstService),
-      start_at: window.startAt,
-      end_at: window.endAt,
-      timezone: STUDIO_TIMEZONE,
-      slot_limit: 5
+    const staffList = listOf(staff.body);
+    const serviceList = listOf(services.body);
+    const categoryList = listOf(categories.body);
+    report.v2.services.summary = {
+      count: serviceList.length,
+      services_per_provider: countBy(serviceList, (item) => (Array.isArray(item?.provider_ids) ? item.provider_ids : [])),
+      visibility_counts: visibilityCounts(serviceList)
     };
-    if (account.value !== undefined) query.account_id = account.value;
-    const slots = await getJson(fetch, `${V2_BASE}/slots`, query, auth);
-    report.v2.slots = {
-      ...summarize(slots),
-      account_id_source: account.source,
-      query: redact({ ...query })
-    };
-    for (const [name, result] of Object.entries({ staff, services, categories, slots })) {
+    report.v2.categories.summary = { count: categoryList.length, visibility_counts: visibilityCounts(categoryList) };
+
+    const account = findAccountId(tokenData, staffList[0], serviceList[0]);
+    report.v2.account_id_source = account.source;
+    const windows = [studioWeekAfter(now(), 0), studioWeekAfter(now(), 1)];
+    const staffIds = staffList
+      .map((item) => item?.id ?? item?.key)
+      .filter((id) => typeof id === 'string' && SAFE_ID.test(id))
+      .slice(0, 3);
+
+    const slotResults = [];
+    report.v2.slots_by_staff = [];
+    for (const providerId of staffIds) {
+      const entry = { provider_id: providerId, windows: [] };
+      for (const window of windows) {
+        const query = {
+          provider_id: providerId,
+          duration: 60,
+          start_at: window.startAt,
+          end_at: window.endAt,
+          timezone: STUDIO_TIMEZONE,
+          slot_limit: 5
+        };
+        if (account.value !== undefined) query.account_id = account.value;
+        const result = await getJson(fetch, `${V2_BASE}/slots`, query, auth);
+        slotResults.push(result);
+        entry.windows.push(summarizeSlotWindow(result, window));
+        log.log(`v2 slots ${providerId} ${window.startAt}: ${result.status ?? result.error}`);
+      }
+      report.v2.slots_by_staff.push(entry);
+    }
+
+    // Bookings hold customer data: report status, count and type schema only.
+    report.v2.bookings_by_staff = [];
+    for (const providerId of staffIds) {
+      const result = await getJson(
+        fetch,
+        `${V2_BASE}/bookings/staffs/${encodeURIComponent(providerId)}`,
+        { start_at: windows[0].startAt, end_at: windows[0].endAt, limit: 5 },
+        auth
+      );
+      const entry = { provider_id: providerId, url: result.url, status: result.status, ok: result.ok };
+      if (result.error) entry.error = result.error;
+      entry.count = listOf(result.body).length;
+      entry.has_cursor = Boolean(result.body?.cursor);
+      entry.schema = schemaOf(result.body);
+      report.v2.bookings_by_staff.push(entry);
+      log.log(`v2 bookings by staff ${providerId}: ${result.status ?? result.error}`);
+    }
+
+    for (const [name, result] of Object.entries({ staff, services, categories })) {
       log.log(`v2 ${name}: ${result.status ?? result.error}`);
     }
-    v2ReadsOk = [staff, services, categories, slots].every((result) => result.ok);
+    v2ReadsOk = [staff, services, categories, ...slotResults].every((result) => result.ok) && slotResults.length > 0;
   }
 
   const v1Token = await getJson(fetch, V1_TOKEN_URL, { refreshToken });
