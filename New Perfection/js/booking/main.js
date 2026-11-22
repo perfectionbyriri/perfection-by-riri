@@ -5,6 +5,10 @@
 // their markup, wires events, moves focus and keeps the summary current.
 
 import { createApi } from './api.js';
+import {
+  TURNSTILE_URL, buildAppointmentBody, createSubmitGuard, ensureIdempotencyKey, formatMoney,
+  mapError, renderReview, squareSdkUrl
+} from './checkout.js';
 import { formatDuration, formatPrice, renderCatalogUnavailable, renderServices } from './render-services.js';
 import { defaultDay, renderSlotsError, renderSlotsLoading, renderWeek } from './render-slots.js';
 import { renderDetails, renderErrorSummary } from './render-details.js';
@@ -35,8 +39,10 @@ if (app) {
   const state = createState({
     step: 1, catalog: null, serviceId: null, focusGroup: null,
     week: null, weekStart: null, selectedDate: null, startAt: null, startLabel: null,
-    details: {}
+    details: {}, idempotencyKey: null, booking: null
   });
+  const guard = createSubmitGuard();
+  const widgets = { card: null, turnstileId: null };
   const deviceTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
   const findService = (id) => {
@@ -144,6 +150,12 @@ if (app) {
     else if (action === 'back' && step > 1) goTo(step - 1);
     else if (action === 'prev-week' || action === 'next-week') loadWeek(target.dataset.week, { focusSelector: `[data-action="${action}"]` });
     else if (action === 'retry-week') loadWeek(state.get().weekStart);
+  });
+
+  elements.banner.addEventListener('click', (event) => {
+    if (event.target.closest('[data-action="retry-submit"]')) {
+      elements.step.querySelector('#bk-checkout')?.requestSubmit();
+    }
   });
 
   // Step 2 · date and time.
@@ -272,6 +284,7 @@ if (app) {
   });
 
   elements.step.addEventListener('submit', (event) => {
+    if (event.target.id !== 'bk-details') return;
     event.preventDefault();
     if (state.get().step !== 3) return;
     const details = readDetails();
@@ -290,8 +303,239 @@ if (app) {
     goTo(4);
   });
 
+  // Step 4 · deposit and confirm. Card data stays in Square's iframe; the
+  // page only receives a one-time token (PCI SAQ A).
+  const loadedScripts = new Map();
+  function loadScript(src) {
+    if (!loadedScripts.has(src)) {
+      loadedScripts.set(src, new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = src;
+        script.async = true;
+        script.onload = resolve;
+        script.onerror = () => { loadedScripts.delete(src); reject(new Error(`load failed: ${src}`)); };
+        document.head.append(script);
+      }));
+    }
+    return loadedScripts.get(src);
+  }
+
+  // D§4 step 4: Jost is not available inside Square's iframe, so the card
+  // field falls back to a system sans with the site's colours.
+  const CARD_STYLE = {
+    input: { backgroundColor: '#f5f2ef', color: '#262620', fontSize: '16px', fontFamily: 'sans-serif' },
+    'input::placeholder': { color: '#6d6a62' },
+    'input.is-error': { color: '#8c2f23' },
+    '.input-container': { borderColor: '#6d6a62', borderRadius: '0px' },
+    '.input-container.is-focus': { borderColor: '#262620' },
+    '.input-container.is-error': { borderColor: '#8c2f23' },
+    '.message-text': { color: '#6d6a62' },
+    '.message-text.is-error': { color: '#8c2f23' },
+    '.message-icon': { color: '#6d6a62' },
+    '.message-icon.is-error': { color: '#8c2f23' }
+  };
+
+  const UNAVAILABLE_HTML = '<p>Online booking is taking a short break. Please call <a href="tel:+14258450045">(425) 845 0045</a> and we&rsquo;ll book you in.</p>';
+
+  function stepTimeLabel() {
+    const { startAt, startLabel, week } = state.get();
+    const day = week?.days.find((item) => startAt && startAt.startsWith(item.date));
+    if (!day) return startLabel ?? '';
+    const date = new Date(`${day.date}T12:00:00Z`).toLocaleDateString('en-US', { month: 'long', day: 'numeric', timeZone: 'UTC' });
+    return `${day.weekday}, ${date} · ${startLabel}`;
+  }
+
+  async function mountCard(service) {
+    if (!service.deposit.required) return;
+    const square = state.get().catalog?.checkout?.square;
+    try {
+      if (!square?.application_id || !square?.location_id) throw new Error('square config missing');
+      await loadScript(squareSdkUrl(square.environment));
+      if (state.get().step !== 4 || !elements.step.querySelector('#bk-card')) return;
+      const payments = window.Square.payments(square.application_id, square.location_id);
+      let card;
+      try {
+        card = await payments.card({ style: CARD_STYLE });
+      } catch {
+        card = await payments.card(); // An unsupported style key must not block payment.
+      }
+      if (state.get().step !== 4 || !elements.step.querySelector('#bk-card')) {
+        card.destroy?.();
+        return;
+      }
+      await card.attach('#bk-card');
+      widgets.card = card;
+    } catch {
+      showBanner(UNAVAILABLE_HTML);
+      setControlsLocked(true, { keepBack: true });
+    }
+  }
+
+  async function mountTurnstile() {
+    const siteKey = state.get().catalog?.checkout?.turnstile_site_key;
+    if (!siteKey) return; // Mock mode without Turnstile; the server decides.
+    try {
+      await loadScript(TURNSTILE_URL);
+      const box = elements.step.querySelector('#bk-turnstile');
+      if (state.get().step !== 4 || !box) return;
+      widgets.turnstileId = window.turnstile.render(box, { sitekey: siteKey, theme: 'light', size: 'flexible', action: 'booking' });
+    } catch {
+      showBanner(UNAVAILABLE_HTML);
+      setControlsLocked(true, { keepBack: true });
+    }
+  }
+
+  function unmountWidgets() {
+    try { widgets.card?.destroy?.(); } catch { /* already gone */ }
+    try { if (widgets.turnstileId !== null) window.turnstile?.remove(widgets.turnstileId); } catch { /* already gone */ }
+    widgets.card = null;
+    widgets.turnstileId = null;
+  }
+
+  function resetTurnstile() {
+    try { if (widgets.turnstileId !== null) window.turnstile?.reset(widgets.turnstileId); } catch { /* reloads on next mount */ }
+  }
+
+  function setControlsLocked(lockedNow, { keepBack = false } = {}) {
+    for (const control of elements.step.querySelectorAll('button, input, textarea')) {
+      if (keepBack && control.dataset.action === 'back') continue;
+      control.disabled = lockedNow;
+    }
+  }
+
+  function setPayBusy(busyNow) {
+    const button = elements.step.querySelector('.bk-pay');
+    if (!button) return;
+    button.textContent = busyNow ? 'Booking…' : button.dataset.label;
+    button.setAttribute('aria-busy', busyNow ? 'true' : 'false');
+    elements.step.setAttribute('aria-busy', busyNow ? 'true' : 'false');
+  }
+
+  function showCardError(message) {
+    const error = elements.step.querySelector('#bk-card-error');
+    if (!error) return;
+    error.textContent = message || '';
+    error.hidden = !message;
+  }
+
+  function renderStep4({ focus = false } = {}) {
+    const service = findService(state.get().serviceId);
+    state.set({ idempotencyKey: ensureIdempotencyKey(state.get().idempotencyKey) });
+    elements.step.innerHTML = '<h2 class="bk-step-title" tabindex="-1">Deposit &amp; confirm</h2>'
+      + renderReview({ service, details: state.get().details, timeLabel: stepTimeLabel() })
+      + '<div class="bk-actions"><button type="button" class="button button-outline" data-action="back">Back</button></div>';
+    elements.step.setAttribute('aria-busy', 'false');
+    if (focus) focusTitle();
+    mountTurnstile();
+    mountCard(service);
+  }
+
+  async function tokenizeCard(service) {
+    if (!service.deposit.required) return { ok: true, payment: null };
+    if (!widgets.card) return { ok: false, message: 'The card form is still loading. Please try again in a moment.' };
+    const { details } = state.get();
+    const result = await widgets.card.tokenize({
+      amount: formatMoney(service.deposit.total_cents).slice(1),
+      currencyCode: 'USD',
+      intent: 'CHARGE',
+      customerInitiated: true,
+      sellerKeyedIn: false,
+      billingContact: {
+        givenName: details.first_name?.trim(),
+        familyName: details.last_name?.trim(),
+        email: details.email?.trim(),
+        phone: details.phone?.replace(/\D/g, '')
+      }
+    });
+    if (result?.status !== 'OK' || !result.token) return { ok: false, message: 'Please check your card details.' };
+    return { ok: true, payment: { source_id: result.token, verification_token: result.verificationToken } };
+  }
+
+  function showSubmitError(mapped) {
+    if (mapped.newKey) state.set({ idempotencyKey: null });
+    if (mapped.step === 2) {
+      const week = mapped.refreshedWeek;
+      state.set({ startAt: null, startLabel: null, ...(week ? { week, weekStart: week.week_start, selectedDate: defaultDay(week) } : { week: null }) });
+      unmountWidgets();
+      goTo(2);
+      updateSummary();
+      showBanner(`<p>${mapped.message}</p>`);
+      return;
+    }
+    if (mapped.step === 3) {
+      unmountWidgets();
+      goTo(3);
+      for (const [name, message] of Object.entries(mapped.fieldErrors ?? {})) setFieldError(name, message);
+      elements.step.querySelector('.bk-error-slot').innerHTML = renderErrorSummary(mapped.fieldErrors ?? {});
+      elements.alert.textContent = mapped.message;
+      elements.step.querySelector(`#bk-${FIELD_ORDER.find((name) => mapped.fieldErrors?.[name])}`)?.focus();
+      return;
+    }
+    if (mapped.inline) {
+      showCardError(mapped.message);
+      elements.alert.textContent = mapped.message;
+      try { widgets.card?.focus?.('cardNumber'); } catch { /* the iframe keeps its own focus */ }
+      return;
+    }
+    const retry = mapped.retry ? '<button type="button" class="button button-outline" data-action="retry-submit">Try again</button>' : '';
+    showBanner(`<p>${mapped.message.replace('(425) 845 0045', '<a href="tel:+14258450045">(425) 845 0045</a>')}</p>${retry}`);
+  }
+
+  function showBooked(data) {
+    // Task 19 replaces this with the full confirmation view.
+    state.set({ booking: data });
+    unmountWidgets();
+    elements.step.innerHTML = `<h2 class="bk-step-title" tabindex="-1">You&rsquo;re booked</h2>`;
+    focusTitle();
+  }
+
+  elements.step.addEventListener('submit', async (event) => {
+    if (event.target.id !== 'bk-checkout') return;
+    event.preventDefault();
+    if (state.get().step !== 4 || !guard.tryStart()) return; // A second click while booking is ignored.
+    hideBanner();
+    showCardError('');
+    setControlsLocked(true);
+    setPayBusy(true);
+    let mapped = null;
+    try {
+      const service = findService(state.get().serviceId);
+      const card = await tokenizeCard(service);
+      if (!card.ok) {
+        mapped = { step: 4, inline: true, message: card.message, newKey: false };
+        return;
+      }
+      const turnstile = widgets.turnstileId !== null ? window.turnstile?.getResponse(widgets.turnstileId) ?? '' : '';
+      state.set({ idempotencyKey: ensureIdempotencyKey(state.get().idempotencyKey) });
+      const body = buildAppointmentBody({ ...state.get(), service }, { turnstile, payment: card.payment });
+      const result = await api.createAppointment(body);
+      if (result.ok) {
+        guard.lock();
+        showBooked(result.data);
+        return;
+      }
+      resetTurnstile(); // A Turnstile token is single use.
+      mapped = mapError({ ...(result.data ?? {}), error: result.error });
+      if (mapped.locked) guard.lock();
+    } catch {
+      resetTurnstile();
+      mapped = mapError({ error: { code: 'NETWORK' } });
+    } finally {
+      guard.finish();
+      if (state.get().step === 4 && !state.get().booking) {
+        setPayBusy(false);
+        setControlsLocked(guard.locked);
+      }
+      if (mapped) showSubmitError(mapped);
+    }
+  });
+
   function goTo(step) {
-    if (step < 1 || step > 3) return; // Step 4 arrives with Task 18.
+    if (step < 1 || step > 4 || guard.busy) return;
+    if (state.get().step === 4 && step !== 4) {
+      unmountWidgets();
+      state.set({ idempotencyKey: null }); // A changed choice is a new attempt.
+    }
     hideBanner();
     state.set({ step });
     updateProgress(step);
@@ -301,6 +545,10 @@ if (app) {
     }
     if (step === 3) {
       renderStep3({ focus: true });
+      return;
+    }
+    if (step === 4) {
+      renderStep4({ focus: true });
       return;
     }
     renderStep2({ focus: true });

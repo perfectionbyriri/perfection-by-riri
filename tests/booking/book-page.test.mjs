@@ -79,6 +79,30 @@ test('_headers sets a Content-Security-Policy for /book/* with the Square, Turns
   assert.deepEqual(csp['object-src'], ["'none'"]);
 });
 
+// Hosts from Square's Web Payments CSP page (sandbox and production, both
+// the SDK block and the PCI vendor-script block) and Cloudflare's Turnstile
+// CSP page, checked 2026-11-22:
+// https://developer.squareup.com/docs/web-payments/content-security-policy
+// https://developers.cloudflare.com/turnstile/reference/content-security-policy/
+test('the CSP covers every host Square Web Payments (sandbox + prod) and Turnstile document', () => {
+  const csp = cspDirectives(headersFor('/book/*')['content-security-policy']);
+  const required = {
+    'script-src': ['https://web.squarecdn.com', 'https://sandbox.web.squarecdn.com', 'https://challenges.cloudflare.com'],
+    'frame-src': ['https://web.squarecdn.com', 'https://sandbox.web.squarecdn.com', 'https://challenges.cloudflare.com'],
+    'style-src': ['https://web.squarecdn.com', 'https://sandbox.web.squarecdn.com'],
+    'font-src': ['https://square-fonts-production-f.squarecdn.com', 'https://d1g145x70srn7h.cloudfront.net'],
+    'connect-src': [
+      'https://web.squarecdn.com', 'https://sandbox.web.squarecdn.com',
+      'https://pci-connect.squareup.com', 'https://pci-connect.squareupsandbox.com',
+      'https://o160250.ingest.sentry.io'
+    ]
+  };
+  for (const [directive, hosts] of Object.entries(required)) {
+    for (const host of hosts) assert.ok(csp[directive]?.includes(host), `${directive} ${host}`);
+  }
+  assert.ok(!Object.values(csp).flat().some((source) => source.includes('*.squarecdn.com')), 'no Square wildcard');
+});
+
 test('the CSP lets the existing Google Analytics and Google Ads tags send their hits', () => {
   // Hosts the live tags contacted in a wrangler dev run on 2026-11-22 (all were blocked before).
   const csp = cspDirectives(headersFor('/book/*')['content-security-policy']);
