@@ -7,7 +7,9 @@
 import { createApi } from './api.js';
 import { formatDuration, formatPrice, renderCatalogUnavailable, renderServices } from './render-services.js';
 import { defaultDay, renderSlotsError, renderSlotsLoading, renderWeek } from './render-slots.js';
+import { renderDetails, renderErrorSummary } from './render-details.js';
 import { createState, parseDeepLink, resolveDeepLink } from './state.js';
+import { FIELD_ORDER, formatPhone, validateDetails } from './validate.js';
 
 const STEP_NAMES = ['Service', 'Date & time', 'Your details', 'Deposit & confirm'];
 
@@ -21,6 +23,7 @@ if (app) {
     step: document.getElementById('bk-step'),
     banner: document.getElementById('bk-banner'),
     status: document.getElementById('bk-status'),
+    alert: document.getElementById('bk-alert'),
     count: document.getElementById('bk-step-count'),
     progress: [...document.querySelectorAll('.bk-progress-item')],
     summary: {
@@ -31,7 +34,8 @@ if (app) {
   };
   const state = createState({
     step: 1, catalog: null, serviceId: null, focusGroup: null,
-    week: null, weekStart: null, selectedDate: null, startAt: null, startLabel: null
+    week: null, weekStart: null, selectedDate: null, startAt: null, startLabel: null,
+    details: {}
   });
   const deviceTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
@@ -134,8 +138,10 @@ if (app) {
     }
     const target = event.target.closest('[data-action]');
     const action = target?.dataset.action;
-    if (action === 'continue' && state.get().step === 1 && state.get().serviceId) goTo(2);
-    else if (action === 'back' && state.get().step === 2) goTo(1);
+    const { step } = state.get();
+    if (action === 'continue' && step === 1 && state.get().serviceId) goTo(2);
+    else if (action === 'continue' && step === 2 && state.get().startAt) goTo(3);
+    else if (action === 'back' && step > 1) goTo(step - 1);
     else if (action === 'prev-week' || action === 'next-week') loadWeek(target.dataset.week, { focusSelector: `[data-action="${action}"]` });
     else if (action === 'retry-week') loadWeek(state.get().weekStart);
   });
@@ -207,13 +213,94 @@ if (app) {
     announce(`${label.trim()} selected.`);
   }
 
+  // Step 3 · your details. Values live in state.details, so going back to
+  // step 2 (or a slot conflict at submit) never clears what was typed.
+  function readDetails() {
+    const form = elements.step.querySelector('#bk-details');
+    if (!form) return state.get().details;
+    const details = {};
+    for (const name of FIELD_ORDER) {
+      const input = form.elements[name];
+      details[name] = input.type === 'checkbox' ? input.checked : input.value;
+    }
+    return details;
+  }
+
+  function setFieldError(name, message) {
+    const input = elements.step.querySelector(`#bk-${name}`);
+    const error = elements.step.querySelector(`#bk-${name}-error`);
+    if (!input || !error) return;
+    error.textContent = message || '';
+    error.hidden = !message;
+    if (message) {
+      input.setAttribute('aria-invalid', 'true');
+      input.setAttribute('aria-describedby', `bk-${name}-error`);
+    } else {
+      input.removeAttribute('aria-invalid');
+      input.removeAttribute('aria-describedby');
+    }
+  }
+
+  function renderStep3({ focus = false } = {}) {
+    const policyText = state.get().catalog?.checkout?.policy_text;
+    elements.step.innerHTML = '<h2 class="bk-step-title" tabindex="-1">Your details</h2>'
+      + renderDetails({ values: state.get().details, errors: {}, policyText })
+      + '<div class="bk-actions"><button type="button" class="button button-outline" data-action="back">Back</button>'
+      + '<button type="submit" class="button button-gold" form="bk-details">Continue</button></div>';
+    elements.step.setAttribute('aria-busy', 'false');
+    if (focus) focusTitle();
+  }
+
+  // Errors appear after a field is left, or on submit (D§4 step 3).
+  elements.step.addEventListener('focusout', (event) => {
+    const name = event.target.name;
+    if (state.get().step !== 3 || !FIELD_ORDER.includes(name)) return;
+    if (name === 'phone') event.target.value = formatPhone(event.target.value);
+    const details = readDetails();
+    state.set({ details });
+    setFieldError(name, validateDetails(details).errors[name]);
+  });
+
+  elements.step.addEventListener('input', (event) => {
+    if (state.get().step !== 3 || !FIELD_ORDER.includes(event.target.name)) return;
+    const details = readDetails();
+    state.set({ details });
+    // Clear a shown error as soon as the value becomes valid.
+    if (event.target.hasAttribute('aria-invalid')) {
+      setFieldError(event.target.name, validateDetails(details).errors[event.target.name]);
+    }
+  });
+
+  elements.step.addEventListener('submit', (event) => {
+    event.preventDefault();
+    if (state.get().step !== 3) return;
+    const details = readDetails();
+    state.set({ details });
+    const { valid, errors } = validateDetails(details);
+    for (const name of FIELD_ORDER) setFieldError(name, errors[name]);
+    const slot = elements.step.querySelector('.bk-error-slot');
+    slot.innerHTML = renderErrorSummary(errors);
+    if (!valid) {
+      const count = Object.keys(errors).length;
+      elements.alert.textContent = `Please check ${count === 1 ? 'one detail' : `${count} details`} before you continue.`;
+      elements.step.querySelector(`#bk-${FIELD_ORDER.find((name) => errors[name])}`)?.focus();
+      return;
+    }
+    elements.alert.textContent = '';
+    goTo(4);
+  });
+
   function goTo(step) {
-    if (step !== 1 && step !== 2) return; // Steps 3 and 4 arrive with Tasks 17 and 18.
+    if (step < 1 || step > 3) return; // Step 4 arrives with Task 18.
     hideBanner();
     state.set({ step });
     updateProgress(step);
     if (step === 1) {
       renderStep1({ focus: true });
+      return;
+    }
+    if (step === 3) {
+      renderStep3({ focus: true });
       return;
     }
     renderStep2({ focus: true });
