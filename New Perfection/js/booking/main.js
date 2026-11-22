@@ -13,7 +13,7 @@ import { buildIcs, confirmedPath, fireConfirmation, renderConfirmation, trackFun
 import { formatDuration, formatPrice, renderCatalogUnavailable, renderServices } from './render-services.js';
 import { defaultDay, renderSlotsError, renderSlotsLoading, renderWeek } from './render-slots.js';
 import { renderDetails, renderErrorSummary } from './render-details.js';
-import { createState, parseDeepLink, resolveDeepLink } from './state.js';
+import { createState, parseDeepLink, resolveDeepLink, stepFromHistory, summaryLine } from './state.js';
 import { FIELD_ORDER, formatPhone, validateDetails } from './validate.js';
 
 const STEP_NAMES = ['Service', 'Date & time', 'Your details', 'Deposit & confirm'];
@@ -31,6 +31,12 @@ if (app) {
     alert: document.getElementById('bk-alert'),
     count: document.getElementById('bk-step-count'),
     progress: [...document.querySelectorAll('.bk-progress-item')],
+    bar: document.getElementById('bk-bar'),
+    barSummary: document.getElementById('bk-bar-summary'),
+    barAction: document.getElementById('bk-bar-action'),
+    sheet: document.getElementById('bk-sheet'),
+    sheetList: document.getElementById('bk-sheet-list'),
+    summaryList: document.getElementById('bk-summary-list'),
     summary: {
       service: document.querySelector('[data-summary="service"]'),
       time: document.querySelector('[data-summary="time"]'),
@@ -89,7 +95,41 @@ if (app) {
     elements.summary.deposit.textContent = service
       ? (service.deposit.required ? `${formatPrice(service.deposit.total_cents)} due today` : 'No deposit needed')
       : '—';
+    updateBar();
   }
+
+  // Mobile sticky bar (docs/booking/DESIGN_SPEC.md §5). It shows the choice so
+  // far and stands in for the step's own primary button, which CSS hides at
+  // 800px and below while the bar is up. Clicking it clicks that button.
+  const primaryButton = () => elements.step.querySelector('.bk-pay')
+    ?? elements.step.querySelector('.bk-actions .button-gold');
+
+  function updateBar() {
+    const { serviceId, step, booking, catalog, week, startAt, startLabel } = state.get();
+    const show = Boolean(serviceId) && step < 5 && !booking && Boolean(catalog);
+    elements.bar.hidden = !show;
+    document.documentElement.classList.toggle('bk-has-bar', show);
+    if (!show) return;
+    elements.barSummary.textContent = summaryLine({ service: findService(serviceId), week, startAt, startLabel });
+    const button = primaryButton();
+    elements.barAction.textContent = (button?.dataset.label ?? button?.textContent ?? 'Continue').trim().toUpperCase();
+    elements.barAction.disabled = !button || button.disabled;
+  }
+
+  elements.barAction.addEventListener('click', () => primaryButton()?.click());
+
+  // Step content is re-rendered in many places; one observer keeps the bar's
+  // label and disabled state in step with whichever button is on screen.
+  new MutationObserver(() => updateBar()).observe(elements.step, {
+    childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ['disabled']
+  });
+
+  elements.barSummary.addEventListener('click', () => {
+    elements.sheetList.innerHTML = elements.summaryList.innerHTML;
+    if (!elements.sheet.open) elements.sheet.showModal();
+  });
+  document.getElementById('bk-sheet-close').addEventListener('click', () => elements.sheet.close());
+  elements.sheet.addEventListener('click', (event) => { if (event.target === elements.sheet) elements.sheet.close(); });
 
   function focusTitle() {
     const title = elements.step.querySelector('.bk-step-title');
@@ -126,6 +166,18 @@ if (app) {
     updateSummary();
     trackFunnel('booking_view_service', { service_id: id }, window.gtag);
     announce(`${service.name} selected.`);
+    scheduleAutoAdvance(id);
+  }
+
+  // On small screens a tap on a service card moves on by itself after 250ms
+  // (at once with reduced motion). Desktop keeps the explicit Continue.
+  let advanceTimer = null;
+  function scheduleAutoAdvance(id) {
+    clearTimeout(advanceTimer);
+    if (!window.matchMedia('(max-width: 800px)').matches) return;
+    const go = () => { if (state.get().step === 1 && state.get().serviceId === id) goTo(2); };
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) go();
+    else advanceTimer = setTimeout(go, 250);
   }
 
   elements.step.addEventListener('click', (event) => {
@@ -574,8 +626,14 @@ if (app) {
     }
   });
 
-  function goTo(step) {
+  // Each step pushes `{ step }` onto history so the browser's back button
+  // walks the steps. `push: false` is used when history already moved.
+  function goTo(step, { push = true } = {}) {
     if (step < 1 || step > 4 || guard.busy) return;
+    clearTimeout(advanceTimer);
+    if (push && step !== state.get().step) {
+      try { window.history.pushState({ step }, '', window.location.href); } catch { /* history is optional */ }
+    }
     if (state.get().step === 4 && step !== 4) {
       unmountWidgets();
       state.set({ idempotencyKey: null }); // A changed choice is a new attempt.
@@ -599,6 +657,21 @@ if (app) {
     if (!state.get().week) loadWeek(state.get().weekStart);
   }
 
+  window.addEventListener('popstate', (event) => {
+    const { booking } = state.get();
+    if (booking) {
+      // The confirmation stays: going back must not reopen the paid form.
+      try { window.history.pushState({ step: 5 }, '', confirmedPath(booking.booking.id)); } catch { /* ignore */ }
+      return;
+    }
+    if (guard.busy || !state.get().catalog) return;
+    const { step } = stepFromHistory(event.state, state.get());
+    if (step !== (event.state?.step ?? 1)) {
+      try { window.history.replaceState({ step }, '', window.location.href); } catch { /* ignore */ }
+    }
+    goTo(step, { push: false });
+  });
+
   async function start() {
     const result = await api.fetchCatalog();
     if (!result.ok) {
@@ -613,6 +686,7 @@ if (app) {
     state.set({ serviceId: link.serviceId, focusGroup: link.group });
     if (link.serviceId) trackFunnel('booking_view_service', { service_id: link.serviceId }, window.gtag);
     updateSummary();
+    try { window.history.replaceState({ step: 1 }, '', window.location.href); } catch { /* ignore */ }
     renderStep1();
     if (link.step === 2) goTo(2);
     announce('Services loaded.');

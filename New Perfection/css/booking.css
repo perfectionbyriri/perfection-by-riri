@@ -648,3 +648,71 @@
   }
   .bk-days li { scroll-snap-align: start; }
 }
+
+/* Mobile sticky bar and summary sheet (docs/booking/DESIGN_SPEC.md §5).
+   The bar sits under the content on screens up to 800px once a service is
+   chosen. Its button stands in for the step's own primary button. */
+.bk-bar {
+  position: fixed;
+  inset: auto 0 0;
+  z-index: 40;
+  display: grid;
+  gap: 10px;
+  padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+  background: var(--ivory);
+  border-top: 1px solid var(--line);
+}
+
+.bk-bar[hidden] { display: none; }
+
+.bk-bar-summary {
+  min-height: 24px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+  line-height: 24px;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-decoration: underline;
+  text-decoration-color: var(--line);
+  text-underline-offset: 4px;
+  cursor: pointer;
+}
+
+.bk-bar-action { width: 100%; min-height: 54px; }
+.bk-bar-action:disabled { opacity: .45; cursor: not-allowed; }
+
+.bk-sheet {
+  width: 100%;
+  max-width: none;
+  margin: auto 0 0;
+  padding: 24px 20px calc(24px + env(safe-area-inset-bottom));
+  border: 0;
+  border-top: 1px solid var(--line);
+  background: var(--ivory);
+  color: var(--ink);
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
+.bk-sheet::backdrop { background: rgba(38, 38, 32, .55); }
+.bk-sheet-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
+.bk-sheet-head .bk-summary-label { margin: 0; }
+.bk-sheet-head .dialog-close { position: static; flex: none; }
+
+/* Room for the bar, and one primary button instead of two. */
+@media (max-width: 800px) {
+  html.bk-has-bar .book-page { padding-bottom: calc(54px + 24px + 24px + env(safe-area-inset-bottom)); }
+  html.bk-has-bar .bk-actions .button-gold,
+  html.bk-has-bar .bk-pay { display: none; }
+}
+
+@media (min-width: 801px) {
+  .bk-bar { display: none !important; }
+  .bk-sheet { display: none !important; }
+}

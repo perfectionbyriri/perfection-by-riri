@@ -38,3 +38,33 @@ export function resolveDeepLink(link, catalog) {
   const group = link.group && groups.some((item) => item.key === link.group) ? link.group : null;
   return { step: 1, serviceId: null, group, error: null };
 }
+
+// Browser back and forward (docs/booking/DESIGN_SPEC.md §5.6). Each step pushes
+// `{ step }` onto history. On popstate the step comes back from there, clamped
+// to the furthest step whose data still exists, and the form values are handed
+// back untouched: going back never drops what the client typed. Step 5 (the
+// confirmation) is never restored: it is replaced in history, not pushed.
+export function stepFromHistory(historyState, current = {}) {
+  const wanted = Number.isInteger(historyState?.step) && historyState.step >= 1 && historyState.step <= 4
+    ? historyState.step
+    : 1;
+  let step = wanted;
+  if (step >= 2 && !current.serviceId) step = 1;
+  if (step >= 3 && !current.startAt) step = 2;
+  if (step >= 4 && !hasDetails(current.details)) step = 3;
+  return { step, details: current.details ?? {} };
+}
+
+function hasDetails(details) {
+  return Boolean(details && details.first_name && details.last_name && details.email && details.phone);
+}
+
+// One line for the sticky bar: `Classic full set · Thu 27, 1:00 PM`.
+export function summaryLine({ service, week, startAt, startLabel } = {}) {
+  if (!service) return '';
+  const day = startAt ? week?.days?.find((item) => startAt.startsWith(item.date)) : null;
+  if (!day || !startLabel) return service.name;
+  const date = new Date(`${day.date}T12:00:00Z`);
+  const weekday = date.toLocaleDateString('en-US', { weekday: 'short', timeZone: 'UTC' });
+  return `${service.name} · ${weekday} ${date.getUTCDate()}, ${startLabel}`;
+}

@@ -139,6 +139,16 @@
     </div>
   </footer>
 
+  <!-- Mobile sticky bar and summary sheet (docs/booking/DESIGN_SPEC.md §5). js/booking/main.js shows the bar on small screens once a service is chosen. -->
+  <div class="bk-bar" id="bk-bar" hidden>
+    <button type="button" class="bk-bar-summary" id="bk-bar-summary" aria-haspopup="dialog" aria-controls="bk-sheet"></button>
+    <button type="button" class="button button-gold bk-bar-action" id="bk-bar-action">CONTINUE</button>
+  </div>
+  <dialog class="bk-sheet" id="bk-sheet" aria-labelledby="bk-sheet-title">
+    <div class="bk-sheet-head"><h2 class="bk-summary-label" id="bk-sheet-title">Your booking</h2><button class="dialog-close" id="bk-sheet-close" type="button" aria-label="Close summary"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/></svg></button></div>
+    <dl class="bk-summary-list" id="bk-sheet-list"></dl>
+    <p class="bk-fine">Times are in Pacific Time. Questions? Call <a href="tel:+14258450045">(425) 845 0045</a>.</p>
+  </dialog>
   <dialog class="detail-dialog" id="contact-dialog" aria-labelledby="contact-dialog-title"><div class="dialog-toolbar"><button class="dialog-close" type="button" aria-label="Close dialog"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/></svg></button></div><div id="contact-dialog-content"></div></dialog>
   <noscript><div class="noscript-message">Studio contact details and opening hours are listed in the footer of this page.</div></noscript>
 </body>
