@@ -9,6 +9,7 @@ import {
   TURNSTILE_URL, buildAppointmentBody, createSubmitGuard, ensureIdempotencyKey, formatMoney,
   mapError, renderReview, squareSdkUrl
 } from './checkout.js';
+import { buildIcs, confirmedPath, fireConfirmation, renderConfirmation, trackFunnel } from './confirm.js';
 import { formatDuration, formatPrice, renderCatalogUnavailable, renderServices } from './render-services.js';
 import { defaultDay, renderSlotsError, renderSlotsLoading, renderWeek } from './render-slots.js';
 import { renderDetails, renderErrorSummary } from './render-details.js';
@@ -123,6 +124,7 @@ if (app) {
     }
     elements.step.querySelector('#bk-continue-hint')?.remove();
     updateSummary();
+    trackFunnel('booking_view_service', { service_id: id }, window.gtag);
     announce(`${service.name} selected.`);
   }
 
@@ -150,6 +152,7 @@ if (app) {
     else if (action === 'back' && step > 1) goTo(step - 1);
     else if (action === 'prev-week' || action === 'next-week') loadWeek(target.dataset.week, { focusSelector: `[data-action="${action}"]` });
     else if (action === 'retry-week') loadWeek(state.get().weekStart);
+    else if (action === 'add-to-calendar') downloadCalendar();
   });
 
   elements.banner.addEventListener('click', (event) => {
@@ -222,6 +225,7 @@ if (app) {
     state.set({ startAt, startLabel: label.trim() });
     refreshWeek({ focusSelector: `.bk-slot[data-start-at="${startAt}"]` });
     updateSummary();
+    trackFunnel('booking_select_slot', { service_id: state.get().serviceId }, window.gtag);
     announce(`${label.trim()} selected.`);
   }
 
@@ -426,6 +430,7 @@ if (app) {
       + '<div class="bk-actions"><button type="button" class="button button-outline" data-action="back">Back</button></div>';
     elements.step.setAttribute('aria-busy', 'false');
     if (focus) focusTitle();
+    trackFunnel('booking_begin_checkout', { service_id: service.service_id }, window.gtag);
     mountTurnstile();
     mountCard(service);
   }
@@ -454,6 +459,7 @@ if (app) {
   function showSubmitError(mapped) {
     if (mapped.newKey) state.set({ idempotencyKey: null });
     if (mapped.step === 2) {
+      trackFunnel('booking_slot_conflict', { service_id: state.get().serviceId }, window.gtag);
       const week = mapped.refreshedWeek;
       state.set({ startAt: null, startLabel: null, ...(week ? { week, weekStart: week.week_start, selectedDate: defaultDay(week) } : { week: null }) });
       unmountWidgets();
@@ -481,12 +487,50 @@ if (app) {
     showBanner(`<p>${mapped.message.replace('(425) 845 0045', '<a href="tel:+14258450045">(425) 845 0045</a>')}</p>${retry}`);
   }
 
+  function sessionStore() {
+    try { return window.sessionStorage; } catch { return undefined; }
+  }
+
+  // Step 5 · confirmed (D§4). The URL changes without a new server page and
+  // the conversion hook fires once per booking (ARCHITECTURE §10).
   function showBooked(data) {
-    // Task 19 replaces this with the full confirmation view.
-    state.set({ booking: data });
+    const service = findService(state.get().serviceId);
+    const result = { ...data, service_id: service.service_id };
+    const timeLabel = stepTimeLabel();
+    state.set({ booking: result, step: 5 });
     unmountWidgets();
-    elements.step.innerHTML = `<h2 class="bk-step-title" tabindex="-1">You&rsquo;re booked</h2>`;
+    hideBanner();
+    elements.count.textContent = 'Booking confirmed';
+    if (result.deposit?.status === 'captured') elements.summary.deposit.textContent = `${formatMoney(result.deposit.total_cents)} paid`;
+    elements.progress.forEach((item) => { item.removeAttribute('aria-current'); item.classList.add('is-done'); });
+    elements.step.innerHTML = renderConfirmation({
+      result, firstName: state.get().details.first_name, email: state.get().details.email,
+      timeLabel, policyText: state.get().catalog?.checkout?.policy_text
+    });
+    elements.step.setAttribute('aria-busy', 'false');
     focusTitle();
+    try { window.history.replaceState({ step: 5 }, '', confirmedPath(result.booking.id)); } catch { /* the view is already shown */ }
+    window.dataLayer = window.dataLayer || [];
+    fireConfirmation(result, {
+      gtag: typeof window.gtag === 'function' ? window.gtag : undefined,
+      dataLayer: window.dataLayer,
+      dispatch: (event) => window.dispatchEvent(event),
+      storage: sessionStore()
+    });
+    announce(`You're booked. ${result.booking.service_name}, ${timeLabel} Pacific Time.`);
+  }
+
+  function downloadCalendar() {
+    const booking = state.get().booking?.booking;
+    if (!booking) return;
+    const url = URL.createObjectURL(new Blob([buildIcs(booking)], { type: 'text/calendar;charset=utf-8' }));
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'perfection-by-riri-appointment.ics';
+    document.body.append(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
 
   elements.step.addEventListener('submit', async (event) => {
@@ -567,6 +611,7 @@ if (app) {
     state.set({ catalog: result.data });
     const link = resolveDeepLink(parseDeepLink(window.location.search), result.data);
     state.set({ serviceId: link.serviceId, focusGroup: link.group });
+    if (link.serviceId) trackFunnel('booking_view_service', { service_id: link.serviceId }, window.gtag);
     updateSummary();
     renderStep1();
     if (link.step === 2) goTo(2);
