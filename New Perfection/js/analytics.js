@@ -1,6 +1,6 @@
 'use strict';
 
-// Measure intent on the site; Setmore controls the actual booking process.
+// Measure intent on the site: booking_click fires on links to the /book/ flow.
 document.addEventListener('click', (event) => {
   const link = event.target.closest('a[href]');
   if (!link || typeof window.gtag !== 'function') return;
