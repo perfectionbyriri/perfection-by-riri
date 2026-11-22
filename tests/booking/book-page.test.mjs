@@ -79,6 +79,20 @@ test('_headers sets a Content-Security-Policy for /book/* with the Square, Turns
   assert.deepEqual(csp['object-src'], ["'none'"]);
 });
 
+test('the CSP lets the existing Google Analytics and Google Ads tags send their hits', () => {
+  // Hosts the live tags contacted in a wrangler dev run on 2026-11-22 (all were blocked before).
+  const csp = cspDirectives(headersFor('/book/*')['content-security-policy']);
+  const allows = (directive, host) => csp[directive].some((source) => source === `https://${host}`
+    || (source.startsWith('https://*.') && host.endsWith(source.slice('https://*'.length))));
+  for (const host of ['www.google.com', 'analytics.google.com', 'region1.analytics.google.com', 'www.google-analytics.com', 'ad.doubleclick.net', 'www.googleadservices.com']) {
+    assert.ok(allows('connect-src', host), `connect-src ${host}`);
+  }
+  for (const host of ['www.google.com', 'googleads.g.doubleclick.net', 'ad.doubleclick.net', 'www.googleadservices.com']) {
+    assert.ok(allows('img-src', host), `img-src ${host}`);
+  }
+  assert.ok(allows('script-src', 'googleads.g.doubleclick.net'), 'script-src googleads.g.doubleclick.net (Ads view-through)');
+});
+
 test('every inline script on the page is allowed by a CSP hash', () => {
   const csp = cspDirectives(headersFor('/book/*')['content-security-policy']);
   const inline = [...html.matchAll(/<script(?![^>]*\bsrc=)(?![^>]*type="application\/ld\+json")[^>]*>([\s\S]*?)<\/script>/g)].map((match) => match[1]);

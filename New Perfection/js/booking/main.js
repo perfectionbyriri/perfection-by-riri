@@ -6,6 +6,7 @@
 
 import { createApi } from './api.js';
 import { formatDuration, formatPrice, renderCatalogUnavailable, renderServices } from './render-services.js';
+import { defaultDay, renderSlotsError, renderSlotsLoading, renderWeek } from './render-slots.js';
 import { createState, parseDeepLink, resolveDeepLink } from './state.js';
 
 const STEP_NAMES = ['Service', 'Date & time', 'Your details', 'Deposit & confirm'];
@@ -28,7 +29,11 @@ if (app) {
       deposit: document.querySelector('[data-summary="deposit"]')
     }
   };
-  const state = createState({ step: 1, catalog: null, serviceId: null, focusGroup: null });
+  const state = createState({
+    step: 1, catalog: null, serviceId: null, focusGroup: null,
+    week: null, weekStart: null, selectedDate: null, startAt: null, startLabel: null
+  });
+  const deviceTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
   const findService = (id) => {
     for (const group of state.get().catalog?.groups ?? []) {
@@ -65,6 +70,11 @@ if (app) {
     elements.summary.service.textContent = service
       ? `${service.name} · ${formatDuration(service.duration_minutes)} · ${formatPrice(service.price_cents)}`
       : 'Not chosen yet';
+    const { startAt, startLabel, week } = state.get();
+    const day = week?.days.find((item) => startAt && startAt.startsWith(item.date));
+    elements.summary.time.textContent = startAt && day
+      ? `${day.weekday}, ${new Date(`${day.date}T12:00:00Z`).toLocaleDateString('en-US', { month: 'long', day: 'numeric', timeZone: 'UTC' })} · ${startLabel}`
+      : 'Not chosen yet';
     elements.summary.deposit.textContent = service
       ? (service.deposit.required ? `${formatPrice(service.deposit.total_cents)} due today` : 'No deposit needed')
       : '—';
@@ -90,6 +100,7 @@ if (app) {
   function selectService(id) {
     const service = findService(id);
     if (!service) return;
+    if (state.get().serviceId !== id) state.set({ week: null, weekStart: null, selectedDate: null, startAt: null, startLabel: null });
     state.set({ serviceId: id });
     for (const card of elements.step.querySelectorAll('.bk-card')) {
       card.setAttribute('aria-pressed', card.dataset.serviceId === id ? 'true' : 'false');
@@ -111,11 +122,103 @@ if (app) {
       selectService(card.dataset.serviceId);
       return;
     }
-    const action = event.target.closest('[data-action]')?.dataset.action;
-    if (action === 'continue' && state.get().serviceId) {
-      document.dispatchEvent(new CustomEvent('booking:step', { detail: { step: 2 } }));
+    const day = event.target.closest('.bk-day');
+    if (day) {
+      if (day.getAttribute('aria-disabled') !== 'true') selectDay(day.dataset.date);
+      return;
     }
+    const slot = event.target.closest('.bk-slot');
+    if (slot) {
+      selectSlot(slot.dataset.startAt, slot.textContent);
+      return;
+    }
+    const target = event.target.closest('[data-action]');
+    const action = target?.dataset.action;
+    if (action === 'continue' && state.get().step === 1 && state.get().serviceId) goTo(2);
+    else if (action === 'back' && state.get().step === 2) goTo(1);
+    else if (action === 'prev-week' || action === 'next-week') loadWeek(target.dataset.week, { focusSelector: `[data-action="${action}"]` });
+    else if (action === 'retry-week') loadWeek(state.get().weekStart);
   });
+
+  // Step 2 · date and time.
+  function step2Actions() {
+    const { startAt } = state.get();
+    const hint = startAt ? '' : '<p class="bk-hint" id="bk-continue-hint">Choose a time to continue.</p>';
+    return `<div class="bk-actions"><button type="button" class="button button-outline" data-action="back">Back</button>${hint}`
+      + `<button type="button" class="button button-gold" data-action="continue"${startAt ? '' : ' disabled aria-disabled="true" aria-describedby="bk-continue-hint"'}>Continue</button></div>`;
+  }
+
+  function renderStep2({ focus = false, focusSelector = null } = {}) {
+    const { week, selectedDate, startAt } = state.get();
+    const body = week ? renderWeek({ week, selectedDate, selectedStartAt: startAt, deviceTimeZone }) : renderSlotsLoading();
+    elements.step.innerHTML = `<h2 class="bk-step-title" tabindex="-1">Choose a date &amp; time</h2><div class="bk-week">${body}</div>${step2Actions()}`;
+    elements.step.setAttribute('aria-busy', week ? 'false' : 'true');
+    if (focus) focusTitle();
+    else if (focusSelector) elements.step.querySelector(focusSelector)?.focus({ preventScroll: true });
+  }
+
+  // Re-render the week and the actions only, so focus on the step title or a
+  // control outside them survives.
+  function refreshWeek({ focusSelector = null } = {}) {
+    const { week, selectedDate, startAt } = state.get();
+    const weekBox = elements.step.querySelector('.bk-week');
+    const actions = elements.step.querySelector('.bk-actions');
+    if (!weekBox || !actions) {
+      renderStep2({ focusSelector });
+      return;
+    }
+    weekBox.innerHTML = week ? renderWeek({ week, selectedDate, selectedStartAt: startAt, deviceTimeZone }) : renderSlotsLoading();
+    actions.outerHTML = step2Actions();
+    elements.step.setAttribute('aria-busy', week ? 'false' : 'true');
+    if (focusSelector) elements.step.querySelector(focusSelector)?.focus({ preventScroll: true });
+  }
+
+  async function loadWeek(weekStart, { focusSelector = null } = {}) {
+    const { serviceId } = state.get();
+    state.set({ week: null, weekStart: weekStart ?? null });
+    refreshWeek();
+    announce('Loading available times…');
+    const result = await api.fetchWeek(serviceId, weekStart ?? undefined);
+    if (state.get().serviceId !== serviceId || state.get().step !== 2) return;
+    if (!result.ok) {
+      elements.step.setAttribute('aria-busy', 'false');
+      elements.step.querySelector('.bk-week').innerHTML = '';
+      showBanner(renderSlotsError(result.error));
+      return;
+    }
+    hideBanner();
+    const week = result.data;
+    const keepDate = week.days.some((day) => day.date === state.get().selectedDate && day.slots.length);
+    state.set({ week, weekStart: week.week_start, selectedDate: keepDate ? state.get().selectedDate : defaultDay(week) });
+    refreshWeek({ focusSelector });
+    const total = week.days.reduce((sum, day) => sum + day.slots.length, 0);
+    announce(total ? `${total} times available this week.` : 'No openings this week.');
+  }
+
+  function selectDay(date) {
+    state.set({ selectedDate: date });
+    refreshWeek({ focusSelector: `.bk-day[data-date="${date}"]` });
+  }
+
+  function selectSlot(startAt, label) {
+    state.set({ startAt, startLabel: label.trim() });
+    refreshWeek({ focusSelector: `.bk-slot[data-start-at="${startAt}"]` });
+    updateSummary();
+    announce(`${label.trim()} selected.`);
+  }
+
+  function goTo(step) {
+    if (step !== 1 && step !== 2) return; // Steps 3 and 4 arrive with Tasks 17 and 18.
+    hideBanner();
+    state.set({ step });
+    updateProgress(step);
+    if (step === 1) {
+      renderStep1({ focus: true });
+      return;
+    }
+    renderStep2({ focus: true });
+    if (!state.get().week) loadWeek(state.get().weekStart);
+  }
 
   async function start() {
     const result = await api.fetchCatalog();
@@ -131,7 +234,7 @@ if (app) {
     state.set({ serviceId: link.serviceId, focusGroup: link.group });
     updateSummary();
     renderStep1();
-    if (link.step === 2) document.dispatchEvent(new CustomEvent('booking:step', { detail: { step: 2 } }));
+    if (link.step === 2) goTo(2);
     announce('Services loaded.');
   }
 

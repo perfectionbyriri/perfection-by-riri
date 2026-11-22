@@ -10,6 +10,22 @@
   --bk-summary-width: 340px;
 }
 
+/* No hero photo on this page: the shared header sits on the dark band, as
+   on the contact and FAQ pages. Structure is shared; only colour is scoped. */
+.book-page .header-shell { background: var(--dark); }
+.book-page .site-header { color: #f4eee5; }
+.book-page .menu-toggle { border-color: rgba(244,238,229,.34); background: transparent; }
+.book-page .menu-toggle span { background: #f4eee5; }
+@media (max-width: 800px) {
+  .book-page .enhanced .main-navigation a,
+  .book-page .main-navigation.is-open a { color: #f5ede0; }
+}
+
+/* motion.css sweeps a dark fill up on hover; keep the label readable. */
+@media (hover: hover) and (pointer: fine) {
+  .book-page .bk .button-outline:hover { color: var(--ivory); }
+}
+
 .book-page .bk {
   padding-block: 40px 64px;
   min-height: 60vh;
@@ -275,6 +291,144 @@
   .bk-card:hover .bk-card-photo img { transform: scale(1.02); }
 }
 
+/* Step 2 · week strip and slots (§4). */
+.bk-week-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 20px;
+  margin-bottom: 20px;
+}
+
+.bk-week-zone { margin: 0; font-size: 13px; color: var(--muted); }
+
+.bk-week-nav { display: flex; align-items: center; gap: 8px; }
+
+.bk-week-range {
+  min-width: 132px;
+  margin: 0;
+  font-size: var(--fs-body);
+  text-align: center;
+  font-variant-numeric: var(--price-numeric);
+}
+
+.bk-week-arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid #aaa197;
+  background: transparent;
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .bk-week-arrow:not(:disabled):hover { background: #e7e0d8; }
+}
+
+.bk-zone-note { margin: 0 0 16px; font-size: 13px; color: var(--muted); }
+
+.bk-days {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0 0 30px;
+  padding: 0;
+  list-style: none;
+}
+
+.bk-day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  min-height: 88px;
+  padding: 12px 4px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink);
+  font-family: var(--sans);
+  text-transform: none;
+  cursor: pointer;
+}
+
+.bk-day:focus-visible { outline: 2px solid #8a6c44; outline-offset: 2px; }
+
+.bk-day-name { font-size: 11px; font-weight: 500; letter-spacing: 1.7px; }
+
+.bk-day-date {
+  font-family: var(--serif);
+  font-size: 22px;
+  line-height: 1.1;
+  font-variant-numeric: var(--price-numeric);
+}
+
+.bk-day-count { font-size: 12px; color: var(--muted); }
+
+.bk-day[aria-pressed="true"] {
+  border: 2px solid var(--ink);
+  padding: 11px 3px;
+  background: var(--card);
+}
+
+.bk-day[aria-disabled="true"] { cursor: default; color: var(--muted); border-style: dashed; }
+
+@media (hover: hover) and (pointer: fine) {
+  .bk-day:not([aria-disabled="true"]):not([aria-pressed="true"]):hover { background: #e7e0d8; }
+}
+
+.bk-slot-group + .bk-slot-group { margin-top: 25px; }
+
+.bk-slot-group-title {
+  margin: 0 0 12px;
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 1.7px;
+  line-height: 1.5;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.bk-slot-list { display: flex; flex-wrap: wrap; gap: 12px; }
+
+.bk-slot {
+  min-width: 104px;
+  color: var(--ink);
+  font-variant-numeric: var(--price-numeric);
+  text-transform: none;
+}
+
+.bk-slot[aria-pressed="true"] {
+  border: 2px solid var(--ink);
+  padding: 10px 22px;
+  background: var(--card);
+}
+
+.bk-skeleton-row { height: 88px; margin-bottom: 16px; background: var(--card); }
+
+.bk-empty p:first-child { margin: 0 0 8px; font-size: var(--fs-body); }
+
+.bk-text-button {
+  min-height: 44px;
+  padding: 0 4px;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
 /* Step actions */
 .bk-actions {
   display: flex;
@@ -328,6 +482,8 @@
 }
 
 @media (max-width: 540px) {
+  .bk-day { min-height: 76px; padding-inline: 2px; }
+  .bk-day-count { font-size: 11px; }
   .bk-card-grid { grid-template-columns: minmax(0, 1fr); }
   .bk-card-photo { aspect-ratio: 3 / 2; }
   .bk-progress-label {
@@ -338,4 +494,17 @@
     clip: rect(0, 0, 0, 0);
     white-space: nowrap;
   }
+}
+
+/* The week strip scrolls with snap points once seven columns no longer fit. */
+@media (max-width: 360px) {
+  .bk-days {
+    grid-template-columns: none;
+    grid-auto-flow: column;
+    grid-auto-columns: 64px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding-bottom: 4px;
+  }
+  .bk-days li { scroll-snap-align: start; }
 }
