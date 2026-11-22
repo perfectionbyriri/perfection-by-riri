@@ -1,8 +1,9 @@
 /* Booking flow · /book/ (docs/booking/DESIGN_SPEC.md §2–§5).
 
-   Warm espresso-chocolate editorial palette drawn from the studio's hero
-   photography, with champagne-gold accents, square corners and no shadows.
-   All animations are guarded by prefers-reduced-motion. */
+   Obsidian black editorial palette with champagne-gold hairlines, square
+   architectural corners and no shadows. Step 1 presents collapsed service
+   categories that expand smoothly on click. All animations respect
+   prefers-reduced-motion. */
 
 :root {
   --error: #8c2f23;
@@ -10,43 +11,43 @@
   --bk-summary-width: 340px;
 }
 
-/* Warm chocolate tokens scoped to the booking page */
+/* Obsidian black & champagne-gold tokens scoped to the booking page */
 .book-page {
-  --bk-bg: #2a1d15;
-  --bk-bg-deep: #211710;
-  --bk-bg-announcement: #1a110c;
-  --bk-surface: #34251c;
-  --bk-surface-hover: #3e2d22;
-  --bk-surface-active: #493528;
-  --bk-ink: #f6efe5;
-  --bk-muted: #c8b6a1;
-  --bk-subtle: #a9957f;
-  --bk-line: rgba(214, 189, 154, .18);
-  --bk-line-strong: rgba(214, 189, 154, .38);
-  --bk-gold: #c9a675;
+  --bk-bg: #0c0c0b;
+  --bk-bg-deep: #080807;
+  --bk-bg-announcement: #050504;
+  --bk-surface: #141312;
+  --bk-surface-inset: #10100f;
+  --bk-surface-hover: #1b1917;
+  --bk-surface-active: #221e19;
+  --bk-ink: #f4efe8;
+  --bk-muted: #a69e94;
+  --bk-subtle: #787168;
+  --bk-line: rgba(212, 187, 150, .15);
+  --bk-line-strong: rgba(212, 187, 150, .34);
+  --bk-gold: #c6a471;
   --bk-gold-bright: #dfc094;
-  --bk-gold-soft: rgba(201, 166, 117, .14);
-  --bk-error: #f09589;
+  --bk-error: #eb8f82;
   --bk-ease: cubic-bezier(.22, 1, .36, 1);
   --bk-ease-out: cubic-bezier(.16, 1, .3, 1);
   background: var(--bk-bg);
   color: var(--bk-ink);
 }
 
-/* Announcement, header, footer and legal modal harmonized in warm chocolate */
+/* Announcement, header, footer and legal modal harmonized in obsidian black */
 .book-page .announcement {
   background: var(--bk-bg-announcement);
-  color: #e9dccb;
-  border-bottom: 1px solid rgba(214, 189, 154, .10);
+  color: #dcd3c6;
+  border-bottom: 1px solid rgba(212, 187, 150, .08);
 }
 
 .book-page .header-shell {
   background: var(--bk-bg-deep);
-  border-bottom: 1px solid rgba(214, 189, 154, .12);
+  border-bottom: 1px solid rgba(212, 187, 150, .12);
 }
 
 .book-page .site-header { color: var(--bk-ink); }
-.book-page .menu-toggle { border-color: rgba(246, 239, 229, .34); background: transparent; }
+.book-page .menu-toggle { border-color: rgba(244, 239, 232, .32); background: transparent; }
 .book-page .menu-toggle span { background: var(--bk-ink); }
 .book-page .nav-dropdown-panel {
   background: var(--bk-bg-deep);
@@ -83,16 +84,16 @@
   border: 1px solid var(--bk-line);
 }
 
-.book-page .detail-dialog::backdrop { background: rgba(18, 12, 8, .72); }
+.book-page .detail-dialog::backdrop { background: rgba(0, 0, 0, .78); }
 .book-page .detail-dialog .dialog-close { color: var(--bk-ink); }
 .book-page .detail-dialog p,
 .book-page .detail-dialog li { color: var(--bk-muted); }
 
-/* Button styling tuned for the chocolate surface */
+/* Luxury gold and hairline outline buttons on obsidian black */
 .book-page .bk .button-gold,
 .book-page .bk-bar .button-gold {
   background: var(--bk-gold);
-  color: #1e140e;
+  color: #0b0b0a;
   border-color: var(--bk-gold);
 }
 
@@ -116,11 +117,11 @@
   .book-page .bk-bar .button-gold:hover {
     background: var(--bk-gold);
     border-color: var(--bk-ink);
-    color: #1e140e;
+    color: #0b0b0a;
   }
   .book-page .bk .button-outline:hover {
     border-color: var(--bk-gold);
-    color: #1e140e;
+    color: #0b0b0a;
   }
 }
 
@@ -132,12 +133,12 @@
   outline-offset: 3px;
 }
 
-/* Main booking stage: velvety chocolate with subtle hero-inspired top studio glow */
+/* Main booking stage: pure obsidian black with whisper-subtle crown glow */
 .book-page .bk {
-  padding-block: 48px 80px;
-  min-height: 70vh;
+  padding-block: 56px 92px;
+  min-height: 74vh;
   background:
-    radial-gradient(ellipse 85% 48% at 14% 0%, rgba(114, 82, 55, .30) 0%, rgba(42, 29, 21, 0) 68%),
+    radial-gradient(ellipse 68% 36% at 50% 0%, rgba(198, 164, 113, .075) 0%, rgba(12, 12, 11, 0) 70%),
     var(--bk-bg);
 }
 
@@ -151,19 +152,19 @@
 .bk-shell:focus { outline: none; }
 
 /* Heading block */
-.bk-head { margin-bottom: 44px; }
+.bk-head { margin-bottom: 48px; }
 
 .bk-eyebrow {
   margin: 0 0 12px;
   font-size: 11px;
   font-weight: 500;
-  letter-spacing: 2px;
+  letter-spacing: 2.4px;
   line-height: 1.5;
   color: var(--bk-gold);
 }
 
 .bk-title {
-  margin: 0 0 22px;
+  margin: 0 0 24px;
   font-family: var(--serif);
   font-size: var(--fs-h2);
   font-weight: 400;
@@ -173,17 +174,17 @@
 
 .bk-step-count {
   margin: 0 0 18px;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 500;
-  letter-spacing: 1.4px;
+  letter-spacing: 1.8px;
   color: var(--bk-muted);
 }
 
-/* Progress: four equal segments with animated champagne-gold indicator bar */
+/* Progress: four architectural segments with animated champagne-gold rule */
 .bk-progress {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 10px;
+  gap: 12px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -215,7 +216,7 @@
   background: var(--bk-gold);
   transform: scaleX(0);
   transform-origin: left center;
-  transition: transform 480ms var(--bk-ease);
+  transition: transform 500ms var(--bk-ease);
 }
 
 .bk-progress-item.is-done,
@@ -228,12 +229,9 @@
   transform: scaleX(1);
 }
 
-.bk-progress-item[aria-current="step"] {
-  font-weight: 500;
-}
-
+.bk-progress-item[aria-current="step"] { font-weight: 500; }
 .bk-progress-item[aria-current="step"]::after {
-  height: 3px;
+  height: 2px;
   background: var(--bk-gold-bright);
 }
 
@@ -249,11 +247,10 @@
 }
 
 .bk-main { min-width: 0; }
-
 .bk-step { position: relative; }
 
 .bk-step-title {
-  margin: 0 0 28px;
+  margin: 0 0 12px;
   font-family: var(--serif);
   font-size: var(--fs-h3);
   font-weight: 400;
@@ -262,16 +259,24 @@
   color: var(--bk-ink);
 }
 
+.bk-step-lead {
+  margin: 0 0 28px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--bk-muted);
+}
+
 .bk-step-title:focus { outline: none; }
 .bk-step-title:focus-visible { outline: 2px solid var(--bk-gold-bright); outline-offset: 5px; }
 
-/* Summary sidebar */
+/* Summary sidebar: atelier reservation card framed with top gold bar */
 .bk-summary {
   position: sticky;
   top: 28px;
   padding: 32px 30px;
   background: var(--bk-surface);
   border: 1px solid var(--bk-line);
+  border-top: 2px solid var(--bk-gold);
 }
 
 .bk-summary-label {
@@ -279,7 +284,7 @@
   font-family: var(--sans);
   font-size: 11px;
   font-weight: 500;
-  letter-spacing: 1.8px;
+  letter-spacing: 2px;
   line-height: 1.5;
   color: var(--bk-gold);
 }
@@ -287,14 +292,15 @@
 .bk-summary-list { margin: 0; }
 
 .bk-summary-row {
-  padding-block: 14px;
+  padding-block: 15px;
   border-top: 1px solid var(--bk-line);
 }
 
 .bk-summary-row dt {
-  margin: 0 0 4px;
-  font-size: 12px;
-  letter-spacing: .5px;
+  margin: 0 0 5px;
+  font-size: 11px;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
   color: var(--bk-subtle);
 }
 
@@ -337,92 +343,217 @@
 .bk-banner:focus-visible { outline: 2px solid var(--bk-gold-bright); outline-offset: 5px; }
 .bk-banner .button { margin-top: 16px; }
 
-/* Step 1 · Editorial text-only service menu (no photos) */
-.bk-group-nav {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 24px;
-  margin: 0 0 34px;
-  padding-bottom: 14px;
-  border-bottom: 1px solid var(--bk-line);
-}
-
-.bk-group-tab {
-  position: relative;
-  min-height: 36px;
-  padding: 6px 0;
-  border: 0;
-  background: transparent;
-  color: var(--bk-muted);
-  font-family: var(--sans);
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 1.3px;
-  text-transform: uppercase;
-  white-space: nowrap;
-  cursor: pointer;
-  transition: color 260ms var(--bk-ease);
-}
-
-.bk-group-tab::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: -15px;
-  height: 2px;
-  background: var(--bk-gold);
-  transform: scaleX(0);
-  transform-origin: left center;
-  transition: transform 340ms var(--bk-ease);
-}
-
-.bk-group-tab.is-active {
-  color: var(--bk-ink);
-}
-
-.bk-group-tab.is-active::after {
-  transform: scaleX(1);
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .bk-group-tab:hover { color: var(--bk-ink); }
-  .bk-group-tab:hover::after { transform: scaleX(1); }
+/* Step 1 · Collapsed luxury category accordion (click category to expand) */
+.bk-accordion {
+  border-top: 1px solid var(--bk-line);
 }
 
 .bk-group {
-  scroll-margin-top: 28px;
+  position: relative;
+  border-bottom: 1px solid var(--bk-line);
+  transition: background-color 320ms var(--bk-ease), border-color 320ms var(--bk-ease);
 }
 
-.bk-group + .bk-group { margin-top: 44px; }
+/* Luminous champagne-gold rail along an open or hovered category */
+.bk-group::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 2px;
+  background: var(--bk-gold);
+  transform: scaleY(0);
+  transform-origin: top center;
+  transition: transform 380ms var(--bk-ease), background-color 280ms var(--bk-ease);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.bk-group.is-open {
+  border-bottom-color: rgba(212, 187, 150, .26);
+}
+
+.bk-group.is-open::before {
+  transform: scaleY(1);
+  background: var(--bk-gold-bright);
+}
 
 .bk-group-label {
-  display: flex;
+  margin: 0;
+  font-family: var(--serif);
+  font-weight: 400;
+  text-transform: none;
+}
+
+.bk-cat-trigger {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) auto;
   align-items: center;
-  gap: 14px;
-  margin: 0 0 16px;
+  gap: 16px 20px;
+  width: 100%;
+  padding: 26px 24px;
+  border: 0;
+  background: transparent;
+  color: var(--bk-ink);
+  text-align: left;
+  text-transform: none;
+  cursor: pointer;
+  transition: background-color 280ms var(--bk-ease);
+}
+
+.bk-cat-trigger:focus-visible {
+  outline: 2px solid var(--bk-gold-bright);
+  outline-offset: -2px;
+}
+
+.bk-cat-num {
   font-family: var(--sans);
   font-size: 11px;
   font-weight: 500;
   letter-spacing: 2px;
-  line-height: 1.5;
-  text-transform: uppercase;
   color: var(--bk-gold);
-}
-
-.bk-group-count {
-  font-size: 11px;
-  letter-spacing: .5px;
-  color: var(--bk-subtle);
   font-variant-numeric: var(--price-numeric);
+  transition: color 260ms var(--bk-ease);
 }
 
-.bk-group-label::after {
-  content: "";
-  flex: 1;
-  border-top: 1px solid var(--bk-line);
+.bk-cat-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
 }
 
+.bk-cat-title {
+  font-family: var(--serif);
+  font-size: clamp(22px, 2.15vw, 28px);
+  font-weight: 400;
+  line-height: 1.18;
+  letter-spacing: .01em;
+  color: var(--bk-ink);
+  transition: transform 320ms var(--bk-ease), color 260ms var(--bk-ease);
+}
+
+.bk-cat-chosen {
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 1.3px;
+  text-transform: uppercase;
+  color: var(--bk-gold-bright);
+}
+
+.bk-cat-right {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  flex-shrink: 0;
+}
+
+.bk-cat-meta {
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 300;
+  letter-spacing: .4px;
+  color: var(--bk-muted);
+  font-variant-numeric: var(--price-numeric);
+  white-space: nowrap;
+  transition: color 260ms var(--bk-ease);
+}
+
+/* Minimalist geometric + / − indicator inside a crisp hairline square */
+.bk-cat-icon {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--bk-line-strong);
+  flex-shrink: 0;
+  transition: border-color 280ms var(--bk-ease), background-color 280ms var(--bk-ease);
+}
+
+.bk-cat-icon span {
+  position: absolute;
+  background: var(--bk-gold);
+  transition: transform 360ms var(--bk-ease), opacity 260ms var(--bk-ease), background-color 260ms var(--bk-ease);
+}
+
+.bk-cat-icon span:first-child {
+  width: 12px;
+  height: 1px;
+}
+
+.bk-cat-icon span:last-child {
+  width: 1px;
+  height: 12px;
+}
+
+.bk-group.is-open .bk-cat-trigger {
+  background: var(--bk-surface);
+}
+
+.bk-group.is-open .bk-cat-title {
+  color: var(--bk-gold-bright);
+}
+
+.bk-group.is-open .bk-cat-meta {
+  color: var(--bk-ink);
+}
+
+.bk-group.is-open .bk-cat-icon {
+  border-color: var(--bk-gold);
+  background: rgba(198, 164, 113, .12);
+}
+
+.bk-group.is-open .bk-cat-icon span {
+  background: var(--bk-gold-bright);
+}
+
+.bk-group.is-open .bk-cat-icon span:last-child {
+  transform: rotate(90deg) scaleY(0);
+  opacity: 0;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .bk-cat-trigger:hover {
+    background: var(--bk-surface);
+  }
+  .bk-group:hover::before {
+    transform: scaleY(1);
+  }
+  .bk-cat-trigger:hover .bk-cat-title {
+    transform: translateX(4px);
+    color: var(--bk-gold-bright);
+  }
+  .bk-cat-trigger:hover .bk-cat-icon {
+    border-color: var(--bk-gold);
+  }
+}
+
+/* Smooth CSS-Grid accordion reveal panel */
+.bk-cat-panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  background: var(--bk-surface-inset);
+  transition:
+    grid-template-rows 480ms var(--bk-ease),
+    opacity 360ms var(--bk-ease);
+}
+
+.bk-group.is-open .bk-cat-panel {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+.bk-cat-panel-inner {
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* Nested treatment list inside each opened category */
 .bk-card-grid {
   display: flex;
   flex-direction: column;
@@ -436,9 +567,9 @@
   justify-content: space-between;
   gap: 24px;
   width: 100%;
-  padding: 20px 22px;
+  padding: 19px 24px 19px 60px;
   border: 0;
-  border-bottom: 1px solid var(--bk-line);
+  border-bottom: 1px solid rgba(212, 187, 150, .10);
   background: transparent;
   color: var(--bk-ink);
   font: inherit;
@@ -446,23 +577,25 @@
   text-transform: none;
   cursor: pointer;
   transition:
-    background-color 280ms var(--bk-ease),
-    border-color 280ms var(--bk-ease),
-    transform 180ms var(--bk-ease);
+    background-color 260ms var(--bk-ease),
+    border-color 260ms var(--bk-ease),
+    opacity 380ms var(--bk-ease),
+    transform 380ms var(--bk-ease);
 }
 
-/* Gold left accent bar that glides in on hover and locks in on selection */
+.bk-card:last-child { border-bottom: 0; }
+
 .bk-card::before {
   content: "";
   position: absolute;
   top: 0;
   bottom: 0;
   left: 0;
-  width: 3px;
+  width: 2px;
   background: var(--bk-gold);
   transform: scaleY(0);
   transform-origin: center;
-  transition: transform 320ms var(--bk-ease), background-color 260ms var(--bk-ease);
+  transition: transform 280ms var(--bk-ease);
 }
 
 .bk-card:focus-visible { outline: 2px solid var(--bk-gold-bright); outline-offset: -2px; }
@@ -470,21 +603,21 @@
 .bk-card-body {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 3px;
   min-width: 0;
 }
 
 .bk-card-name {
   font-family: var(--serif);
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 400;
   line-height: 1.25;
   color: var(--bk-ink);
-  transition: transform 300ms var(--bk-ease), color 260ms var(--bk-ease);
+  transition: transform 280ms var(--bk-ease), color 240ms var(--bk-ease);
 }
 
 .bk-card-blurb {
-  font-size: 14px;
+  font-size: 13px;
   line-height: 1.5;
   color: var(--bk-muted);
 }
@@ -505,12 +638,11 @@
 
 .bk-card-meta {
   font-family: var(--price-font);
-  font-size: 16px;
+  font-size: 15px;
   font-weight: var(--price-weight);
   font-variant-numeric: var(--price-numeric);
   color: var(--bk-ink);
   white-space: nowrap;
-  transition: color 260ms var(--bk-ease);
 }
 
 .bk-card-indicator {
@@ -521,30 +653,29 @@
   height: 22px;
   border: 1px solid var(--bk-line-strong);
   background: transparent;
-  color: #1e140e;
+  color: #0b0b0a;
   flex-shrink: 0;
   transition:
-    background-color 280ms var(--bk-ease),
-    border-color 280ms var(--bk-ease),
-    transform 280ms var(--bk-ease);
+    background-color 260ms var(--bk-ease),
+    border-color 260ms var(--bk-ease),
+    transform 260ms var(--bk-ease);
 }
 
 .bk-card-indicator svg {
   opacity: 0;
   transform: scale(.65);
-  transition: opacity 220ms var(--bk-ease), transform 300ms var(--bk-ease);
+  transition: opacity 220ms var(--bk-ease), transform 280ms var(--bk-ease);
 }
 
 .bk-card-indicator path {
   stroke-dasharray: 20;
   stroke-dashoffset: 20;
-  transition: stroke-dashoffset 320ms var(--bk-ease) 60ms;
+  transition: stroke-dashoffset 300ms var(--bk-ease) 50ms;
 }
 
-/* Selected service row: illuminated cocoa fill, gold edge, filled check mark */
+/* Selected service row */
 .bk-card[aria-pressed="true"] {
   background: var(--bk-surface-active);
-  border-bottom-color: rgba(201, 166, 117, .35);
 }
 
 .bk-card[aria-pressed="true"]::before {
@@ -589,10 +720,6 @@
   .bk-card:hover .bk-card-indicator {
     border-color: var(--bk-gold);
   }
-}
-
-.bk-card:active {
-  transform: scale(.996);
 }
 
 /* Step 2 · week strip and slots (§4). */
@@ -663,7 +790,7 @@
   min-height: 90px;
   padding: 12px 4px;
   border: 1px solid var(--bk-line);
-  background: rgba(52, 37, 28, .45);
+  background: var(--bk-surface);
   color: var(--bk-ink);
   font-family: var(--sans);
   text-transform: none;
@@ -704,8 +831,8 @@
   color: var(--bk-subtle);
   background: transparent;
   border-style: dashed;
-  border-color: rgba(214, 189, 154, .12);
-  opacity: .55;
+  border-color: rgba(212, 187, 150, .10);
+  opacity: .5;
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -723,7 +850,7 @@
   font-family: var(--sans);
   font-size: 11px;
   font-weight: 500;
-  letter-spacing: 1.8px;
+  letter-spacing: 2px;
   line-height: 1.5;
   text-transform: uppercase;
   color: var(--bk-gold);
@@ -734,7 +861,7 @@
 .book-page .bk .bk-slot {
   min-width: 108px;
   border-color: var(--bk-line-strong);
-  background: rgba(52, 37, 28, .4);
+  background: var(--bk-surface);
   color: var(--bk-ink);
   font-variant-numeric: var(--price-numeric);
   text-transform: none;
@@ -761,7 +888,7 @@
   border: 2px solid var(--bk-gold);
   padding: 10px 22px;
   background: var(--bk-gold);
-  color: #1e140e;
+  color: #0b0b0a;
   font-weight: 500;
 }
 
@@ -771,7 +898,7 @@
 
 @media (hover: hover) and (pointer: fine) {
   .book-page .bk .bk-slot[aria-pressed="true"]:hover {
-    color: #1e140e;
+    color: #0b0b0a;
   }
 }
 
@@ -806,7 +933,7 @@
   align-items: center;
   justify-content: flex-end;
   gap: 16px;
-  margin-top: 40px;
+  margin-top: 44px;
   padding-top: 30px;
   border-top: 1px solid var(--bk-line);
 }
@@ -815,11 +942,12 @@
 .bk-actions [data-action="back"] { margin-right: auto; }
 .bk-hint { margin: 0; font-size: 13px; color: var(--bk-muted); }
 
-/* Step 3 · details form. Underlined inputs that illuminate in gold on focus. */
+/* Step 3 · details form */
 .bk-fields {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 30px 40px;
+  margin-top: 24px;
 }
 
 .bk-field { display: flex; flex-direction: column; min-width: 0; }
@@ -829,7 +957,7 @@
   margin-bottom: 8px;
   font-size: 11px;
   font-weight: 500;
-  letter-spacing: 1.4px;
+  letter-spacing: 1.6px;
   line-height: 1.5;
   color: var(--bk-muted);
   transition: color 240ms var(--bk-ease);
@@ -907,7 +1035,7 @@
 .bk-error-summary ul { margin: 0; padding-left: 20px; }
 .bk-error-summary a { color: var(--bk-error); text-underline-offset: 3px; }
 
-/* Step 4 · review, quote and card. Amounts use the site price face. */
+/* Step 4 · review, quote and card */
 .bk-review-block { margin-bottom: 30px; }
 
 .bk-review-label {
@@ -915,7 +1043,7 @@
   font-family: var(--sans);
   font-size: 11px;
   font-weight: 500;
-  letter-spacing: 1.6px;
+  letter-spacing: 1.8px;
   line-height: 1.5;
   color: var(--bk-gold);
 }
@@ -950,8 +1078,7 @@
 .bk-pay[aria-busy="true"] { cursor: progress; }
 .bk-secured { margin-top: 12px; }
 
-/* Step 5 · confirmed. The headline takes the page-title size with the
-   site's italic serif accent. */
+/* Step 5 · confirmed */
 .bk-confirm { max-width: 640px; }
 .bk-confirm .bk-eyebrow { margin-bottom: 16px; }
 
@@ -968,9 +1095,9 @@
 .bk-confirm-line a { color: var(--bk-gold-bright); text-underline-offset: 3px; text-decoration: underline; }
 .bk-confirm-actions { justify-content: flex-start; margin: 30px 0; padding-top: 0; border-top: 0; }
 
-/* Loading skeletons reshaped as sleek editorial list rows */
+/* Loading skeletons matching the 6 collapsed category rows */
 .bk-skeleton-card {
-  height: 76px;
+  height: 82px;
   background: var(--bk-surface);
   border-bottom: 1px solid var(--bk-line);
 }
@@ -986,8 +1113,8 @@
 
 .bk-noscript p { margin: 0; }
 
-/* Smooth motion language: page open cascade, staggered service rows,
-   directional step transitions, slot reveals and live summary highlight. */
+/* Smooth luxury motion language: page open cascade, accordion reveal,
+   staggered nested treatments, directional step slides and summary pulse. */
 @media (prefers-reduced-motion: no-preference) {
   .bk-head .bk-eyebrow { animation: bk-focus-in 620ms var(--bk-ease) 40ms both; }
   .bk-head .bk-title { animation: bk-focus-in 760ms var(--bk-ease) 100ms both; }
@@ -995,10 +1122,22 @@
   .bk-head .bk-progress { animation: bk-fade-up 680ms var(--bk-ease) 220ms both; }
   .bk-summary { animation: bk-fade-up 740ms var(--bk-ease) 180ms both; }
 
-  .bk-group-nav { animation: bk-fade-up 460ms var(--bk-ease) both; }
-  .bk-group-label { animation: bk-fade-up 480ms var(--bk-ease) 40ms both; }
-  .bk-card {
-    animation: bk-row-in 500ms var(--bk-ease) calc(var(--bk-i, 0) * 32ms) both;
+  .bk-step-lead { animation: bk-fade-up 460ms var(--bk-ease) 40ms both; }
+  .bk-group {
+    animation: bk-row-in 520ms var(--bk-ease) calc(var(--bk-g, 0) * 55ms) both;
+  }
+
+  /* Nested treatments glide in cleanly when their category opens */
+  .bk-group:not(.is-open) .bk-card {
+    opacity: 0;
+    transform: translateY(8px);
+    transition-delay: 0ms;
+  }
+
+  .bk-group.is-open .bk-card {
+    opacity: 1;
+    transform: none;
+    transition-delay: calc(var(--bk-i, 0) * 26ms);
   }
 
   .bk-step.is-entering-forward { animation: bk-step-forward 420ms var(--bk-ease) both; }
@@ -1017,6 +1156,12 @@
 
   .bk-skeleton-card,
   .bk-skeleton-row { animation: bk-pulse 1.5s ease-in-out infinite alternate; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bk-cat-panel,
+  .bk-cat-icon span,
+  .bk-card { transition: none; }
 }
 
 @keyframes bk-focus-in {
@@ -1066,11 +1211,11 @@
 
 @keyframes bk-pulse {
   from { opacity: 1; }
-  to { opacity: .45; }
+  to { opacity: .4; }
 }
 
 @media (max-width: 800px) {
-  .book-page .bk { padding-block: 32px 48px; }
+  .book-page .bk { padding-block: 36px 52px; }
   .bk-actions { justify-content: stretch; }
   .bk-actions .button { flex: 1 1 100%; }
   .bk-hint { flex: 1 1 100%; }
@@ -1079,29 +1224,34 @@
   .bk-progress-label { font-size: 12px; }
   .bk-fields { grid-template-columns: minmax(0, 1fr); gap: 25px; }
   .bk-pay { width: 100%; min-width: 0; }
-  .bk-group-nav {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    gap: 20px;
-    scrollbar-width: none;
+  .bk-cat-trigger {
+    grid-template-columns: 28px minmax(0, 1fr) auto;
+    padding: 22px 16px;
+    gap: 12px 14px;
   }
-  .bk-group-nav::-webkit-scrollbar { display: none; }
+  .bk-card { padding: 18px 16px 18px 28px; }
 }
 
 @media (max-width: 540px) {
   .bk-day { min-height: 76px; padding-inline: 2px; }
   .bk-day-count { font-size: 11px; }
+  .bk-cat-trigger {
+    grid-template-columns: minmax(0, 1fr) auto;
+    padding: 20px 14px;
+  }
+  .bk-cat-num { display: none; }
+  .bk-cat-meta { display: none; }
   .bk-card {
     flex-direction: column;
     align-items: flex-start;
-    gap: 12px;
-    padding: 18px 16px;
+    gap: 10px;
+    padding: 17px 14px 17px 20px;
   }
   .bk-card-aside {
     width: 100%;
     justify-content: space-between;
   }
-  .bk-card-name { font-size: 20px; }
+  .bk-card-name { font-size: 19px; }
   .bk-progress-label {
     position: absolute;
     width: 1px;
@@ -1125,9 +1275,7 @@
   .bk-days li { scroll-snap-align: start; }
 }
 
-/* Mobile sticky bar and summary sheet (docs/booking/DESIGN_SPEC.md §5).
-   The bar sits under the content on screens up to 800px once a service is
-   chosen. Its button stands in for the step's own primary button. */
+/* Mobile sticky bar and summary sheet (docs/booking/DESIGN_SPEC.md §5). */
 .bk-bar {
   position: fixed;
   inset: auto 0 0;
@@ -1176,7 +1324,7 @@
   overflow-y: auto;
 }
 
-.bk-sheet::backdrop { background: rgba(18, 12, 8, .72); }
+.bk-sheet::backdrop { background: rgba(0, 0, 0, .78); }
 .bk-sheet-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
 .bk-sheet-head .bk-summary-label { margin: 0; }
 .bk-sheet-head .dialog-close { position: static; flex: none; color: var(--bk-ink); }

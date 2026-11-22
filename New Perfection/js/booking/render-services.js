@@ -1,8 +1,10 @@
 // Step 1 · Choose a service (docs/booking/DESIGN_SPEC.md §4, §7).
 //
 // Returns HTML strings; js/booking/main.js inserts them and wires clicks.
-// Text-only editorial service menu (no photos): names, prices and durations
-// come from the catalog API (Setmore), never from this file.
+// Text-only editorial accordion menu (no photos): categories start collapsed
+// unless deep-linked or holding the chosen service, so clients click a
+// category first to reveal its treatments. Names, prices and durations come
+// strictly from the catalog API (Setmore).
 
 import { escapeHtml } from './html.js';
 
@@ -20,6 +22,16 @@ export function formatDuration(minutes) {
   return rest ? `${hours} hr ${rest} min` : `${hours} hr`;
 }
 
+function minPriceCents(services) {
+  let min = Infinity;
+  for (const service of services) {
+    if (typeof service.price_cents === 'number' && service.price_cents < min) {
+      min = service.price_cents;
+    }
+  }
+  return Number.isFinite(min) ? min : null;
+}
+
 function card(service, selected, index) {
   const blurb = service.blurb ? `<span class="bk-card-blurb">${escapeHtml(service.blurb)}</span>` : '';
   const deposit = service.deposit?.required
@@ -33,25 +45,47 @@ function card(service, selected, index) {
     + '</button>';
 }
 
-function categoryNav(groups) {
-  if (groups.length < 2) return '';
-  const items = groups.map((group, index) => `<button type="button" class="bk-group-tab${index === 0 ? ' is-active' : ''}" data-group-jump="${escapeHtml(group.key)}">${escapeHtml(group.label)}</button>`).join('');
-  return `<nav class="bk-group-nav" aria-label="Service categories">${items}</nav>`;
-}
-
-export function renderServices({ groups, selectedId = null, focusGroup = null }) {
+export function renderServices({ groups, selectedId = null, focusGroup = null, openGroup = undefined }) {
   const ordered = focusGroup
     ? [...groups.filter((group) => group.key === focusGroup), ...groups.filter((group) => group.key !== focusGroup)]
     : groups;
-  let index = 0;
-  const sections = ordered.map((group) => {
-    const headingId = `bk-group-${escapeHtml(group.key)}`;
-    const cards = group.services.map((service) => card(service, service.service_id === selectedId, index++)).join('');
-    return `<section class="bk-group" data-group="${escapeHtml(group.key)}" aria-labelledby="${headingId}">`
-      + `<h3 class="bk-group-label" id="${headingId}">${escapeHtml(group.label)}<span class="bk-group-count">${group.services.length}</span></h3>`
-      + `<div class="bk-card-grid">${cards}</div></section>`;
+  const selectedGroupKey = selectedId
+    ? ordered.find((group) => group.services.some((service) => service.service_id === selectedId))?.key ?? null
+    : null;
+  const initialOpenKey = openGroup !== undefined ? openGroup : (selectedGroupKey ?? focusGroup ?? null);
+
+  const sections = ordered.map((group, groupIndex) => {
+    const key = escapeHtml(group.key);
+    const headingId = `bk-group-${key}`;
+    const panelId = `bk-panel-${key}`;
+    const isOpen = group.key === initialOpenKey;
+    const hasSelected = group.services.some((service) => service.service_id === selectedId);
+    const selectedService = hasSelected ? group.services.find((service) => service.service_id === selectedId) : null;
+    const count = group.services.length;
+    const countText = `${count} ${count === 1 ? 'service' : 'services'}`;
+    const minPrice = minPriceCents(group.services);
+    const metaText = minPrice !== null ? `${countText} · From ${formatPrice(minPrice)}` : countText;
+    const numeral = String(groupIndex + 1).padStart(2, '0');
+    const chosenNote = selectedService
+      ? `<span class="bk-cat-chosen">Selected · ${escapeHtml(selectedService.name)}</span>`
+      : '';
+    const cards = group.services.map((service, idx) => card(service, service.service_id === selectedId, idx)).join('');
+
+    return `<section class="bk-group${isOpen ? ' is-open' : ''}${hasSelected ? ' has-selected' : ''}" data-group="${key}" style="--bk-g: ${Math.min(groupIndex, 8)}">`
+      + `<h3 class="bk-group-label" id="${headingId}">`
+      + `<button type="button" class="bk-cat-trigger" data-group-toggle="${key}" aria-expanded="${isOpen ? 'true' : 'false'}" aria-controls="${panelId}">`
+      + `<span class="bk-cat-num" aria-hidden="true">${numeral}</span>`
+      + `<span class="bk-cat-copy"><span class="bk-cat-title">${escapeHtml(group.label)}</span>${chosenNote}</span>`
+      + `<span class="bk-cat-right"><span class="bk-cat-meta">${metaText}</span>`
+      + '<span class="bk-cat-icon" aria-hidden="true"><span></span><span></span></span></span>'
+      + '</button></h3>'
+      + `<div class="bk-cat-panel" id="${panelId}" role="region" aria-labelledby="${headingId}"${isOpen ? '' : ' inert'}>`
+      + `<div class="bk-cat-panel-inner"><div class="bk-card-grid">${cards}</div></div>`
+      + '</div></section>';
   }).join('');
-  return `${categoryNav(ordered)}${sections}`;
+
+  return `<p class="bk-step-lead">Select a service category to explore available treatments.</p>`
+    + `<div class="bk-accordion">${sections}</div>`;
 }
 
 export function renderCatalogUnavailable() {

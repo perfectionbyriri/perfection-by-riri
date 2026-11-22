@@ -168,6 +168,18 @@ if (app) {
     if (focus) focusTitle();
   }
 
+  function toggleGroup(key) {
+    for (const section of elements.step.querySelectorAll('.bk-group')) {
+      const trigger = section.querySelector('[data-group-toggle]');
+      const panel = section.querySelector('.bk-cat-panel');
+      const isTarget = section.dataset.group === key;
+      const nextOpen = isTarget ? !section.classList.contains('is-open') : false;
+      section.classList.toggle('is-open', nextOpen);
+      trigger?.setAttribute('aria-expanded', nextOpen ? 'true' : 'false');
+      if (panel) panel.inert = !nextOpen;
+    }
+  }
+
   function selectService(id) {
     const service = findService(id);
     if (!service) return;
@@ -175,6 +187,22 @@ if (app) {
     state.set({ serviceId: id });
     for (const card of elements.step.querySelectorAll('.bk-card')) {
       card.setAttribute('aria-pressed', card.dataset.serviceId === id ? 'true' : 'false');
+    }
+    for (const section of elements.step.querySelectorAll('.bk-group')) {
+      const hasMatch = Boolean(section.querySelector(`.bk-card[data-service-id="${CSS.escape(id)}"]`));
+      section.classList.toggle('has-selected', hasMatch);
+      const copy = section.querySelector('.bk-cat-copy');
+      let badge = copy?.querySelector('.bk-cat-chosen');
+      if (hasMatch && copy) {
+        if (!badge) {
+          badge = document.createElement('span');
+          badge.className = 'bk-cat-chosen';
+          copy.append(badge);
+        }
+        badge.textContent = `Selected · ${service.name}`;
+      } else {
+        badge?.remove();
+      }
     }
     const continueButton = elements.step.querySelector('[data-action="continue"]');
     if (continueButton) {
@@ -201,14 +229,9 @@ if (app) {
   }
 
   elements.step.addEventListener('click', (event) => {
-    const groupTab = event.target.closest('[data-group-jump]');
-    if (groupTab) {
-      const key = groupTab.dataset.groupJump;
-      for (const tab of elements.step.querySelectorAll('[data-group-jump]')) {
-        tab.classList.toggle('is-active', tab === groupTab);
-      }
-      const section = elements.step.querySelector(`.bk-group[data-group="${key}"]`);
-      section?.scrollIntoView({ behavior: prefersReducedMotion() ? 'auto' : 'smooth', block: 'start' });
+    const groupToggle = event.target.closest('[data-group-toggle]');
+    if (groupToggle) {
+      toggleGroup(groupToggle.dataset.groupToggle);
       return;
     }
     const card = event.target.closest('.bk-card');
@@ -407,18 +430,18 @@ if (app) {
   }
 
   // D§4 step 4: Jost is not available inside Square's iframe, so the card
-  // field falls back to a system sans tuned to the warm chocolate theme.
+  // field falls back to a system sans tuned to the obsidian black theme.
   const CARD_STYLE = {
-    input: { backgroundColor: '#34251c', color: '#f6efe5', fontSize: '16px', fontFamily: 'sans-serif' },
-    'input::placeholder': { color: '#c8b6a1' },
-    'input.is-error': { color: '#f09589' },
-    '.input-container': { borderColor: '#7d6752', borderRadius: '0px' },
+    input: { backgroundColor: '#141312', color: '#f4efe8', fontSize: '16px', fontFamily: 'sans-serif' },
+    'input::placeholder': { color: '#a69e94' },
+    'input.is-error': { color: '#eb8f82' },
+    '.input-container': { borderColor: '#4a4237', borderRadius: '0px' },
     '.input-container.is-focus': { borderColor: '#dfc094' },
-    '.input-container.is-error': { borderColor: '#f09589' },
-    '.message-text': { color: '#c8b6a1' },
-    '.message-text.is-error': { color: '#f09589' },
-    '.message-icon': { color: '#c8b6a1' },
-    '.message-icon.is-error': { color: '#f09589' }
+    '.input-container.is-error': { borderColor: '#eb8f82' },
+    '.message-text': { color: '#a69e94' },
+    '.message-text.is-error': { color: '#eb8f82' },
+    '.message-icon': { color: '#a69e94' },
+    '.message-icon.is-error': { color: '#eb8f82' }
   };
 
   const UNAVAILABLE_HTML = '<p>Online booking is taking a short break. Please call <a href="tel:+14258450045">(425) 845 0045</a> and we&rsquo;ll book you in.</p>';

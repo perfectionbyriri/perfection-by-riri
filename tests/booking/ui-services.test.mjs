@@ -63,15 +63,24 @@ test('the service list markup has aria-pressed, button semantics and no photos',
   }
 });
 
-test('the service list includes category jump tabs in display order and staggered indices', () => {
-  const html = renderServices({ groups: GROUPS, focusGroup: 'lash-lift' });
-  assert.match(html, /<nav class="bk-group-nav" aria-label="Service categories">/);
-  const tabs = [...html.matchAll(/data-group-jump="([^"]+)"/g)].map((match) => match[1]);
-  assert.equal(tabs.length, 6);
-  assert.equal(tabs[0], 'lash-lift');
-  const all = cards(html);
-  assert.match(all[0], /style="--bk-i: 0"/);
-  assert.match(all[all.length - 1], /style="--bk-i: 10"/);
+test('all categories start collapsed by default when nothing is selected or focused', () => {
+  const html = renderServices({ groups: GROUPS });
+  const triggers = [...html.matchAll(/<button[^>]*data-group-toggle="([^"]+)"[^>]*>/g)];
+  assert.equal(triggers.length, 6);
+  for (const match of triggers) assert.match(match[0], /aria-expanded="false"/);
+  assert.equal((html.match(/class="bk-cat-panel"[^>]*\binert\b/g) ?? []).length, 6);
+  assert.doesNotMatch(html, /class="bk-group is-open/);
+});
+
+test('focusGroup or selectedId opens only its matching category accordion', () => {
+  const focused = renderServices({ groups: GROUPS, focusGroup: 'lash-lift' });
+  assert.match(focused, /data-group-toggle="lash-lift" aria-expanded="true"/);
+  assert.equal((focused.match(/aria-expanded="true"/g) ?? []).length, 1);
+  assert.equal((focused.match(/class="bk-cat-panel"[^>]*\binert\b/g) ?? []).length, 5);
+
+  const selected = renderServices({ groups: GROUPS, selectedId: 'svc_lash_lift' });
+  assert.match(selected, /data-group-toggle="lash-lift" aria-expanded="true"/);
+  assert.match(selected, /class="bk-cat-chosen">Selected · /);
 });
 
 test('the price is rendered from price_cents as $165 and the duration from minutes', () => {
@@ -99,10 +108,11 @@ test('catalog text is escaped', () => {
   assert.match(html, /&quot;quoted&quot;/);
 });
 
-test('each group has a heading, service count and a rule', () => {
+test('each group has an accordion trigger with title, count and starting price', () => {
   const html = renderServices({ groups: GROUPS });
   assert.equal((html.match(/<h3 class="bk-group-label"/g) ?? []).length, 6);
-  assert.match(html, /<h3 class="bk-group-label"[^>]*>Lash extensions<span class="bk-group-count">\d+<\/span><\/h3>/);
+  assert.match(html, /<span class="bk-cat-title">Lash extensions<\/span>/);
+  assert.match(html, /<span class="bk-cat-meta">\d+ services · From \$\d+<\/span>/);
 });
 
 test('the catalog-unavailable state offers the phone number', () => {
