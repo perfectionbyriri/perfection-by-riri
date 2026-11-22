@@ -659,7 +659,7 @@ html.motion-armed .svc-pmu .pmu-cta-copy { opacity: 0 }
   padding: 42px 38px 28px;
   background: var(--card)
 }
-.svc-pmu .pmu-touchups .pmu-kicker { margin-bottom: 17px; color: #917650 }
+.svc-pmu .pmu-touchups .pmu-kicker { margin-bottom: 17px; color: #7a5e3a }
 .svc-pmu .pmu-touchups > h3 { font-size: 42px }
 .svc-pmu .pmu-touchups-intro {
   max-width: 31ch;
@@ -698,7 +698,7 @@ html.motion-armed .svc-pmu .pmu-cta-copy { opacity: 0 }
 /* --------------------------------------------------------------------------
    THE RIRI STANDARD Â· compact proof rail separating pricing from process.
    -------------------------------------------------------------------------- */
-.svc-pmu .pmu-standard { padding: 50px 0 54px; background: #ebe4dc }
+.svc-pmu .pmu-standard { padding: 50px 0 54px; background: #ebe4dc; --muted: #625f58 }
 .svc-pmu .pmu-standard-head {
   display: flex;
   align-items: baseline;
@@ -848,7 +848,7 @@ html.motion-armed .svc-pmu .pmu-cta-copy { opacity: 0 }
   width: 46px;
   height: 46px;
   padding: 0;
-  border: 1px solid var(--line);
+  border: 1px solid #8a857c;
   border-radius: 50%;
   background: transparent;
   color: var(--ink);
@@ -856,7 +856,7 @@ html.motion-armed .svc-pmu .pmu-cta-copy { opacity: 0 }
   transition: color 200ms var(--ease-premium), border-color 200ms var(--ease-premium), opacity 200ms var(--ease-premium)
 }
 .svc-pmu .pmu-results-arrow svg { width: 18px; height: 18px }
-.svc-pmu .pmu-results-arrow:disabled { opacity: .32; cursor: default }
+.svc-pmu .pmu-results-arrow:disabled { opacity: .42; cursor: default }
 .svc-pmu .pmu-results-arrow:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px }
 /* The carousel wrapper is the single scroll-reveal target: slides inside a
    horizontal scroller may never intersect the viewport on their own, so they

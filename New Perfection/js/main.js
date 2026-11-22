@@ -28,41 +28,41 @@
       name: 'Lash extensions',
       note: 'Individual extensions for soft, natural definition.',
       items: [
-        { image: 'images/Lash%20Extensions/lash-extensions-results-155.webp', alt: 'Lash extensions result: natural lashes on the left, softly defined extensions on the right.', description: 'A SOFT, FULL SET WITH A NATURAL, DEFINED FINISH.' },
-        { image: 'images/Lash%20Extensions/eyelashextensions-results-155.webp', alt: 'Lash extensions result: a wispy, lightweight set.', description: 'A WISPY SET FOR LIGHTWEIGHT TEXTURE AND DEFINITION.' },
-        { image: 'images/Lash%20Extensions/lashextensions1-results-155.webp', alt: 'Lash extensions result: full volume lashes above natural lashes.', description: 'A FULL SET WITH A SOFT, DEFINED FINISH.' },
-        { image: 'images/Lash%20Extensions/lashextensions2-results-155.webp', alt: 'Lash extensions result: a dramatic, softly wisped set.', description: 'A DRAMATIC SET WITH A SOFT, WISPY FINISH.' }
+        { image: 'images/Lash%20Extensions/lash-extensions-results-155.webp', alt: 'Lash extensions result: natural lashes on the left, softly defined extensions on the right.', description: 'A soft, full set with a natural, defined finish.' },
+        { image: 'images/Lash%20Extensions/eyelashextensions-results-155.webp', alt: 'Lash extensions result: a wispy, lightweight set.', description: 'A wispy set for lightweight texture and definition.' },
+        { image: 'images/Lash%20Extensions/lashextensions1-results-155.webp', alt: 'Lash extensions result: full volume lashes above natural lashes.', description: 'A full set with a soft, defined finish.' },
+        { image: 'images/Lash%20Extensions/lashextensions2-results-155.webp', alt: 'Lash extensions result: a dramatic, softly wisped set.', description: 'A dramatic set with a soft, wispy finish.' }
       ]
     },
     permanentMakeup: {
       name: 'Permanent makeup',
       note: 'Subtle, refined definition designed to last.',
       items: [
-        { image: 'images/PMU/eye-liner-results-155.webp', alt: 'Permanent makeup result: softly defined eyeliner along the upper lash line.', description: 'A SOFTLY DEFINED EYELINER ALONG THE UPPER LASH LINE.' },
-        { image: 'images/PMU/eyeliner-results-155.webp', alt: 'Permanent makeup result: refined eyeliner with a delicate, natural finish.', description: 'REFINED EYELINER WITH A DELICATE, NATURAL FINISH.' },
-        { image: 'images/PMU/lip-blush-results-155.webp', alt: 'Permanent makeup result: lip blush with a soft, even tint.', description: 'LIP BLUSH WITH A SOFT, EVEN TINT.' },
-        { image: 'images/PMU/lip-blush3-results-155.webp', alt: 'Permanent makeup result: lip blush with a fuller, rosier tint.', description: 'LIP BLUSH WITH A FULLER, ROSIER TINT.' },
-        { image: 'images/PMU/lipblush-results-155.webp', alt: 'Permanent makeup result: lip blush with a smooth, natural-looking tint.', description: 'LIP BLUSH WITH A SMOOTH, NATURAL-LOOKING TINT.' },
-        { image: 'images/PMU/ombre-brows-results-155.webp', alt: 'Permanent makeup result: ombré powder brows with a soft, defined shape.', description: 'OMBRÉ POWDER BROWS WITH A SOFT, DEFINED SHAPE.' },
-        { image: 'images/PMU/powder-brows-results-155.webp', alt: 'Permanent makeup result: powder brows with a softly shaded finish.', description: 'POWDER BROWS WITH A SOFTLY SHADED FINISH.' },
-        { image: 'images/PMU/powderbrows-results-155.webp', alt: 'Permanent makeup result: powder brows with gently defined arches.', description: 'POWDER BROWS WITH GENTLY DEFINED ARCHES.' }
+        { image: 'images/PMU/eye-liner-results-155.webp', alt: 'Permanent makeup result: softly defined eyeliner along the upper lash line.', description: 'A softly defined eyeliner along the upper lash line.' },
+        { image: 'images/PMU/eyeliner-results-155.webp', alt: 'Permanent makeup result: refined eyeliner with a delicate, natural finish.', description: 'Refined eyeliner with a delicate, natural finish.' },
+        { image: 'images/PMU/lip-blush-results-155.webp', alt: 'Permanent makeup result: lip blush with a soft, even tint.', description: 'Lip blush with a soft, even tint.' },
+        { image: 'images/PMU/lip-blush3-results-155.webp', alt: 'Permanent makeup result: lip blush with a fuller, rosier tint.', description: 'Lip blush with a fuller, rosier tint.' },
+        { image: 'images/PMU/lipblush-results-155.webp', alt: 'Permanent makeup result: lip blush with a smooth, natural-looking tint.', description: 'Lip blush with a smooth, natural-looking tint.' },
+        { image: 'images/PMU/ombre-brows-results-155.webp', alt: 'Permanent makeup result: ombré powder brows with a soft, defined shape.', description: 'Ombré powder brows with a soft, defined shape.' },
+        { image: 'images/PMU/powder-brows-results-155.webp', alt: 'Permanent makeup result: powder brows with a softly shaded finish.', description: 'Powder brows with a softly shaded finish.' },
+        { image: 'images/PMU/powderbrows-results-155.webp', alt: 'Permanent makeup result: powder brows with gently defined arches.', description: 'Powder brows with gently defined arches.' }
       ]
     },
     lashLift: {
       name: 'Lash lift',
       note: 'An upward curl and deeper tint for effortless definition.',
       items: [
-        { image: 'images/Lash%20Lift/lash-lift-results-155.webp', alt: 'Lash lift result: relaxed lashes on the left, lifted lashes on the right.', description: 'A NATURAL LIFT WITH A SOFT, DEFINED CURL.' },
-        { image: 'images/Lash%20Lift/lashlift-results-155.webp', alt: 'Lash lift result: natural lashes on the left, lifted and curled lashes on the right.', description: 'A LIFTED, DEFINED CURL FOR A NATURALLY OPEN LOOK.' }
+        { image: 'images/Lash%20Lift/lash-lift-results-155.webp', alt: 'Lash lift result: relaxed lashes on the left, lifted lashes on the right.', description: 'A natural lift with a soft, defined curl.' },
+        { image: 'images/Lash%20Lift/lashlift-results-155.webp', alt: 'Lash lift result: natural lashes on the left, lifted and curled lashes on the right.', description: 'A lifted, defined curl for a naturally open look.' }
       ]
     },
     browLamination: {
       name: 'Brow lamination &amp; tint',
       note: 'Fuller, defined brows with a soft, natural finish.',
       items: [
-        { image: 'images/Brow%20Lamination%20%26%20Tint/browlamination-results-155.webp', alt: 'Brow lamination and tint result: natural brows on the left, fuller defined brows on the right.', description: 'A FULLER, SMOOTHED SHAPE WITH SOFT DEFINITION.' },
-        { image: 'images/Brow%20Lamination%20%26%20Tint/brow-lamination-tint-results-155.webp', alt: 'Brow lamination and tint result: fuller, defined brows with a soft finish.', description: 'FULLER, DEFINED BROWS WITH A SOFT, NATURAL FINISH.' },
-        { image: 'images/Brow%20Lamination%20%26%20Tint/browlamination1-results-155.webp', alt: 'Brow lamination and tint result: a fluffed, styled brow shape with defined arches.', description: 'A FLUFFED, STYLED SHAPE WITH DEFINED ARCHES.' }
+        { image: 'images/Brow%20Lamination%20%26%20Tint/browlamination-results-155.webp', alt: 'Brow lamination and tint result: natural brows on the left, fuller defined brows on the right.', description: 'A fuller, smoothed shape with soft definition.' },
+        { image: 'images/Brow%20Lamination%20%26%20Tint/brow-lamination-tint-results-155.webp', alt: 'Brow lamination and tint result: fuller, defined brows with a soft finish.', description: 'Fuller, defined brows with a soft, natural finish.' },
+        { image: 'images/Brow%20Lamination%20%26%20Tint/browlamination1-results-155.webp', alt: 'Brow lamination and tint result: a fluffed, styled brow shape with defined arches.', description: 'A fluffed, styled shape with defined arches.' }
       ]
     }
   };
@@ -82,8 +82,8 @@
     browLamination: '<p class="eyebrow">MY SIGNATURE SERVICES</p><h2 id="dialog-title">Brow lamination &amp; tint</h2><p>Fuller, defined brows with a soft, natural finish. Brow lamination smooths and lifts the natural brow hairs for a softly groomed shape.</p>',
     permanentMakeup: '<p class="eyebrow">MY SIGNATURE SERVICES</p><h2 id="dialog-title">Permanent makeup</h2><p>Subtle, refined definition designed to last, tailored to your features. Ombré powder brows, lip blush and eyeliner are designed around your features.</p>',
     appointment: '<p class="eyebrow">CONTACT</p><h2 id="dialog-title">Perfection by Riri</h2><address class="dialog-contact"><a class="dialog-map-link" href="' + mapsUrl + '" target="_blank" rel="noopener noreferrer" aria-label="Open Perfection by Riri location in Google Maps">18205 Alderwood Mall Pkwy A<br>Suite 918<br>Lynnwood, WA 98037</a><a class="dialog-phone" href="tel:+14258450045">(425) 845 0045</a></address><p class="eyebrow dialog-hours-title">Hours</p><p class="dialog-hours">Monday–Saturday<br>10:00 AM–5:00 PM<br>Sunday<br>Closed</p>',
-    privacy: '<p class="eyebrow">WEBSITE INFORMATION</p><h2 id="dialog-title">Privacy Policy</h2><p>Perfection by Riri respects your privacy. This website uses Google Analytics to understand visits and interactions, including appointment, phone and directions clicks. Google Analytics may use cookies and process usage data. This website does not collect personal information through its own forms or accounts.</p><p>Appointment bookings are handled through Setmore, our third-party booking provider. A hosting provider may process ordinary connection information when serving this website.</p><p>If you have questions about how your information is handled, please contact the studio at (425) 845 0045.</p>',
-    terms: '<p class="eyebrow">WEBSITE INFORMATION</p><h2 id="dialog-title">Terms &amp; Conditions</h2><p>All services, prices and availability are subject to change. Prices shown on this website describe the services offered at Perfection by Riri and are confirmed at the time of booking.</p><p>Appointments can be reserved through Setmore, our third-party booking provider. Please contact the studio at (425) 845 0045 with any questions before your appointment.</p><p>Viewing this website does not create an appointment or purchase a service.</p>'
+    privacy: '<p class="eyebrow">WEBSITE INFORMATION</p><h2 id="dialog-title">Privacy policy</h2><p>Perfection by Riri respects your privacy. This website uses Google Analytics to understand visits and interactions, including appointment, phone and directions clicks. Google Analytics may use cookies and process usage data. This website does not collect personal information through its own forms or accounts.</p><p>Appointment bookings are handled through Setmore, our third-party booking provider. A hosting provider may process ordinary connection information when serving this website.</p><p>If you have questions about how your information is handled, please contact the studio at (425) 845 0045.</p>',
+    terms: '<p class="eyebrow">WEBSITE INFORMATION</p><h2 id="dialog-title">Terms &amp; conditions</h2><p>All services, prices and availability are subject to change. Prices shown on this website describe the services offered at Perfection by Riri and are confirmed at the time of booking.</p><p>Appointments can be reserved through Setmore, our third-party booking provider. Please contact the studio at (425) 845 0045 with any questions before your appointment.</p><p>Viewing this website does not create an appointment or purchase a service.</p>'
   };
 
 
@@ -600,6 +600,8 @@
   initReviews();
 
   // Signature services: hovering or focusing a service shows its photo.
+  // Set by initLoopVideos(); re-evaluates which clips may play.
+  let refreshLoopVideos = () => {};
   function initHomeServices() {
     const root = document.querySelector('[data-home-services]');
     if (!root) return;
@@ -608,6 +610,7 @@
     const activate = (key) => {
       items.forEach((item) => item.classList.toggle('is-active', item.dataset.svc === key));
       panels.forEach((panel) => panel.classList.toggle('is-active', panel.dataset.panel === key));
+      refreshLoopVideos();
     };
     items.forEach((item) => {
       item.addEventListener('mouseenter', () => activate(item.dataset.svc));
@@ -641,14 +644,25 @@
   function initLoopVideos() {
     const videos = Array.prototype.slice.call(document.querySelectorAll('video[data-loop-video]'));
     if (!videos.length || reducedMotion.matches || !('IntersectionObserver' in window)) return;
+    // Hidden stage panels stay in the layout (opacity/visibility), so they
+    // intersect too: only the active panel's clip may play.
+    const visible = new Set();
+    const update = (video) => {
+      const panel = video.closest('.home-svc-panel');
+      if (visible.has(video) && (!panel || panel.classList.contains('is-active'))) {
+        const playing = video.play();
+        if (playing && playing.catch) playing.catch(() => {});
+      } else if (!video.paused) video.pause();
+    };
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
-        const video = entry.target;
-        if (entry.isIntersecting) { const playing = video.play(); if (playing && playing.catch) playing.catch(() => {}); }
-        else video.pause();
+        if (entry.isIntersecting) visible.add(entry.target);
+        else visible.delete(entry.target);
+        update(entry.target);
       });
     }, { threshold: 0.2 });
     videos.forEach((video) => { video.muted = true; observer.observe(video); });
+    refreshLoopVideos = () => videos.forEach(update);
   }
   initLoopVideos();
 
