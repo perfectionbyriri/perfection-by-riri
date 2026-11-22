@@ -77,7 +77,7 @@ Resolves A§20 V1 and V2. **Gate:** Tasks 2–23 start only after the owner conf
   - `schemaOf(value: unknown): unknown` — a type tree: objects map keys to child schemas, arrays become `[schemaOf(first)]` or `[]`, primitives become `'string'|'number'|'boolean'|'null'`.
   - `redact(value: unknown, key?: string): unknown` — rules below.
   - `studioWeekAfter(now: Date): { startAt: string, endAt: string }` — the next Monday 00:00 America/Los_Angeles to the following Monday 00:00, RFC 3339 with each boundary's own offset.
-  - `runProbe({ env, fetch, now, log }): Promise<Report>` where `Report = { conclusion: 'v2_ok'|'v1_only'|'neither'|'skipped', v2: {...}, v1: {...} }`.
+  - `runProbe({ env, fetch, now, log }): Promise<Report>` where `Report = { conclusion: 'v2_ok'|'v2_token_ok_reads_failed'|'v1_only'|'neither'|'skipped', v2: {...}, v1: {...} }`.
 - CLI: `node worker/tools/setmore-probe.js` prints `JSON.stringify(report, null, 2)` and exits 0.
 
 Redaction rules (`redact`):
@@ -93,7 +93,7 @@ Probe sequence (`runProbe`):
 2. v2 token: `GET {v2}/o/oauth2/token?refreshToken=…`. Record `status`, `schemaOf(body)`, `redact(body)`.
 3. If the v2 token works: `GET /staff`, `GET /services`, `GET /categories` (one page each, Bearer). Then `GET /slots` with `provider_id` = the first staff id, `duration` = the first service's numeric `duration|duration_minutes` (default 60), `account_id` (first found as `account_id|merchant_id|company_id` in the token data, staff[0] or services[0]; else the token's `user_id`; record `account_id_source`), `start_at`/`end_at` from `studioWeekAfter`, `timezone=America/Los_Angeles`, `slot_limit=5`. Record status, schema and redacted sample for each.
 4. v1 token: `GET https://developer.setmore.com/api/v1/o/oauth2/token?refreshToken=…`. Record status and schema only.
-5. Conclusion: `v2_ok` if the v2 token and all v2 reads returned 2xx; `v1_only` if the v2 token failed and v1 returned 2xx; otherwise `neither`.
+5. Conclusion: `v2_ok` if the v2 token and all v2 reads returned 2xx; `v2_token_ok_reads_failed` if the v2 token worked but a read failed; `v1_only` if the v2 token failed and v1 returned 2xx; otherwise `neither`.
 6. Every request uses `method: 'GET'`, `redirect: 'error'`, `AbortSignal.timeout(10000)`. URLs in the report omit the query string.
 
 - [ ] **Step 1: Write the failing tests** in `tests/booking/setmore-probe.test.mjs`:

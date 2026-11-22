@@ -1,0 +1,42 @@
+name: Setmore API probe (read-only)
+
+# Read-only check of the owner's Setmore refresh token against API v2 and v1,
+# plus redacted response shapes (docs/booking/IMPLEMENTATION_PLAN.md, Task 1).
+# GET requests only; never touches customers or bookings. The repository is
+# public, so the probe prints schemas and allowlisted non-personal values only.
+# The push trigger is temporary and is removed before this branch merges.
+
+"on":
+  workflow_dispatch:
+  push:
+    branches:
+      - claude/dazzling-shannon-7jkxc1
+    paths:
+      - worker/tools/setmore-probe.js
+      - .github/workflows/setmore-probe.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: setmore-probe
+  cancel-in-progress: false
+
+jobs:
+  probe:
+    name: setmore-probe
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: lts/*
+
+      - name: Run read-only probe
+        run: node worker/tools/setmore-probe.js
+        env:
+          SETMORE_REFRESH_TOKEN: ${{ secrets.SETMORE_REFRESH_TOKEN }}

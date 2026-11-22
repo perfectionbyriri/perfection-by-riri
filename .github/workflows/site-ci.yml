@@ -30,12 +30,12 @@ jobs:
           while IFS= read -r -d '' file; do
             node --check "$file"
             count=$((count + 1))
-          done < <(find "New Perfection" -type f -name '*.js' -print0)
+          done < <(find "New Perfection" worker -type f -name '*.js' -print0)
           echo "Checked $count JavaScript file(s)."
 
       - name: Run unit tests
         shell: bash
-        run: node --test tests/*.test.cjs
+        run: node --test tests/*.test.cjs tests/booking/*.test.mjs
 
       - name: Check for conflict markers
         shell: bash
