@@ -1,0 +1,7 @@
+# Cloudflare static-asset headers (docs/booking/ARCHITECTURE.md §16).
+# The script hash allows the inline Google tag snippet in book/index.html;
+# tests/booking/book-page.test.mjs fails if that snippet changes without it.
+/book/*
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'sha256-styz7pZ6XEaIixVcbPviztWIyqtsfwgUVSwRMuiXoMY=' https://www.googletagmanager.com https://web.squarecdn.com https://sandbox.web.squarecdn.com https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://web.squarecdn.com https://sandbox.web.squarecdn.com; img-src 'self' data: https://www.googletagmanager.com https://*.google-analytics.com https://web.squarecdn.com https://sandbox.web.squarecdn.com; font-src 'self' https://web.squarecdn.com https://sandbox.web.squarecdn.com; connect-src 'self' https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com https://pci-connect.squareup.com https://pci-connect.squareupsandbox.com; frame-src https://web.squarecdn.com https://sandbox.web.squarecdn.com https://challenges.cloudflare.com; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin

@@ -1,0 +1,215 @@
+/* Booking flow · /book/ (docs/booking/DESIGN_SPEC.md §2–§5).
+
+   Reuses the site tokens from styles.css; the only new token is --error.
+   Square corners, no shadows: separation comes from --card fills and 1px
+   rules. Gold is an accent on dark only, never text on ivory. */
+
+:root {
+  --error: #8c2f23;
+  --bk-gutter: max(5.9vw, calc((100vw - 1272px) / 2));
+  --bk-summary-width: 340px;
+}
+
+.book-page .bk {
+  padding-block: 40px 64px;
+  min-height: 60vh;
+}
+
+.bk-shell {
+  width: auto;
+  max-width: none;
+  margin: 0;
+  padding-inline: var(--bk-gutter);
+}
+
+.bk-shell:focus { outline: none; }
+
+/* Heading block */
+.bk-head { margin-bottom: 40px; }
+
+.bk-eyebrow {
+  margin: 0 0 12px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 1.7px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.bk-title {
+  margin: 0 0 20px;
+  font-family: var(--serif);
+  font-size: var(--fs-h2);
+  font-weight: 400;
+  line-height: 1.06;
+  letter-spacing: -1.1px;
+}
+
+.bk-step-count {
+  margin: 0 0 16px;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 1.1px;
+  color: var(--ink);
+}
+
+/* Progress: four equal segments on a 1px rule; the current and completed
+   steps carry a heavier --ink rule so colour is never the only signal. */
+.bk-progress {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: bk-step;
+}
+
+.bk-progress-item {
+  counter-increment: bk-step;
+  padding-top: 12px;
+  border-top: 1px solid var(--muted);
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.bk-progress-item::before {
+  content: counter(bk-step) ". ";
+  font-variant-numeric: var(--price-numeric);
+}
+
+.bk-progress-item.is-done,
+.bk-progress-item[aria-current="step"] {
+  border-top: 3px solid var(--ink);
+  padding-top: 10px;
+  color: var(--ink);
+}
+
+.bk-progress-item[aria-current="step"] { font-weight: 500; }
+
+/* Layout: step content + sticky summary from 801px; one column below. */
+.bk-app { display: none; }
+.bk-enhanced .bk-app { display: block; }
+
+.bk-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) var(--bk-summary-width);
+  gap: 64px;
+  align-items: start;
+}
+
+.bk-main { min-width: 0; }
+
+.bk-step-title {
+  margin: 0 0 30px;
+  font-family: var(--serif);
+  font-size: var(--fs-h3);
+  font-weight: 400;
+  line-height: 1.2;
+  text-transform: none;
+}
+
+.bk-step-title:focus { outline: none; }
+.bk-step-title:focus-visible { outline: 2px solid #8a6c44; outline-offset: 5px; }
+
+/* Summary */
+.bk-summary {
+  position: sticky;
+  top: 24px;
+  padding: 30px;
+  background: var(--card);
+}
+
+.bk-summary-label {
+  margin: 0 0 20px;
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 1.1px;
+  line-height: 1.5;
+}
+
+.bk-summary-list { margin: 0; }
+
+.bk-summary-row {
+  padding-block: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.bk-summary-row dt {
+  margin: 0 0 4px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.bk-summary-row dd {
+  margin: 0;
+  font-size: var(--fs-body);
+  line-height: 1.5;
+  font-variant-numeric: var(--price-numeric);
+}
+
+.bk-fine {
+  margin: 20px 0 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+.bk-fine a,
+.bk-noscript a,
+.bk-banner a { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
+
+/* Banner: conflict, busy and unavailable messages (§7). */
+.bk-banner {
+  margin: 0 0 30px;
+  padding: 16px 20px;
+  border-left: 2px solid var(--error);
+  background: var(--card);
+  font-size: var(--fs-body);
+  line-height: 1.6;
+}
+
+.bk-banner:focus { outline: none; }
+.bk-banner:focus-visible { outline: 2px solid #8a6c44; outline-offset: 5px; }
+.bk-banner .button { margin-top: 16px; }
+
+/* Loading skeletons in the card fill; animated only when motion is welcome. */
+.bk-skeleton-card {
+  aspect-ratio: 4 / 5;
+  background: var(--card);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .bk-skeleton-card,
+  .bk-skeleton-row { animation: bk-pulse 1.4s var(--ease-soft, ease-in-out) infinite alternate; }
+}
+
+@keyframes bk-pulse { from { opacity: 1; } to { opacity: .55; } }
+
+.bk-noscript {
+  padding: 30px;
+  background: var(--card);
+  font-size: var(--fs-body);
+  line-height: 1.6;
+}
+
+.bk-noscript p { margin: 0; }
+
+@media (max-width: 800px) {
+  .book-page .bk { padding-block: 30px 40px; }
+  .bk-layout { grid-template-columns: minmax(0, 1fr); gap: 40px; }
+  .bk-summary { position: static; padding: 25px 20px; }
+  .bk-progress-label { font-size: 12px; }
+}
+
+@media (max-width: 540px) {
+  .bk-progress-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+  }
+}
