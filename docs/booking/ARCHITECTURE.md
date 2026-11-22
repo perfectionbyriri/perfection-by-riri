@@ -291,7 +291,7 @@ A Worker Cron Trigger (`*/15 * * * *`) scans `idem:*` records whose `updated_at`
 Payment forms attract card-testing bots. Protections:
 
 - **Cloudflare Turnstile** token required on `POST /appointments` (verified server-side).
-- Cloudflare Workers **Rate Limiting binding**: 5 POSTs per IP per 10 minutes, 60 GETs per IP per minute.
+- Cloudflare Workers **Rate Limiting binding**: 5 POSTs per IP per 60 seconds, 60 GETs per IP per minute. The binding allows only 10 s or 60 s periods, and its counts are approximate and per location. Owner-approved 2026-11-22: 5 POSTs / 60 s is enough; no Durable Object.
 - Square's own risk checks. Square SCA buyer verification (`verifyBuyer`) is used when Square requests it.
 
 ---
@@ -589,15 +589,17 @@ Findings (2026-11-22):
 | V6 | Can `POST /bookings` store our own marker (for example the hashed idempotency key in `meta_data` or `label`) and return it on lookup? This would make the cron's match exact. | Cron matching (nice to have; the service + time + customer match already works) | The owner-approved live test in Task 23. |
 | V3 | Customer notifications for API-created bookings. | Confirmation copy | One owner-approved live test booking on the owner's email, then `DELETE /bookings/{id}`. |
 | V4 | ~~Card fee surcharge compliance~~ **Resolved 2026-11-22:** default fee 0% (owner). Re-open only if the fee is ever enabled. | — | — |
-| V5 | Square delayed capture: `delay_duration` minimum and default, `delay_action=CANCEL` behaviour, current `Square-Version`. Also confirm Wrangler supports the `run_worker_first` array form and the `ratelimits` binding in the pinned version. | Payments adapter, deploy config | Square API reference and Cloudflare Workers docs, checked at implementation time. |
+| V5 | **Resolved 2026-11-22** (docs read at implementation). Square: `delay_duration` is valid for card-not-present payments from `PT1M` to below `P7D`, so `PT48H` fits; `delay_action` is `CANCEL` or `COMPLETE`; `Square-Version` pinned to `2026-11-18`. CompletePayment and CancelPayment are not documented as idempotent, so on a 4xx the adapter reads `GET /v2/payments/{id}` and treats the call as done when the payment already has the target status (owner-approved 2026-11-22). Cloudflare: `assets.run_worker_first` accepts an array; the `ratelimits` binding needs Wrangler ≥ 4.36.0 and allows only 10 s or 60 s periods (see §8.5); local check ran on Wrangler 4.166.0. | — | — |
 | O1 | Square production `application_id`, `location_id`, access token (the same Square account the salon already uses?). | Live payments | Owner sets the secrets in Cloudflare. |
 | O2 | Google Ads conversion action for the new `purchase` event. | Ads measurement | Owner-approved plan in `google-ads-reports`. |
-| O3 | Email Routing destination for salon alerts. | Alerts | Owner verifies the address in Cloudflare. |
+| O3 | Email Routing destination for salon alerts. The owner will set up Cloudflare Email Routing before Task 23 (owner, 2026-11-22). | Alerts | Owner verifies the address in Cloudflare. |
 | O4 | Fill in real `service_id` values in `services-meta.json`. | Live catalog | Output of V2. |
 
 Owner-approved 2026-11-22: Turnstile + rate limiting, alerts by e-mail, `PT48H` authorization with immediate cancel, fee 0%.
 
 Owner-approved 2026-11-22 (second reply): `MIN_LEAD_MINUTES=120`, `BOOKING_HORIZON_DAYS=56`, `MEGA Volume Wispy` hidden (43 of 44).
+
+Owner decision 2026-11-22 (after the backend, Tasks 2–13): do **not** merge into `main` yet. Merging deploys through Workers Builds (`npx wrangler deploy` on `main`). The UI tasks continue on branch `claude/dazzling-shannon-7jkxc1`.
 
 Calls I made (the owner can override): `SLOT_STEP_MINUTES=15`, mock slots on the real 5-minute grid, catalog TTL 10 min, slots TTL 30 s, customer scan cap 2,000, 15-minute reconciliation cron.
 
