@@ -1,6 +1,6 @@
 # Booking UI — Design Spec
 
-Status: **draft for owner approval** · 2026-11-22 · Companion to [ARCHITECTURE.md](ARCHITECTURE.md).
+Status: **approved by the owner 2026-11-22** (amended: no card fee by default) · Companion to [ARCHITECTURE.md](ARCHITECTURE.md).
 
 This spec defines how the white-label booking flow at `/book/` looks and behaves. Every token, font and photo below is taken from the site source in `New Perfection/`. Nothing here introduces a new visual language. The only new token is an error colour; the site has none today.
 
@@ -212,18 +212,17 @@ Please enter your first name.  ← --error 13px, shown after blur or submit
  Anna Smith · anna@… · (425) …
 
  Deposit                         $50.00
- Card processing fee (3.1%)       $1.55
  ──────────────────────────────────────
- Due today                       $51.55
+ Due today                       $50.00
  Remaining balance is paid at the studio.
 
  CARD
  [ Square card field ]
- [ PAY $51.55 & BOOK ]           ← .button-gold, full width on mobile
+ [ PAY $50.00 & BOOK ]           ← .button-gold, full width on mobile
  Payment secured by Square.
 ```
 
-- All amounts come from the BFF quote in the catalog response. The UI never calculates money. The fee line label and rate come from config (`CARD_FEE_BASIS_POINTS`).
+- All amounts come from the BFF quote in the catalog response. The UI never calculates money. The card fee is **0% by default** (owner decision 2026-11-22), so no fee line is shown. A `Card processing fee (x%)` line appears only if the server quote has `fee_cents > 0` (`CARD_FEE_BASIS_POINTS` above 0).
 - The Square Web Payments SDK card field is styled through its `style` option: Jost (system fallback inside the iframe), 16px, `--ink` text, `--muted` placeholder, `--error` invalid colour, and an `--ivory`-matched background.
 - Services without a deposit (`deposit: "none"` in meta, for example Lash Removal at $30) skip the card block. The button reads `BOOK APPOINTMENT`.
 - While submitting: the button shows "Booking…" and `aria-busy`, and every step control is locked. A second submit is ignored (the idempotency key stays the same, see ARCHITECTURE §8).
@@ -236,7 +235,7 @@ Please enter your first name.  ← --error 13px, shown after blur or submit
  Classic full set
  Thursday, November 27 · 1:00 PM Pacific Time
  Perfection by Riri · Lynnwood, WA  [Directions]
- Deposit paid $51.55 · Receipt from Square sent to anna@…
+ Deposit paid $50.00 · Receipt from Square sent to anna@…
  [ ADD TO CALENDAR ]  (.ics, generated client-side)
  Need to change or cancel? Call (425) 845 0045.
  Booking policy (verbatim)

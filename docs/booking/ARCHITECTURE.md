@@ -1,6 +1,6 @@
 # Booking BFF — Architecture
 
-Status: **draft for owner approval** · 2026-11-22 · Companion to [DESIGN_SPEC.md](DESIGN_SPEC.md).
+Status: **approved by the owner 2026-11-22**, with amendments applied (card fee default 0%, Square authorization 48 h with immediate cancel, conversion hook) · Companion to [DESIGN_SPEC.md](DESIGN_SPEC.md) · Plan: [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md).
 
 This document describes the backend-for-frontend (BFF) that powers `/book/`. It runs as a Cloudflare Worker in this repository, in front of the Setmore Booking API v2 and Square. It also records the decisions made with the owner, the evidence behind them, and the facts that are still unverified.
 
@@ -217,9 +217,12 @@ validate input + Turnstile
 ```
 
 - The customer is resolved **after** card authorization, so declined cards and card-testing bots never create Setmore contacts.
-- Steps 2–6 use **delayed capture**. The card is authorized first and captured only after Setmore confirms the booking. If the Worker dies between steps 2 and 6, Square's `delay_action=CANCEL` voids the authorization when `delay_duration` ends, so the client is never charged without a booking. `delay_duration` is set to `PT15M` (Square's minimum and default values to be confirmed in verification V5).
+- Steps 2–6 use **delayed capture**. The card is authorized first and captured only after Setmore confirms the booking.
+- **Authorization lifetime (owner decision): `delay_duration=PT48H`** (allowed config range `PT24H`–`PT48H`), with `delay_action=CANCEL`. The long window gives the salon time to complete the capture by hand in the Square Dashboard if a network failure happens *after* the Setmore booking exists (step 6). Square's limits for `delay_duration` are confirmed in V5.
+- **Any failure before or at Setmore booking creation (steps 3, 4, 5) calls `CancelPayment` immediately.** The 48 h window is never relied on to release a client's hold in normal error paths.
+- The payment id is written to the idempotency record right after step 2. If the Worker dies between steps 2 and 5, the **reconciliation cron** (§8.4) cancels the orphaned authorization within 15 minutes, so the client's hold is not left for 48 h.
 - Services with `deposit: "none"` skip steps 2 and 6 and the payment cancels.
-- Setmore `POST /bookings` body: `type: "APPOINTMENT"`, `account_id`, `provider_id`, `consumer_ids: [customerId]`, `service_id`, `start_at`, `end_at` (start + duration, RFC 3339 with offset), `cost` (Setmore price), `notes` (client notes + `"Deposit paid online via Square: $50.00 + $1.55 card fee. Square payment <id>. Booked on perfectionbyriri.com."`).
+- Setmore `POST /bookings` body: `type: "APPOINTMENT"`, `account_id`, `provider_id`, `consumer_ids: [customerId]`, `service_id`, `start_at`, `end_at` (start + duration, RFC 3339 with offset), `cost` (Setmore price), `notes` (client notes + `"Deposit paid online via Square: $50.00. Square payment <id>. Booked on perfectionbyriri.com."`; a fee clause is appended only when a fee is configured).
 
 ### 8.2 Slot conflict (owner decision)
 
@@ -235,7 +238,15 @@ validate input + Turnstile
 - Square `idempotency_key` = the same UUID, so Square deduplicates CreatePayment on retries.
 - KV is eventually consistent. Two simultaneous submits with the same key in different colos are additionally protected by Square's idempotency (one payment) and by the step 4/7 checks. Acceptable for a single-salon volume.
 
-### 8.4 Abuse protection
+### 8.4 Reconciliation cron
+
+A Worker Cron Trigger (`*/15 * * * *`) lists `idem:*` records with `state: "in_progress"` that are older than 10 minutes.
+
+- Record has a `payment_id` but no `booking_id`: call `CancelPayment`, set the state to `failed`, and log `orphan_authorization_cancelled`.
+- Record has both ids: the booking exists but capture was not confirmed. Do **not** cancel. Alert the salon once (`capture_failed_booking_kept`) so they can complete the capture by hand within the 48 h window.
+- A `CancelPayment` failure raises a `payment_cancel_failed` alert.
+
+### 8.5 Abuse protection
 
 Payment forms attract card-testing bots. Protections:
 
@@ -270,7 +281,17 @@ Match priority: email first, then phone. If the email matches customer X and the
 
 - GA4 property `G-9T26E3J0XS` (already on the site). The confirmation view fires `gtag('event', 'purchase', {transaction_id: <Setmore booking id>, value: <deposit total>, currency: 'USD', items: [{item_id: service_id, item_name}]})` **only** when the API response says `booking.status = "CONFIRMED"` and `deposit_status = "captured"` (or `"none"`).
 - Funnel events: `booking_view_service`, `booking_select_slot`, `booking_begin_checkout`, `booking_slot_conflict`. The existing `booking_click` on CTAs stays.
-- A Google Ads conversion action for the new flow (for example, "Website - Confirmed Paid Booking") is **not** created by this project. It needs the owner's approval of the exact plan, per project rules. The BFF and UI expose the event; wiring the Ads conversion is a separate approved task.
+- A Google Ads conversion action for the new flow (for example, "Website - Confirmed Paid Booking") is **not** created by this project. It needs the owner's approval of the exact plan, per project rules.
+- **Conversion hook (owner decision).** On the confirmation view, under the same conditions as `purchase`, the UI runs exactly once per booking:
+
+  ```js
+  const detail = { booking_id, payment_id, deposit_cents, value: deposit_cents / 100, currency: 'USD', service_id, service_name };
+  window.dataLayer = window.dataLayer || [];
+  window.dataLayer.push({ event: 'booking_confirmed', ...detail });
+  window.dispatchEvent(new CustomEvent('pbr:booking-confirmed', { detail }));
+  ```
+
+  `payment_id` is the Square payment id (`null` for no-deposit services). The future Google Ads conversion (gtag `conversion` or a GTM trigger on `booking_confirmed`) attaches to this hook without touching the booking code. The API response carries `deposit.payment_id` for this purpose.
 - Duplicate guard: a sessionStorage flag `purchase_sent:<booking id>` prevents a refresh from re-firing.
 
 ---
@@ -281,12 +302,12 @@ Match priority: email first, then phone. If the email matches customer X and the
 |---|---|---|
 | Deposit | `DEPOSIT_AMOUNT_CENTS=5000` | Setmore policy text, `PROJECT_CONTEXT` (`$50 deposit in Setmore`) |
 | Deposit applies when | Setmore price **>** deposit and meta `deposit: "standard"` | Owner-approved proposal (Lash Removal $30 has none) |
-| Card fee | `CARD_FEE_BASIS_POINTS=310` → $1.55 on $50, total **$51.55** | Derived: Setmore checkout $165 → $170.12 (fee $5.12 = 3.103%). Only a 3.1% rate reproduces $5.12 exactly; 2.9% + $0.30 gives $5.09. Script output kept in the session log. |
+| Card fee | **`CARD_FEE_BASIS_POINTS=0` (default)** → the client pays a flat **$50.00** | Owner decision 2026-11-22: no surcharge, to stay within card-network rules (Visa US 3% cap; no surcharge on debit cards). For reference, the Setmore checkout $165 → $170.12 implies 3.1% (only that rate reproduces $5.12; 2.9% + $0.30 gives $5.09). |
 | Rounding | `round_half_up(deposit × bp / 10000)` in integer cents | — |
 | Policy text (verbatim) | "Cancellations made on the same day as your appointment will result in the forfeiture of your $50 deposit. The deposit is non-refundable for same-day cancellations." | perfectionbyriri1.setmore.com, read 2026-11-22 |
 | Refund on an earlier cancellation | Manual, by the owner in the Square Dashboard | Owner, 2026-11-22 |
 
-**Compliance flag (owner decision needed before go-live):** passing a card fee to clients is a surcharge. Card-network rules cap surcharges (Visa US: 3%, to be verified) and forbid surcharging debit and prepaid cards. 310 bp is above that cap. The fee rate and its disclosure must be confirmed by the owner, and Square's surcharge policy checked, before live payments. The code keeps the rate configurable, and `0` disables the fee line.
+**Fee switch:** the rate stays configurable, but any value above `0` is a surcharge. Before anyone sets it above `0`, card-network rules (rate cap, debit and prepaid exclusion, disclosure) and Square's surcharge policy must be checked again. With `0`, the fee line is not shown anywhere and `fee_cents` is `0`.
 
 ---
 
@@ -368,7 +389,7 @@ All responses are JSON with `Content-Type: application/json; charset=utf-8` and 
       "services": [
         { "service_id": "svc_classic_full", "name": "Classic full set", "blurb": "Soft & understated",
           "duration_minutes": 120, "price_cents": 16500, "photo": { "...": "..." },
-          "deposit": { "required": true, "deposit_cents": 5000, "fee_cents": 155, "total_cents": 5155, "fee_basis_points": 310 } }
+          "deposit": { "required": true, "deposit_cents": 5000, "fee_cents": 0, "total_cents": 5000, "fee_basis_points": 0 } }
       ] }
   ],
   "checkout": {
@@ -419,7 +440,7 @@ Request:
 {
   "booking": { "id": "<setmore id>", "status": "CONFIRMED", "service_name": "Classic full set",
                "start_at": "2026-11-27T13:00:00-08:00", "end_at": "2026-11-27T15:00:00-08:00" },
-  "deposit": { "status": "captured", "total_cents": 5155, "receipt_url": "https://squareup.com/receipt/…" }
+  "deposit": { "status": "captured", "payment_id": "<square payment id>", "total_cents": 5000, "receipt_url": "https://squareup.com/receipt/…" }
 }
 ```
 
@@ -460,9 +481,9 @@ Secrets are set with `wrangler secret put` in Cloudflare. Plain vars go in `wran
 | `SQUARE_LOCATION_ID` | var | — | Public, sent to the browser |
 | `SQUARE_ACCESS_TOKEN` | **secret** | — | Server only |
 | `SQUARE_VERSION` | var | pinned at implementation | `Square-Version` header |
-| `SQUARE_DELAY_DURATION` | var | `PT15M` | Authorization lifetime (V5) |
+| `SQUARE_DELAY_DURATION` | var | `PT48H` | Authorization lifetime; allowed `PT24H`–`PT48H` (V5) |
 | `DEPOSIT_AMOUNT_CENTS` | var | `5000` | Deposit |
-| `CARD_FEE_BASIS_POINTS` | var | `310` | Fee (see compliance flag §11) |
+| `CARD_FEE_BASIS_POINTS` | var | `0` | Surcharge rate; `0` = none (see §11) |
 | `TURNSTILE_SITE_KEY` | var | Cloudflare test key in dev | Public |
 | `TURNSTILE_SECRET_KEY` | **secret** | Cloudflare test secret in dev | Server only |
 | `SALON_ALERT_EMAIL` | var | — | Verified Email Routing destination |
@@ -470,7 +491,7 @@ Secrets are set with `wrangler secret put` in Cloudflare. Plain vars go in `wran
 | `RATE_LIMITER` | rate-limit binding | — | Per-IP limits |
 | `ALERT_EMAIL` | send_email binding | — | Salon alerts |
 
-`wrangler.jsonc` changes: `"main": "worker/src/index.js"`, `assets.run_worker_first: ["/api/*"]`, `kv_namespaces`, `ratelimits`, `send_email`, `vars`. `assets.directory` stays `./New Perfection`.
+`wrangler.jsonc` changes: `"main": "worker/src/index.js"`, `assets.run_worker_first: ["/api/*"]`, `kv_namespaces`, `ratelimits`, `send_email`, `vars`, `triggers.crons: ["*/15 * * * *"]` (§8.4). `assets.directory` stays `./New Perfection`.
 
 ---
 
@@ -501,7 +522,7 @@ Findings (2026-11-22):
 ## 18. Observability and alerts
 
 - Structured JSON logs (Workers observability is already enabled in `wrangler.jsonc`): `event`, `request_id`, `route`, `upstream`, `status`, `duration_ms`, `scenario` (mock). There is no PII.
-- Salon alert e-mail (Cloudflare `send_email` binding to `SALON_ALERT_EMAIL`), sent for `double_booking_detected`, `capture_failed_booking_kept`, `payment_cancel_failed`, and `upstream_auth_failed`. Each alert has booking and payment ids only, plus a link to the Setmore calendar.
+- Salon alert e-mail (Cloudflare `send_email` binding to `SALON_ALERT_EMAIL`), sent for `double_booking_detected`, `capture_failed_booking_kept` (complete the capture by hand in Square within 48 h), `payment_cancel_failed`, and `upstream_auth_failed`. Each alert has booking and payment ids only, plus a link to the Setmore calendar.
 - Requires Cloudflare Email Routing enabled on the zone, with a verified destination address. This is an owner action (O3).
 
 ---
@@ -523,14 +544,16 @@ Findings (2026-11-22):
 | V1 | Does the owner's token work with **v2**? What are `account_id` and `provider_id`? (The voice agent uses **v1** `/api/v1/bookingapi`; v2 is "not backwards compatible", and token compatibility is not stated.) | Live mode | One read-only `GET /o/oauth2/token` + `GET /staff` against v2, run from a GitHub Actions `workflow_dispatch` job using a repository secret. Output: HTTP status and the ids (no PII). If it fails, request v2 access via api@setmore.com. |
 | V2 | Real v2 shapes: service price and duration fields, staff-to-service link, slot element format, create-customer required fields. | Live mode adapter | Same read-only job: redacted JSON samples of `/services`, `/categories`, `/slots` (one week). |
 | V3 | Customer notifications for API-created bookings. | Confirmation copy | One owner-approved live test booking on the owner's email, then `DELETE /bookings/{id}`. |
-| V4 | Card fee surcharge compliance (rate cap, debit cards, disclosure) and Square surcharge rules. | Live payments | Owner decision + Square policy page. |
+| V4 | ~~Card fee surcharge compliance~~ **Resolved 2026-11-22:** default fee 0% (owner). Re-open only if the fee is ever enabled. | — | — |
 | V5 | Square delayed capture: `delay_duration` minimum and default, `delay_action=CANCEL` behaviour, current `Square-Version`. Also confirm Wrangler supports the `run_worker_first` array form and the `ratelimits` binding in the pinned version. | Payments adapter, deploy config | Square API reference and Cloudflare Workers docs, checked at implementation time. |
 | O1 | Square production `application_id`, `location_id`, access token (the same Square account the salon already uses?). | Live payments | Owner sets the secrets in Cloudflare. |
 | O2 | Google Ads conversion action for the new `purchase` event. | Ads measurement | Owner-approved plan in `google-ads-reports`. |
 | O3 | Email Routing destination for salon alerts. | Alerts | Owner verifies the address in Cloudflare. |
 | O4 | Fill in real `service_id` values in `services-meta.json`. | Live catalog | Output of V2. |
 
-Calls I made (owner can override): `MIN_LEAD_MINUTES=120`, `BOOKING_HORIZON_DAYS=56`, 30-minute mock slot grid, `PT15M` authorization, Turnstile + rate limiting, alerts by e-mail, catalog TTL 10 min, slots TTL 30 s, customer scan cap 2,000.
+Owner-approved 2026-11-22: Turnstile + rate limiting, alerts by e-mail, `PT48H` authorization with immediate cancel, fee 0%.
+
+Calls I made (kept because the owner's reply left these blank; the owner can override): `MIN_LEAD_MINUTES=120`, `BOOKING_HORIZON_DAYS=56`, `MEGA Volume Wispy` hidden (43 of 44), 30-minute mock slot grid, catalog TTL 10 min, slots TTL 30 s, customer scan cap 2,000, 15-minute reconciliation cron.
 
 ---
 
