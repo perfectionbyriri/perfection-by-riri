@@ -137,7 +137,7 @@ export function createMockSetmoreFetch({
   rateLimitCount = 3,
   state = createMockState()
 } = {}) {
-  const counters = { rateLimited: 0, tokenExpired: false, slotCalls: 0 };
+  const counters = { rateLimited: new Map(), tokenExpired: false, slotCalls: 0 };
   const firstSlotStarts = new Set();
 
   async function handle(method, url, headers, readBody, active) {
@@ -153,8 +153,10 @@ export function createMockSetmoreFetch({
     if (!/^Bearer \S+/.test(headers.get('Authorization') ?? '')) return fail(401, 'token_invalid');
 
     const limit = active === 'rate_limited' ? rateLimitCount : active === 'rate_limited_once' ? 1 : 0;
-    if (counters.rateLimited < limit) {
-      counters.rateLimited += 1;
+    // Each route has its own 429 budget, so concurrent calls fail alike.
+    const limited = counters.rateLimited.get(path) ?? 0;
+    if (limited < limit) {
+      counters.rateLimited.set(path, limited + 1);
       return fail(429, 'rate_limited', { 'Retry-After': '1' });
     }
     if (active === 'token_expired' && !counters.tokenExpired) {

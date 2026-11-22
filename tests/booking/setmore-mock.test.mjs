@@ -175,3 +175,9 @@ test('state is shared between mock fetch instances', async () => {
   const b = setup({ state });
   assert.equal((await b.client.listCustomersPage()).items.length, 1);
 });
+
+test('rate_limited: each route has its own 429 budget, so concurrent calls all fail', async () => {
+  const { client } = setup({ scenario: 'rate_limited' });
+  const results = await Promise.allSettled([client.listServices(), client.listCategories(), client.listStaff()]);
+  assert.ok(results.every((result) => result.status === 'rejected' && result.reason instanceof SetmoreBusy));
+});
