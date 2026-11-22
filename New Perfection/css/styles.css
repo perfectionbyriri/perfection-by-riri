@@ -3657,6 +3657,12 @@ html:not(.enhanced) .review-nav {
   line-height:1
 }
 
+/* Desktop: a 45px hit area like the neighbouring links, without moving the
+   label (the negative margin cancels the padding in layout). */
+@media (min-width:801px) {
+  .nav-trigger { padding-block:16px; margin-block:-16px }
+}
+
 .nav-trigger:focus-visible {
   outline:2px solid var(--gold);
   outline-offset:5px
@@ -4067,4 +4073,16 @@ html:not(.enhanced) .review-nav {
   .nav-services.is-open .nav-dropdown-panel {
     transform:none !important
   }
+}
+
+/* Touch: footer links and legal buttons get a taller hit area (>= 32px tall,
+   above the WCAG 2.2 24px minimum) without changing the type. */
+@media (max-width:800px) {
+  .footer-grid ul a,
+  .footer-grid li button {
+    display:inline-block;
+    padding-block:7px
+  }
+  .footer-grid li { line-height:1.5 }
+  .footer-bottom button { padding-block:12px }
 }

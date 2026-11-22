@@ -58,11 +58,11 @@
 
   /* 3 · Page-local dialog. Content is the studio's verified information only. */
   const studioLinks = {
-    google: 'https://maps.app.goo.gl/2zzJp92GvUAGifaV8?g_st=ic',
-    instagram: 'https://www.instagram.com/perfection.byriri?stkn=eHcyYW1jODF5bXNi'
+    google: 'https://maps.app.goo.gl/2zzJp92GvUAGifaV8',
+    instagram: 'https://www.instagram.com/perfection.byriri'
   };
   const dialogs = {
-    appointment: '<p class="eyebrow">CONTACT</p><h2 id="svc-dialog-title">Perfection by Riri</h2><address class="dialog-contact"><a class="dialog-map-link" href="' + studioLinks.google + '" target="_blank" rel="noopener noreferrer" aria-label="Open Perfection by Riri location in Google Maps">18205 Alderwood Mall Pkwy A<br>Suite 918<br>Lynnwood, WA 98037</a><a class="dialog-phone" href="tel:+14258450045">(425) 845 0045</a></address><p class="eyebrow dialog-hours-title">Hours</p><p class="dialog-hours">Monday&ndash;Saturday<br>10:00 AM&ndash;5:00 PM<br>Sunday<br>Closed</p>',
+    appointment: '<p class="eyebrow">CONTACT</p><h2 id="svc-dialog-title">Perfection by Riri</h2><address class="dialog-contact"><a class="dialog-map-link" href="' + studioLinks.google + '" target="_blank" rel="noopener noreferrer" aria-label="Open Perfection by Riri location in Google Maps">18205 Alderwood Mall Pkwy&nbsp;A<br>Suite 918<br>Lynnwood, WA 98037</a><a class="dialog-phone" href="tel:+14258450045">(425) 845 0045</a></address><p class="eyebrow dialog-hours-title">Hours</p><p class="dialog-hours">Monday&ndash;Saturday<br>10:00 AM&ndash;5:00 PM<br>Sunday<br>Closed</p>',
     privacy: '<p class="eyebrow">WEBSITE INFORMATION</p><h2 id="svc-dialog-title">Privacy policy</h2><p>Perfection by Riri respects your privacy. This website uses Google Analytics to understand visits and interactions, including appointment, phone and directions clicks. Google Analytics may use cookies and process usage data. This website does not collect personal information through its own forms or accounts.</p><p>Appointment bookings are handled through Setmore, our third-party booking provider. A hosting provider may process ordinary connection information when serving this website.</p><p>If you have questions about how your information is handled, please contact the studio at (425) 845 0045.</p>',
     terms: '<p class="eyebrow">WEBSITE INFORMATION</p><h2 id="svc-dialog-title">Terms &amp; conditions</h2><p>All services, prices and availability are subject to change. Prices shown on this website describe the services offered at Perfection by Riri and are confirmed at the time of booking.</p><p>Appointments can be reserved through Setmore, our third-party booking provider. Please contact the studio at (425) 845 0045 with any questions before your appointment.</p><p>Viewing this website does not create an appointment or purchase a service.</p>'
   };

@@ -31,6 +31,12 @@
   .result-explore:hover,
   .le-text-link:hover { background-size: 100% 1px; }
 }
+/* The bordered "Let's find your look" button shares .le-text-link but fills
+   on hover instead of drawing an underline: keep its own fill transition. */
+.le-text-link.le-result-cta {
+  background: transparent;
+  transition: background-color 250ms var(--ease-premium), color 250ms var(--ease-premium), border-color 250ms var(--ease-premium);
+}
 
 /* Photos ease in a touch closer on hover. */
 @media (hover: hover) and (pointer: fine) {
@@ -49,7 +55,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   @view-transition { navigation: none; }
-  .button::before, .result-action, .result-explore, .le-text-link { transition: none; }
+  .button::before, .result-action, .result-explore, .le-text-link, .le-text-link.le-result-cta { transition: none; }
 }
 
 /* Phone menu: fills the screen under the header; large serif links come into
