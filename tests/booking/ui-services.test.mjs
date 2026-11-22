@@ -63,12 +63,13 @@ test('the service list markup has aria-pressed, button semantics and no photos',
   }
 });
 
-test('all categories start collapsed by default when nothing is selected or focused', () => {
+test('all four site-menu categories start collapsed by default when nothing is selected or focused', () => {
   const html = renderServices({ groups: GROUPS });
   const triggers = [...html.matchAll(/<button[^>]*data-group-toggle="([^"]+)"[^>]*>/g)];
-  assert.equal(triggers.length, 6);
+  assert.equal(triggers.length, 4);
+  assert.deepEqual(triggers.map((match) => match[1]), ['lash-extensions', 'permanent-makeup', 'lash-lift', 'brows']);
   for (const match of triggers) assert.match(match[0], /aria-expanded="false"/);
-  assert.equal((html.match(/class="bk-cat-panel"[^>]*\binert\b/g) ?? []).length, 6);
+  assert.equal((html.match(/class="bk-cat-panel"[^>]*\binert\b/g) ?? []).length, 4);
   assert.doesNotMatch(html, /class="bk-group is-open/);
 });
 
@@ -76,7 +77,10 @@ test('focusGroup or selectedId opens only its matching category accordion', () =
   const focused = renderServices({ groups: GROUPS, focusGroup: 'lash-lift' });
   assert.match(focused, /data-group-toggle="lash-lift" aria-expanded="true"/);
   assert.equal((focused.match(/aria-expanded="true"/g) ?? []).length, 1);
-  assert.equal((focused.match(/class="bk-cat-panel"[^>]*\binert\b/g) ?? []).length, 5);
+  assert.equal((focused.match(/class="bk-cat-panel"[^>]*\binert\b/g) ?? []).length, 3);
+
+  const wispyFocus = renderServices({ groups: GROUPS, focusGroup: 'wispy-lashes' });
+  assert.match(wispyFocus, /data-group-toggle="lash-extensions" aria-expanded="true"/);
 
   const selected = renderServices({ groups: GROUPS, selectedId: 'svc_lash_lift' });
   assert.match(selected, /data-group-toggle="lash-lift" aria-expanded="true"/);
@@ -108,11 +112,25 @@ test('catalog text is escaped', () => {
   assert.match(html, /&quot;quoted&quot;/);
 });
 
-test('each group has an accordion trigger with title, count and starting price', () => {
+test('categories use the exact website Services menu titles and sort treatments logically', () => {
   const html = renderServices({ groups: GROUPS });
-  assert.equal((html.match(/<h3 class="bk-group-label"/g) ?? []).length, 6);
-  assert.match(html, /<span class="bk-cat-title">Lash extensions<\/span>/);
+  const titles = [...html.matchAll(/<span class="bk-cat-title">([^<]+)<\/span>/g)].map((match) => match[1]);
+  assert.deepEqual(titles, ['Lash Extensions', 'Permanent Makeup', 'Lash Lift', 'Brow Lamination &amp; Tint']);
   assert.match(html, /<span class="bk-cat-meta">\d+ services · From \$\d+<\/span>/);
+
+  // Lash Extensions: Full Sets -> Wispy Full Sets -> Refills -> Wispy Refills -> Removal.
+  assert.ok(html.indexOf('svc_classic_full_extension') < html.indexOf('svc_classic_wispy'));
+  assert.ok(html.indexOf('svc_classic_wispy') < html.indexOf('svc_classic_refill_2_weeks'));
+  assert.ok(html.indexOf('svc_classic_refill_2_weeks') < html.indexOf('svc_classic_wispy_refill_2_weeks'));
+  assert.ok(html.indexOf('svc_mega_volume_wispy_refill_3_weeks') < html.indexOf('svc_lash_removal'));
+
+  // Permanent Makeup: Initial Sessions (Brows -> Lips -> Eyeliner) before Touch-Ups.
+  assert.ok(html.indexOf('svc_ombre_powder_eyebrows') < html.indexOf('svc_lip_blushing'));
+  assert.ok(html.indexOf('svc_lip_blushing') < html.indexOf('svc_lash_line_tattoo'));
+  assert.ok(html.indexOf('svc_bottom_eyeliner_tattoo') < html.indexOf('svc_ombre_powder_eyebrows_touch_up'));
+
+  // Lash Lift: base lift before lift + tinting.
+  assert.ok(html.indexOf('svc_lash_lift"') < html.indexOf('svc_lash_lift_tinting"'));
 });
 
 test('the catalog-unavailable state offers the phone number', () => {

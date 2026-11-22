@@ -434,6 +434,21 @@
   transition: transform 320ms var(--bk-ease), color 260ms var(--bk-ease);
 }
 
+.bk-cat-desc {
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+  color: var(--bk-subtle);
+  transition: color 260ms var(--bk-ease);
+}
+
+.bk-group.is-open .bk-cat-desc,
+.bk-cat-trigger:hover .bk-cat-desc {
+  color: var(--bk-muted);
+}
+
 .bk-cat-chosen {
   font-family: var(--sans);
   font-size: 11px;
@@ -553,11 +568,37 @@
   min-height: 0;
 }
 
+/* Sub-section headers inside multi-part categories (e.g. Lash Extensions, PMU) */
+.bk-subhead {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 0;
+  padding: 20px 24px 10px 60px;
+  border-top: 1px solid var(--bk-line);
+  font-family: var(--sans);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 2.2px;
+  text-transform: uppercase;
+  color: var(--bk-gold);
+}
+
+.bk-subhead::after {
+  content: "";
+  flex: 1;
+  border-top: 1px solid rgba(212, 187, 150, .10);
+}
+
 /* Nested treatment list inside each opened category */
 .bk-card-grid {
   display: flex;
   flex-direction: column;
   border-top: 1px solid var(--bk-line);
+}
+
+.bk-subhead + .bk-card-grid {
+  border-top: 0;
 }
 
 .bk-card {
@@ -1229,6 +1270,7 @@
     padding: 22px 16px;
     gap: 12px 14px;
   }
+  .bk-subhead { padding: 18px 16px 8px 28px; }
   .bk-card { padding: 18px 16px 18px 28px; }
 }
 
@@ -1241,6 +1283,7 @@
   }
   .bk-cat-num { display: none; }
   .bk-cat-meta { display: none; }
+  .bk-subhead { padding: 16px 14px 8px 20px; }
   .bk-card {
     flex-direction: column;
     align-items: flex-start;
