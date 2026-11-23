@@ -144,6 +144,24 @@ test('categories use the exact website Services menu titles and sort treatments 
   assert.match(refillSelected, /data-subpanel="refills"><div/);
 });
 
+test('lash sub-tabs follow the Setmore source group when the service name does not say', () => {
+  const svc = (id, name) => ({ ...GROUPS[0].services[0], service_id: id, name });
+  const groups = [
+    { key: 'lash-extensions', label: 'Lash extensions', services: [svc('svc_ext', 'Classic Full Extension'), svc('svc_rm', 'Lash Removal')] },
+    { key: 'wispy-lashes', label: 'Wispy lashes', services: [svc('svc_wispy_plain', 'Kim K Look'), svc('svc_wispy_fill', 'Kim K Look Fill Refill')] },
+    { key: 'lash-refills', label: 'Lash refills', services: [svc('svc_fill', 'Classic Fill 2 Weeks'), svc('svc_wispy_rf', 'Wispy Fill 3 Weeks')] }
+  ];
+  const panel = (html, key) => html.match(new RegExp(`data-subpanel="${key}"[^>]*>([\\s\\S]*?)(?=data-subpanel=|$)`))?.[1] ?? '';
+  const html = renderServices({ groups });
+  assert.match(panel(html, 'full-sets'), /svc_ext/);
+  assert.match(panel(html, 'removal'), /svc_rm/);
+  assert.match(panel(html, 'wispy-sets'), /svc_wispy_plain/);
+  assert.match(panel(html, 'wispy-refills'), /svc_wispy_fill/);
+  assert.match(panel(html, 'refills'), /svc_fill"/);
+  assert.match(panel(html, 'wispy-refills'), /svc_wispy_rf/);
+  assert.doesNotMatch(panel(html, 'full-sets'), /svc_fill"|svc_wispy_plain|svc_wispy_rf/);
+});
+
 test('the catalog-unavailable state offers the phone number', () => {
   const html = renderCatalogUnavailable();
   assert.match(html, /Online booking is taking a short break\. Please call \(425\) 845 0045 and we&rsquo;ll book you in\./);

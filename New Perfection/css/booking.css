@@ -22,7 +22,7 @@
   --bk-surface-active: #221e19;
   --bk-ink: #f4efe8;
   --bk-muted: #a69e94;
-  --bk-subtle: #787168;
+  --bk-subtle: #8f877c;
   --bk-line: rgba(212, 187, 150, .15);
   --bk-line-strong: rgba(212, 187, 150, .34);
   --bk-gold: #c6a471;
@@ -248,7 +248,8 @@
 }
 
 .bk-progress-item[data-goto-step] { cursor: pointer; }
-.bk-progress-item[data-goto-step]:focus-visible { outline: 2px solid var(--bk-gold-bright); outline-offset: 4px; }
+.bk-progress-item[data-goto-step] .bk-progress-label:focus-visible { outline: none; }
+.bk-progress-item[data-goto-step]:has(.bk-progress-label:focus-visible) { outline: 2px solid var(--bk-gold-bright); outline-offset: 4px; }
 @media (hover: hover) and (pointer: fine) {
   .bk-progress-item[data-goto-step]:hover { color: var(--bk-gold-bright); }
 }

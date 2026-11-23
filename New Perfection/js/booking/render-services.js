@@ -99,16 +99,22 @@ function pmuRank(name) {
   return 90;
 }
 
-function organizeCategoryServices(categoryKey, services) {
+function organizeCategoryServices(categoryKey, matchedGroups) {
+  const services = matchedGroups.flatMap((group) => group.services);
   if (categoryKey === 'lash-extensions') {
     const fullSets = [];
     const wispyFull = [];
     const refills = [];
     const wispyRefills = [];
     const removal = [];
-    for (const service of services) {
+    // The Setmore source group decides first; name keywords only split services
+    // the group does not classify (the main lash-extensions group or unknown ones).
+    const entries = matchedGroups.flatMap((group) => group.services.map((service) => ({ service, groupKey: group.key })));
+    for (const { service, groupKey } of entries) {
       const lower = service.name.toLowerCase();
-      if (lower.includes('removal')) removal.push(service);
+      if (groupKey === 'lash-refills') (lower.includes('wispy') ? wispyRefills : refills).push(service);
+      else if (groupKey === 'wispy-lashes') (lower.includes('refill') ? wispyRefills : wispyFull).push(service);
+      else if (lower.includes('removal')) removal.push(service);
       else if (lower.includes('refill') && lower.includes('wispy')) wispyRefills.push(service);
       else if (lower.includes('refill')) refills.push(service);
       else if (lower.includes('wispy')) wispyFull.push(service);
@@ -174,8 +180,7 @@ function buildMenuCategories(groups) {
     const title = primary && primary.label && primary.label !== entry.defaultLabel
       ? primary.label
       : entry.title;
-    const allServices = matched.flatMap((group) => group.services);
-    const subgroups = organizeCategoryServices(entry.key, allServices);
+    const subgroups = organizeCategoryServices(entry.key, matched);
     categories.push({
       key: entry.key,
       title,

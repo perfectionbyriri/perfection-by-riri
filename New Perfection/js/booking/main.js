@@ -104,13 +104,15 @@ if (app) {
       if (target === step) item.setAttribute('aria-current', 'step');
       else item.removeAttribute('aria-current');
       item.classList.toggle('is-done', done);
+      // The button role sits on the inner label so the <li> keeps its list-item role.
+      const label = item.querySelector('.bk-progress-label');
       if (done) {
-        item.setAttribute('role', 'button');
-        item.setAttribute('tabindex', '0');
+        label?.setAttribute('role', 'button');
+        label?.setAttribute('tabindex', '0');
         item.dataset.gotoStep = String(target);
       } else {
-        item.removeAttribute('role');
-        item.removeAttribute('tabindex');
+        label?.removeAttribute('role');
+        label?.removeAttribute('tabindex');
         delete item.dataset.gotoStep;
       }
     });
@@ -676,8 +678,8 @@ if (app) {
     if (elements.summaryCta) elements.summaryCta.hidden = true;
     elements.progress.forEach((item) => {
       item.removeAttribute('aria-current');
-      item.removeAttribute('role');
-      item.removeAttribute('tabindex');
+      item.querySelector('.bk-progress-label')?.removeAttribute('role');
+      item.querySelector('.bk-progress-label')?.removeAttribute('tabindex');
       delete item.dataset.gotoStep;
       item.classList.add('is-done');
     });
