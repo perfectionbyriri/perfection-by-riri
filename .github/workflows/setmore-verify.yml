@@ -1,0 +1,69 @@
+name: Setmore live verification
+
+# Checks /book/ against the real Setmore account
+# (docs/superpowers/specs/2026-11-23-setmore-live-verification-design.md).
+# mode=read: GET requests only; maps catalog ids and checks that free slots
+# never overlap existing bookings. mode=write: one test booking on the
+# owner's own contact, then deletion; runs only after the owner approves the
+# setmore-write environment. The repository is public, so the tool prints
+# only public service data, counts, dates and times.
+
+"on":
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "read (GET only) or write (one test booking, owner approval)"
+        type: choice
+        options:
+          - read
+          - write
+        default: read
+
+permissions:
+  contents: read
+
+concurrency:
+  group: setmore-verify
+  cancel-in-progress: false
+
+jobs:
+  read:
+    name: setmore-verify-read
+    if: inputs.mode == 'read'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: lts/*
+
+      - name: Run read-only verification
+        run: node worker/tools/setmore-verify.js --mode=read
+        env:
+          SETMORE_REFRESH_TOKEN: ${{ secrets.SETMORE_REFRESH_TOKEN }}
+
+  write:
+    name: setmore-verify-write
+    if: inputs.mode == 'write'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: setmore-write
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: lts/*
+
+      - name: Run write verification
+        run: node worker/tools/setmore-verify.js --mode=write
+        env:
+          SETMORE_REFRESH_TOKEN: ${{ secrets.SETMORE_REFRESH_TOKEN }}
+          SETMORE_TEST_EMAIL: ${{ secrets.SETMORE_TEST_EMAIL }}
+          SETMORE_TEST_PHONE: ${{ secrets.SETMORE_TEST_PHONE }}
