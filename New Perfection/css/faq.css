@@ -246,6 +246,9 @@
    LIP BLUSHING SUBSECTION Â· visually noticeable but calm: a warm tinted ground
    and a single champagne rule. No alarm styling.
    -------------------------------------------------------------------------- */
+/* The booking notice links here: keep the heading clear of the sticky header. */
+#lip-blushing-cold-sores { scroll-margin-top: 140px; }
+
 .faq-subsection {
   margin-top: 30px;
   padding: 18px 20px 6px;

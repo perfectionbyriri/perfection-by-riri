@@ -270,3 +270,8 @@ test('history never lands past step 1 on a flagged service that is not acknowled
   assert.equal(stepFromHistory({ step: 2 }, { ...current, faqAcknowledged: false }).step, 1);
   assert.equal(stepFromHistory({ step: 2 }, { ...current, faqAcknowledged: true }).step, 2);
 });
+
+test('choosing a flagged service scrolls its notice into view so the checkbox is not hidden behind the bar', () => {
+  const js = fs.readFileSync(path.join(ROOT, 'New Perfection/js/booking/main.js'), 'utf8');
+  assert.match(js, /notice\.scrollIntoView\(\{ block: 'center'/);
+});

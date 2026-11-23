@@ -1082,6 +1082,64 @@
 
 .bk-actions .button { min-width: 200px; }
 .bk-actions [data-action="back"] { margin-right: auto; }
+/* FAQ notice under a flagged service (Lip Blushing): a full-row panel in the card grid. */
+.bk-notice {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 20px 24px 22px 60px;
+  border-top: 1px solid var(--bk-line);
+  border-left: 2px solid var(--bk-gold);
+  background: var(--bk-surface);
+}
+
+.bk-notice[hidden] { display: none; }
+
+.bk-notice-title {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--bk-gold-text);
+}
+
+.bk-notice-text {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--bk-ink);
+}
+
+.bk-notice-link {
+  justify-self: start;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--bk-ink);
+  border-bottom: 1px solid var(--bk-gold);
+  padding-bottom: 2px;
+}
+
+.bk-notice-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-top: 4px;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--bk-ink);
+  cursor: pointer;
+}
+
+.bk-notice-label .bk-checkbox { flex: none; margin-top: 3px; }
+
+@media (max-width: 540px) {
+  .bk-notice { padding: 18px 16px 20px 20px; }
+}
+
 .bk-hint { margin: 0; font-size: 13px; color: var(--bk-muted); }
 
 /* Step 3 · details form */

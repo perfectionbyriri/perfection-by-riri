@@ -321,6 +321,7 @@ if (app) {
       notice.hidden = !mine;
       const check = notice.querySelector('.bk-notice-check');
       if (check && !mine) check.checked = false;
+      if (mine) notice.scrollIntoView({ block: 'center', behavior: prefersReducedMotion() ? 'auto' : 'smooth' });
     }
     for (const card of elements.step.querySelectorAll('.bk-card')) {
       card.setAttribute('aria-pressed', card.dataset.serviceId === id ? 'true' : 'false');

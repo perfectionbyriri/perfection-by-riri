@@ -169,3 +169,11 @@ test('Jost Light is used only for standalone numbers and prices, never for digit
   const js = read('js/booking/main.js');
   assert.match(js, /classList\.toggle\('is-numeric', \/\^\[\$\\d\.,\\s\]\+\$\/\.test\(title\)\)/);
 });
+
+test('the FAQ notice is a full-row panel built from theme tokens only', () => {
+  const rules = [...css.matchAll(/\n\.bk-notice[\w-]*[^{]*\{([^}]*)\}/g)].map((m) => m[1]).join('\n');
+  assert.ok(rules.length > 0, '.bk-notice rules exist');
+  assert.match(css, /\.bk-notice\s*\{[^}]*grid-column:\s*1 \/ -1/);
+  assert.doesNotMatch(rules, /#[0-9a-f]{3,8}\b|rgba?\(/i, 'no hardcoded colors');
+  assert.match(css, /\.bk-notice\[hidden\]\s*\{\s*display:\s*none/);
+});

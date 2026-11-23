@@ -258,3 +258,9 @@ test('motion: steps swap through a named view transition, no blur keyframes, ful
   assert.doesNotMatch(js, /scheduleAutoAdvance|advanceTimer/, 'choosing a service never moves on by itself; only Continue does');
   assert.match(js, /morphHeight\(weekBox/);
 });
+
+test('faq has the lip-blushing-cold-sores anchor on the existing subsection, with room under the sticky header', () => {
+  const faq = read('faq/index.html');
+  assert.match(faq, /<div class="faq-subsection" id="lip-blushing-cold-sores">\s*<h3 class="faq-subsection-title">Lip Blushing &amp; Cold Sores<\/h3>/);
+  assert.match(read('css/faq.css'), /#lip-blushing-cold-sores\s*\{[^}]*scroll-margin-top:\s*\d+px/);
+});
