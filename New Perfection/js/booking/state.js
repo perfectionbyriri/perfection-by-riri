@@ -1,5 +1,8 @@
 // Booking flow state and deep links (docs/booking/DESIGN_SPEC.md §3).
 
+import { formatMoney } from './checkout.js';
+import { formatDuration } from './render-services.js';
+
 const ID_RE = /^[A-Za-z0-9_-]{1,100}$/;
 
 export function createState(initial = {}) {
@@ -67,4 +70,28 @@ export function summaryLine({ service, week, startAt, startLabel } = {}) {
   const date = new Date(`${day.date}T12:00:00Z`);
   const weekday = date.toLocaleDateString('en-US', { weekday: 'short', timeZone: 'UTC' });
   return `${service.name} · ${weekday} ${date.getUTCDate()}, ${startLabel}`;
+}
+
+const NOT_CHOSEN = 'Not chosen yet';
+
+// Three columns of the live selection ribbon (Variant C §5.2). Plain text; callers use textContent.
+export function ribbonValues({ service, week, startAt, startLabel } = {}) {
+  const values = {
+    service: { title: NOT_CHOSEN, sub: '' },
+    time: { title: NOT_CHOSEN, sub: '' },
+    deposit: { title: '\u2014', sub: '' }
+  };
+  if (!service) return values;
+  values.service = { title: service.name, sub: `${formatDuration(service.duration_minutes)} \u00b7 ${formatMoney(service.price_cents)}` };
+  values.deposit = service.deposit?.required
+    ? { title: formatMoney(service.deposit.total_cents), sub: 'Deposit \u00b7 balance at the studio' }
+    : { title: formatMoney(0), sub: 'No deposit needed' };
+  const day = startAt ? week?.days?.find((item) => startAt.startsWith(item.date)) : null;
+  if (day && startLabel) {
+    const monthDay = new Date(`${day.date}T12:00:00Z`)
+      .toLocaleDateString('en-US', { month: 'long', day: 'numeric', timeZone: 'UTC' })
+      .replace(' ', '\u00a0');
+    values.time = { title: `${day.weekday}, ${monthDay}`, sub: `${startLabel} Pacific Time` };
+  }
+  return values;
 }

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { stepFromHistory, summaryLine } from '../../New Perfection/js/booking/state.js';
+import { ribbonValues, stepFromHistory, summaryLine } from '../../New Perfection/js/booking/state.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const read = (file) => fs.readFileSync(path.join(ROOT, 'New Perfection', file), 'utf8');
@@ -69,4 +69,40 @@ test('booking.css pads the bar with the safe-area inset and hides it on desktop'
   assert.match(css, /\.bk-bar\s*\{[^}]*env\(safe-area-inset-bottom\)/s);
   assert.match(css, /@media \(min-width: 801px\)\s*\{[^}]*\.bk-bar\s*\{\s*display:\s*none/s);
   assert.match(css, /\.bk-sheet/);
+});
+
+const HYBRID = {
+  service_id: 'svc_hybrid', name: 'Hybrid Full Extension 2D-3D', duration_minutes: 120, price_cents: 18000,
+  deposit: { required: true, deposit_cents: 5000, fee_cents: 0, total_cents: 5000 }
+};
+const REMOVAL = { ...HYBRID, name: 'Lash Removal', duration_minutes: 30, price_cents: 3000, deposit: { required: false } };
+const DEC_WEEK = { days: [{ date: '2026-12-29', weekday: 'Tuesday' }] };
+
+test('ribbonValues shows placeholders before anything is chosen', () => {
+  assert.deepEqual(ribbonValues({}), {
+    service: { title: 'Not chosen yet', sub: '' },
+    time: { title: 'Not chosen yet', sub: '' },
+    deposit: { title: '\u2014', sub: '' }
+  });
+});
+
+test('ribbonValues fills the treatment and deposit once a service is chosen', () => {
+  const values = ribbonValues({ service: HYBRID, week: DEC_WEEK });
+  assert.deepEqual(values.service, { title: 'Hybrid Full Extension 2D-3D', sub: '2 hr \u00b7 $180.00' });
+  assert.deepEqual(values.deposit, { title: '$50.00', sub: 'Deposit \u00b7 balance at the studio' });
+  assert.deepEqual(values.time, { title: 'Not chosen yet', sub: '' });
+});
+
+test('ribbonValues shows $0.00 for a service without a deposit', () => {
+  assert.deepEqual(ribbonValues({ service: REMOVAL }).deposit, { title: '$0.00', sub: 'No deposit needed' });
+});
+
+test('ribbonValues keeps month and day together in the chosen time', () => {
+  const values = ribbonValues({ service: HYBRID, week: DEC_WEEK, startAt: '2026-12-29T13:15:00-08:00', startLabel: '1:15 PM' });
+  assert.deepEqual(values.time, { title: 'Tuesday, December\u00a029', sub: '1:15 PM Pacific Time' });
+});
+
+test('ribbonValues falls back when the week no longer lists the chosen day', () => {
+  const values = ribbonValues({ service: HYBRID, week: WEEK, startAt: '2026-12-29T13:15:00-08:00', startLabel: '1:15 PM' });
+  assert.deepEqual(values.time, { title: 'Not chosen yet', sub: '' });
 });
