@@ -50,7 +50,7 @@ test('generates no slots on Sunday and none ending after 17:00', async () => {
   assert.deepEqual(days['2026-11-30'], [], 'the end_at date is returned as an empty key');
   const monday = days['2026-11-23'];
   assert.deepEqual(monday[0], { start_at: '2026-11-23T10:00:00-08:00', end_at: '2026-11-23T12:00:00-08:00' });
-  assert.deepEqual(monday[1].start_at, '2026-11-23T10:05:00-08:00');
+  assert.deepEqual(monday[1].start_at, '2026-11-23T10:15:00-08:00');
   assert.deepEqual(monday.at(-1), { start_at: '2026-11-23T15:00:00-08:00', end_at: '2026-11-23T17:00:00-08:00' });
 });
 
@@ -180,4 +180,14 @@ test('rate_limited: each route has its own 429 budget, so concurrent calls all f
   const { client } = setup({ scenario: 'rate_limited' });
   const results = await Promise.allSettled([client.listServices(), client.listCategories(), client.listStaff()]);
   assert.ok(results.every((result) => result.status === 'rejected' && result.reason instanceof SetmoreBusy));
+});
+
+test('spaces slot starts by slot_limit like live Setmore (15 minutes by default)', async () => {
+  const minutesApart = (days) => {
+    const starts = days['2026-11-24'].map((slot) => Date.parse(slot.start_at));
+    return new Set(starts.slice(1).map((start, i) => (start - starts[i]) / 60000));
+  };
+  const { client } = setup();
+  assert.deepEqual([...minutesApart(await client.getSlots(slotsQuery()))], [15]);
+  assert.deepEqual([...minutesApart(await client.getSlots(slotsQuery({ slotLimit: 30 })))], [30]);
 });

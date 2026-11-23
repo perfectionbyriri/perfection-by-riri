@@ -15,7 +15,8 @@ export const MOCK_SCENARIOS = [
   'unavailable', 'double_booked_after_create'
 ];
 
-const SLOT_GRID_MINUTES = 5;
+// Live Setmore spaces slot starts by `slot_limit` (minutes); the BFF sends 15.
+const DEFAULT_SLOT_SPACING_MINUTES = 15;
 const TOKEN_LIFETIME_SECONDS = 7200;
 
 export function createMockState() {
@@ -68,6 +69,9 @@ function generateDays(state, url, now, blocked) {
   const duration = Number(url.searchParams.get('duration'));
   const startAt = url.searchParams.get('start_at');
   const endAt = url.searchParams.get('end_at');
+  const spacing = Number(url.searchParams.get('slot_limit')) > 0
+    ? Number(url.searchParams.get('slot_limit'))
+    : DEFAULT_SLOT_SPACING_MINUTES;
   if (!(duration > 0) || parseInstant(startAt) === null || parseInstant(endAt) === null) return null;
 
   const firstDate = startAt.slice(0, 10);
@@ -80,7 +84,7 @@ function generateDays(state, url, now, blocked) {
     if (date === lastDate) break;
     const weekday = instantToZonedParts(zonedDateTimeToInstant(date, '12:00')).weekday;
     if (MOCK_HOURS.closedWeekdays.includes(weekday)) continue;
-    for (let minute = open; minute + duration <= close; minute += SLOT_GRID_MINUTES) {
+    for (let minute = open; minute + duration <= close; minute += spacing) {
       const start = zonedDateTimeToInstant(date, toHHMM(minute)).getTime();
       const end = start + duration * 60000;
       if (start < now().getTime() || blocked.has(start) || overlaps(state, MOCK_PROVIDER_ID, start, end)) continue;
