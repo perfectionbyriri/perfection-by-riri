@@ -23,7 +23,7 @@ import { createSlotsService } from '../src/slots.js';
 import { createTokenManager } from '../src/setmore/token-manager.js';
 import { addDays, formatRfc3339Local, instantToZonedParts, studioToday, weekWindow } from '../src/time.js';
 import { createMemoryKV } from './setmore-verify/memory-kv.js';
-import { STUDIO_HOURS, findSlotConflicts, mapCatalog, slotsOutsideHours } from './setmore-verify/checks.js';
+import { STUDIO_HOURS, TITLE_ALIASES, findSlotConflicts, mapCatalog, slotsOutsideHours } from './setmore-verify/checks.js';
 
 const WEEKS = 4;
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -60,7 +60,7 @@ async function fetchSlots(client, config, { duration, startAt, endAt, workingHou
 
 export async function runRead({ client, meta, config, now = () => new Date(), log = () => {} }) {
   const services = await client.listServices();
-  const catalog = mapCatalog(meta.services, services);
+  const catalog = mapCatalog(meta.services, services, TITLE_ALIASES);
   log(`CATALOG_MAP ${JSON.stringify(catalog.map)}`);
   log(`catalog: mapped=${catalog.map.length} unmatched=${JSON.stringify(catalog.unmatched)} ambiguous=${JSON.stringify(catalog.ambiguous)} unlisted=${JSON.stringify(catalog.unlisted)}`);
 

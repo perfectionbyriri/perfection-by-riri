@@ -19,6 +19,28 @@ export const STUDIO_HOURS = {
   6: ['10:00', '17:00']
 };
 
+// Live Setmore titles that differ from the placeholder names, confirmed by
+// the owner on 2026-11-23 (run 45116299041). Placeholder id -> exact title.
+export const TITLE_ALIASES = {
+  svc_lip_blushing_touch_up: 'Lip Blushing Touch-Up Session',
+  svc_ombre_powder_eyebrows_touch_up: 'Ombre Powder Eyebrows Touch-Up Session',
+  svc_eyeliner_touch_up: 'Eyeliner Tattoo Touch-Up Session',
+  svc_lash_line_touch_up: 'Lash Line Tattoo Touch-Up Session',
+  svc_bottom_eyeliner_touch_up: 'Bottom Eyeliner Tattoo Touch-Up Session',
+  svc_wet_effect_full_extension: 'Wet Effect',
+  svc_classic_wispy: 'Classic Wispy Effect',
+  svc_hybrid_wispy: 'Hybrid Wispy Effect 2D-3D',
+  svc_volume_wispy: 'Volume Wispy Effect 4D-5D',
+  svc_classic_wispy_refill_2_weeks: 'Classic Wispy Refill 2 Week',
+  svc_classic_wispy_refill_3_weeks: 'Classic Wispy Refill 3 Week',
+  svc_hybrid_wispy_refill_2_weeks: 'Hybrid Wispy Refill 2 Week',
+  svc_hybrid_wispy_refill_3_weeks: 'Hybrid Wispy Refill 3 Week',
+  svc_volume_wispy_refill_2_weeks: 'Volume Wispy Refill 2 Week',
+  svc_volume_wispy_refill_3_weeks: 'Volume Wispy Refill 3 Week',
+  svc_mega_volume_wispy_refill_2_weeks: 'MEGA Volume Wispy Refill 2 Week',
+  svc_mega_volume_wispy_refill_3_weeks: 'MEGA Volume Wispy Refill 3 Week'
+};
+
 const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
 export function slugId(title) {
@@ -44,7 +66,7 @@ function entryOf(placeholder, service) {
   };
 }
 
-export function mapCatalog(metaServices, setmoreServices) {
+export function mapCatalog(metaServices, setmoreServices, aliases = {}) {
   const byId = new Map(setmoreServices.map((service) => [service.id, service]));
   const bySlug = new Map();
   for (const service of setmoreServices) {
@@ -61,7 +83,8 @@ export function mapCatalog(metaServices, setmoreServices) {
       used.add(placeholder);
       continue;
     }
-    const candidates = bySlug.get(placeholder) ?? [];
+    const key = aliases[placeholder] ? slugId(aliases[placeholder]) : placeholder;
+    const candidates = bySlug.get(key) ?? [];
     if (candidates.length === 0) unmatched.push(placeholder);
     else if (candidates.length > 1) ambiguous.push(placeholder);
     else {
@@ -70,7 +93,7 @@ export function mapCatalog(metaServices, setmoreServices) {
     }
   }
   const unlisted = setmoreServices.filter((service) => !used.has(service.id)
-    && !ambiguous.includes(slugId(service.title))).map((service) => service.title);
+    && !ambiguous.some((placeholder) => (aliases[placeholder] ? slugId(aliases[placeholder]) : placeholder) === slugId(service.title))).map((service) => service.title);
   return { map, unmatched, ambiguous, unlisted };
 }
 

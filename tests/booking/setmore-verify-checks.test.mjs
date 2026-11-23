@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  STUDIO_HOURS, applyMap, findSlotConflicts, isBlocking, mapCatalog, slotsOutsideHours, slugId
+  STUDIO_HOURS, TITLE_ALIASES, applyMap, findSlotConflicts, isBlocking, mapCatalog, slotsOutsideHours, slugId
 } from '../../worker/tools/setmore-verify/checks.js';
 import { MOCK_SERVICES } from '../../worker/src/setmore/fixtures.js';
 
@@ -89,4 +89,18 @@ test('applyMap replaces every placeholder and refuses gaps', () => {
   assert.equal(applied.services[0].service_id, 'real-a');
   assert.equal(meta.services[0].service_id, 'svc_a');
   assert.throws(() => applyMap(meta, []));
+});
+
+test('mapCatalog uses owner-confirmed title aliases when Setmore names differ', () => {
+  const r = mapCatalog([{ service_id: 'svc_classic_wispy' }], [{ id: 'real-w', title: 'Classic Wispy Effect' }],
+    { svc_classic_wispy: 'Classic Wispy Effect' });
+  assert.equal(r.map[0].id, 'real-w');
+  assert.deepEqual(r.unmatched, []);
+  assert.deepEqual(r.unlisted, []);
+});
+
+test('TITLE_ALIASES covers the 17 services confirmed by the owner on 2026-11-23', () => {
+  assert.equal(Object.keys(TITLE_ALIASES).length, 17);
+  assert.equal(TITLE_ALIASES.svc_eyeliner_touch_up, 'Eyeliner Tattoo Touch-Up Session');
+  assert.equal(TITLE_ALIASES.svc_mega_volume_wispy_refill_3_weeks, 'MEGA Volume Wispy Refill 3 Week');
 });
