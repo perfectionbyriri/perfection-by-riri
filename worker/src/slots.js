@@ -81,7 +81,7 @@ export function createSlotsService({ client, catalog, config, cache = null, now 
       startAt,
       endAt,
       timezone: tz,
-      slotLimit: 100
+      slotLimit: 15
     });
     await writeCached(key, days);
     return days;

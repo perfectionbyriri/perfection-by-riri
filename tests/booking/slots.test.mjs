@@ -58,7 +58,7 @@ test('returns seven days starting at week_start with labels in Pacific time', as
   assert.equal(week.next_week_start, '2026-11-30');
   assert.deepEqual(client.calls[0], {
     accountId: MOCK_ACCOUNT_ID, providerId: MOCK_PROVIDER_ID, duration: 60,
-    startAt: '2026-11-23T00:00:00-08:00', endAt: '2026-11-30T00:00:00-08:00', timezone: 'America/Los_Angeles', slotLimit: 100
+    startAt: '2026-11-23T00:00:00-08:00', endAt: '2026-11-30T00:00:00-08:00', timezone: 'America/Los_Angeles', slotLimit: 15
   });
 });
 

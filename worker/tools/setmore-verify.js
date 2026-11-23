@@ -49,7 +49,7 @@ async function fetchSlots(client, config, { duration, startAt, endAt, workingHou
       start_at: startAt,
       end_at: endAt,
       timezone: config.studioTimezone,
-      slot_limit: 100,
+      slot_limit: 15,
       double_booking: false,
       working_hours: workingHours
     }

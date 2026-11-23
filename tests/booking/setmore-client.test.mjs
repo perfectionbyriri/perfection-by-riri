@@ -174,7 +174,7 @@ test('encodes the offset in start_at and end_at', async () => {
   assert.match(search, /account_id=acc/);
   assert.match(search, /duration=60/);
   assert.match(search, /timezone=America%2FLos_Angeles/);
-  assert.match(search, /slot_limit=100/);
+  assert.match(search, /slot_limit=15/);
   assert.match(search, /double_booking=false/);
 });
 

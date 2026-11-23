@@ -161,7 +161,9 @@ export function createSetmoreClient({
     listCategories: () => listAll('/categories'),
     listStaff: () => listAll('/staff'),
 
-    async getSlots({ accountId, providerId, duration, startAt, endAt, timezone, slotLimit = 100 }) {
+    // Setmore treats slot_limit as the spacing between starts in minutes: 5 gave a 5-minute grid
+    // (run 44990258119), 100 a 100-minute grid (run 45122471180). 15 matches the booking page.
+    async getSlots({ accountId, providerId, duration, startAt, endAt, timezone, slotLimit = 15 }) {
       const body = await request('GET', '/slots', {
         query: {
           account_id: accountId, provider_id: providerId, duration, start_at: startAt, end_at: endAt,
