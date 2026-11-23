@@ -1,6 +1,6 @@
 # Setmore live verification for `/book/` — design
 
-Date: 2026-11-23. Status: draft for owner approval. Scope: booking only. Square stays in mock mode until the final stage.
+Date: 2026-11-23. Status: approved by the owner 2026-11-23 (approach A, Q1 = b). Scope: booking only. Square stays in mock mode until the final stage.
 
 ## 1. Intent
 
@@ -88,11 +88,11 @@ Output of Stage 1: a PR that writes real ids into `services-meta.json` (plus the
 
 1. Confirm `SETMORE_REFRESH_TOKEN` is present in GitHub → Settings → Secrets and variables → Actions (add it again if it was removed after the earlier probe).
 2. For `mode=write`: add secrets `SETMORE_TEST_EMAIL` and `SETMORE_TEST_PHONE` (your own contact); create the GitHub environment `setmore-write` (Settings → Environments) with yourself as required reviewer; approve each write run.
-3. Stage 2: see open question Q1.
+3. Stage 2: paste `SETMORE_REFRESH_TOKEN` (and a generated `CUSTOMER_HASH_SECRET`) into the Cloudflare dashboard for `perfection-by-riri-preview` (Q1 = b).
 
-## 9. Open questions for the owner
+## 9. Decided questions
 
-- **Q1. How the preview Worker gets its Setmore token.** (a) A manual GitHub workflow deploys the preview and sets the secret from GitHub Secrets; it needs a Cloudflare API token stored as a GitHub secret. (b) The session deploys the preview code through the connected Cloudflare account, and the owner pastes the Setmore token into the Cloudflare dashboard for the preview Worker. Builder's pick: (b), because there is one fewer long-lived credential in GitHub and the token never passes through the session.
+- **Q1. How the preview Worker gets its Setmore token — decided (b), owner 2026-11-23.** The session deploys the preview code through the connected Cloudflare account; the owner pastes the Setmore token into the Cloudflare dashboard for the preview Worker. The token never passes through the session or GitHub. Each preview deploy is a Cloudflare change and is announced before it runs.
 
 ## 10. Calls made by the designer (owner may override)
 
