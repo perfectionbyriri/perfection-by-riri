@@ -155,14 +155,18 @@ test('the Step 5 confirmation hero is full-bleed and its primary button is gold 
   const confirmHero = css.match(/\n\.bk-cinema-hero--confirm\s*\{([^}]*)\}/)?.[1] ?? '';
   assert.match(confirmHero, /padding:\s*56px var\(--bk-gutter\) 44px/);
 
-  const base = css.match(/\.book-page \.bk \.bk-cinema-hero \.button-gold\s*\{([^}]*)\}/)?.[1] ?? '';
+  const baseMatches = [...css.matchAll(/\.book-page \.bk \.bk-cinema-hero \.button-gold\s*\{([^}]*)\}/g)];
+  assert.equal(baseMatches.length, 1, 'exactly one .bk-cinema-hero .button-gold rule');
+  const base = baseMatches[0][1];
   assert.match(base, /background:\s*var\(--bk-gold\)/);
   assert.match(base, /color:\s*#0b0b0a/);
   assert.match(base, /border-color:\s*var\(--bk-gold\)/);
-  const sweep = css.match(/\.book-page \.bk \.bk-cinema-hero \.button-gold::before\s*\{([^}]*)\}/)?.[1] ?? '';
-  assert.match(sweep, /background:\s*#0b0b0a/);
-  const hover = css.match(/\.book-page \.bk \.bk-cinema-hero \.button-gold:hover\s*\{([^}]*)\}/)?.[1] ?? '';
-  assert.match(hover, /color:\s*#f5f2ef/);
+  const sweepMatches = [...css.matchAll(/\.book-page \.bk \.bk-cinema-hero \.button-gold::before\s*\{([^}]*)\}/g)];
+  assert.equal(sweepMatches.length, 1, 'exactly one .bk-cinema-hero .button-gold::before rule');
+  assert.match(sweepMatches[0][1], /background:\s*#0b0b0a/);
+  const hoverMatches = [...css.matchAll(/\.book-page \.bk \.bk-cinema-hero \.button-gold:hover\s*\{([^}]*)\}/g)];
+  assert.equal(hoverMatches.length, 1, 'exactly one .bk-cinema-hero .button-gold:hover rule');
+  assert.match(hoverMatches[0][1], /color:\s*#f5f2ef/);
   assert.ok(contrast('#0b0b0a', island['--bk-gold']) >= 7, 'dark text on the gold confirmation button');
   assert.ok(contrast('#f5f2ef', '#0b0b0a') >= 7, 'light text on the black hover fill');
 });

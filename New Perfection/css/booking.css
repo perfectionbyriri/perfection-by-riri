@@ -183,25 +183,6 @@
   }
 }
 
-/* On the dark confirmation hero, the primary action is gold and sweeps to black on hover. */
-.book-page .bk .bk-cinema-hero .button-gold {
-  background: var(--bk-gold);
-  color: #0b0b0a;
-  border-color: var(--bk-gold);
-}
-
-.book-page .bk .bk-cinema-hero .button-gold::before {
-  background: #0b0b0a;
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .book-page .bk .bk-cinema-hero .button-gold:hover {
-    background: var(--bk-gold);
-    border-color: var(--bk-gold);
-    color: #f5f2ef;
-  }
-}
-
 .book-page .bk button:focus-visible,
 .book-page .bk a:focus-visible,
 .book-page .bk-bar button:focus-visible,
@@ -2009,12 +1990,16 @@
   border-top: 0;
 }
 
-/* On the dark confirmation banner the black primary button would vanish:
-   it turns ivory there and still fills gold on hover. */
+/* On the dark confirmation hero, the primary action is gold with dark text
+   and sweeps to black with light text on hover. */
 .book-page .bk .bk-cinema-hero .button-gold {
-  background: #f5f2ef;
+  background: var(--bk-gold);
   color: #0b0b0a;
-  border-color: #f5f2ef;
+  border-color: var(--bk-gold);
+}
+
+.book-page .bk .bk-cinema-hero .button-gold::before {
+  background: #0b0b0a;
 }
 
 .book-page .bk .bk-cinema-hero .button-outline {
@@ -2026,7 +2011,7 @@
   .book-page .bk .bk-cinema-hero .button-gold:hover {
     background: var(--bk-gold);
     border-color: var(--bk-gold);
-    color: #0b0b0a;
+    color: #f5f2ef;
   }
   .book-page .bk .bk-cinema-hero .button-outline:hover {
     border-color: var(--bk-gold);
