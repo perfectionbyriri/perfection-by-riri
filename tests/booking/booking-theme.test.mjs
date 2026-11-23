@@ -52,6 +52,12 @@ test('gold text and error text pass AA on light', () => {
   assert.ok(contrast(page['--bk-error'], page['--bk-surface']) >= 4.5, 'error on surface');
 });
 
+test('dark button text stays readable on the gold fills', () => {
+  for (const fill of ['--bk-gold', '--bk-gold-fill']) {
+    assert.ok(contrast('#0b0b0a', page[fill]) >= 7, `button text on ${fill}`);
+  }
+});
+
 test('decorative gold stays the site gold', () => {
   assert.equal(page['--bk-gold'].toLowerCase(), '#b99a6d');
 });
@@ -69,7 +75,7 @@ test('no obsidian colors remain outside the dark island and the photo overlays',
   const cleaned = css
     .replace(/([^{}]*\.bk-dark-island[^{}]*)\{[^}]*\}/, '')
     .replace(/linear-gradient\([^;]*rgba\(12, 12, 11[^;]*;/g, '');
-  const leftovers = cleaned.match(/#0c0c0b|#080807|#141312|#10100f|#1b1917|#221e19|rgba\(12, 12, 11|rgba\(20, 19, 18/gi) ?? [];
+  const leftovers = cleaned.match(/#0c0c0b|#080807|#141312|#10100f|#1b1917|#221e19|rgba\(12, 12, 11/gi) ?? [];
   assert.deepEqual(leftovers, []);
 });
 

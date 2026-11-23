@@ -27,6 +27,7 @@
   --bk-gold: #b99a6d;
   --bk-gold-bright: #7d6035;
   --bk-gold-text: #7d6035;
+  --bk-gold-fill: #d3bb93;
   --bk-error: #8c2f23;
   --bk-ease: cubic-bezier(.22, 1, .36, 1);
   --bk-ease-out: cubic-bezier(.16, 1, .3, 1);
@@ -47,6 +48,7 @@
   --bk-gold: #c6a471;
   --bk-gold-bright: #dfc094;
   --bk-gold-text: #dfc094;
+  --bk-gold-fill: #dfc094;
   color: var(--bk-ink);
 }
 
@@ -62,7 +64,7 @@
      beat the hero layers (z-index 2) and the sticky bar (40) or they show through. */
   z-index: 50;
   background: var(--bk-bg-deep);
-  border-bottom: 1px solid rgba(212, 187, 150, .12);
+  border-bottom: 1px solid rgba(38, 38, 32, .12);
 }
 
 .book-page .site-header { color: var(--bk-ink); }
@@ -92,7 +94,7 @@
 .book-page .footer-bottom,
 .book-page .footer-bottom button { color: var(--bk-muted); }
 
-.book-page .footer-heading { color: var(--bk-gold); }
+.book-page .footer-heading { color: var(--bk-gold-text); }
 .book-page .footer-bottom { border-top-color: var(--bk-line); }
 .book-page .site-footer a:hover,
 .book-page .footer-bottom button:hover { color: var(--bk-ink); }
@@ -126,7 +128,7 @@
 .book-page .detail-dialog p,
 .book-page .detail-dialog li { color: var(--bk-muted); }
 
-/* Luxury gold and hairline outline buttons on obsidian black */
+/* Gold and hairline outline buttons on the light page */
 .book-page .bk .button-gold,
 .book-page .bk-bar .button-gold {
   background: var(--bk-gold);
@@ -175,7 +177,7 @@
   padding-block: 36px 84px;
   min-height: 74vh;
   background:
-    radial-gradient(ellipse 68% 36% at 50% 0%, rgba(198, 164, 113, .075) 0%, rgba(12, 12, 11, 0) 70%),
+    radial-gradient(ellipse 68% 36% at 50% 0%, rgba(185, 154, 109, .10) 0%, rgba(245, 242, 239, 0) 70%),
     var(--bk-bg);
 }
 
@@ -197,7 +199,7 @@
   font-weight: 500;
   letter-spacing: 2.4px;
   line-height: 1.5;
-  color: var(--bk-gold);
+  color: var(--bk-gold-text);
 }
 
 .bk-title {
@@ -276,7 +278,7 @@
 .bk-progress-item[aria-current="step"] { font-weight: 500; }
 .bk-progress-item[aria-current="step"]::after {
   height: 2px;
-  background: var(--bk-gold-bright);
+  background: var(--bk-gold-fill);
 }
 
 /* Layout: one full-width column on every step (Variant C); the ribbon sits above the step. */
@@ -321,7 +323,7 @@
   font-weight: 500;
   letter-spacing: 2px;
   line-height: 1.5;
-  color: var(--bk-gold);
+  color: var(--bk-gold-text);
 }
 
 .bk-summary-list { margin: 0; }
@@ -407,12 +409,12 @@
 }
 
 .bk-group.is-open {
-  border-bottom-color: rgba(212, 187, 150, .26);
+  border-bottom-color: rgba(38, 38, 32, .26);
 }
 
 .bk-group.is-open::before {
   transform: scaleY(1);
-  background: var(--bk-gold-bright);
+  background: var(--bk-gold-fill);
 }
 
 .bk-group-label {
@@ -448,7 +450,7 @@
   font-size: 11px;
   font-weight: 500;
   letter-spacing: 2px;
-  color: var(--bk-gold);
+  color: var(--bk-gold-text);
   font-variant-numeric: var(--price-numeric);
   transition: color 260ms var(--bk-ease);
 }
@@ -564,11 +566,11 @@
 
 .bk-group.is-open .bk-cat-icon {
   border-color: var(--bk-gold);
-  background: rgba(198, 164, 113, .12);
+  background: rgba(185, 154, 109, .14);
 }
 
 .bk-group.is-open .bk-cat-icon span {
-  background: var(--bk-gold-bright);
+  background: var(--bk-gold-fill);
 }
 
 .bk-group.is-open .bk-cat-icon span:last-child {
@@ -620,7 +622,7 @@
   gap: 8px;
   padding: 16px 24px 16px 60px;
   border-top: 1px solid var(--bk-line);
-  background: rgba(20, 19, 18, .65);
+  background: rgba(239, 235, 231, .8);
 }
 
 .bk-subtab {
@@ -687,7 +689,7 @@
   width: 100%;
   padding: 19px 24px 19px 60px;
   border: 0;
-  border-bottom: 1px solid rgba(212, 187, 150, .10);
+  border-bottom: 1px solid rgba(38, 38, 32, .10);
   background: transparent;
   color: var(--bk-ink);
   font: inherit;
@@ -791,7 +793,7 @@
 
 .bk-card[aria-pressed="true"]::before {
   transform: scaleY(1);
-  background: var(--bk-gold-bright);
+  background: var(--bk-gold-fill);
 }
 
 .bk-card[aria-pressed="true"] .bk-card-name {
@@ -938,7 +940,7 @@
   color: var(--bk-subtle);
   background: transparent;
   border-style: dashed;
-  border-color: rgba(212, 187, 150, .10);
+  border-color: rgba(38, 38, 32, .10);
   opacity: .5;
 }
 
@@ -973,7 +975,7 @@
   letter-spacing: 2px;
   line-height: 1.5;
   text-transform: uppercase;
-  color: var(--bk-gold);
+  color: var(--bk-gold-text);
 }
 
 .bk-slot-list { display: flex; flex-wrap: wrap; gap: 12px; }
@@ -1013,7 +1015,7 @@
 }
 
 .book-page .bk .bk-slot[aria-pressed="true"]::before {
-  background: var(--bk-gold-bright);
+  background: var(--bk-gold-fill);
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -1245,7 +1247,7 @@
   font-size: 11px;
   font-weight: 500;
   letter-spacing: 2px;
-  color: var(--bk-gold);
+  color: var(--bk-gold-text);
 }
 
 .bk-monolith-kicker[hidden],
@@ -1458,7 +1460,7 @@
   font-weight: 500;
   letter-spacing: 2px;
   line-height: 1.65;
-  color: var(--bk-gold);
+  color: var(--bk-gold-text);
 }
 
 .bk-cinema-hero--confirm .bk-eyebrow {
@@ -1549,7 +1551,7 @@
   font-weight: 500;
   letter-spacing: 2px;
   line-height: 1.65;
-  color: var(--bk-gold);
+  color: var(--bk-gold-text);
 }
 
 .bk-cinema-edit {
@@ -1814,7 +1816,7 @@
   font-size: 10px;
   font-weight: 500;
   letter-spacing: 2px;
-  color: var(--bk-gold);
+  color: var(--bk-gold-text);
 }
 
 .bk-pay { min-width: 260px; }
