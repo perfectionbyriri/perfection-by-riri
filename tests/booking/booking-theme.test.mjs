@@ -121,13 +121,13 @@ test('booking panels use exactly the service-page panel color (--card #efebe7)',
   assert.equal(page['--bk-surface-inset'].toLowerCase(), '#efebe7');
 });
 
-test('Bodoni at small and medium sizes is sturdier: weight 500, opsz 12; open/selected titles stay ink', () => {
+test('Bodoni at small and medium sizes is sturdier: weight 600, opsz 9; open/selected titles stay ink', () => {
   const block = css.match(/\/\* Bodoni legibility[\s\S]*?\n\}\n/)?.[0] ?? '';
   for (const sel of ['.bk-card-name', '.bk-cat-title', '.bk-ribbon-title', '.bk-day-date', '.bk-step-title', '.bk-cinema-col-title', '.bk-review-service', '.bk-confirm-service']) {
     assert.ok(block.includes(sel), `${sel} is in the legibility block`);
   }
-  assert.match(block, /font-weight:\s*500/);
-  assert.match(block, /font-variation-settings:\s*"opsz" 12/);
+  assert.match(block, /font-weight:\s*600/);
+  assert.match(block, /font-variation-settings:\s*"opsz" 9/);
   assert.doesNotMatch(block, /\.bk-monolith|\.bk-cinema-title|\.bk-title\b/, 'display headings keep their size-tuned style');
   assert.match(css, /\.bk-group\.is-open \.bk-cat-title\s*\{\s*color:\s*var\(--bk-ink\)/);
   assert.match(css, /\.bk-card\[aria-pressed="true"\] \.bk-card-name\s*\{\s*color:\s*var\(--bk-ink\)/);
