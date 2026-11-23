@@ -27,6 +27,7 @@ test('buildAppointmentBody sends the D§14 request with trimmed details and a di
     customer: { first_name: 'Anna', last_name: 'Smith', email: 'Anna@Example.com', phone: '4258450045' },
     notes: 'First visit',
     policy_accepted: true,
+    faq_acknowledged: false,
     turnstile_token: 'ts-token',
     payment: { source_id: 'cnon:abc', verification_token: 'verf:xyz' }
   });
@@ -190,4 +191,22 @@ test('heroPhotoFor picks the editorial hero photo that matches the service group
     assert.equal(photo.alt, alt, `group ${group}`);
     assert.match(photo.focal, /^\d+% \d+%$/);
   }
+});
+
+test('buildAppointmentBody sends faq_acknowledged', () => {
+  const body = buildAppointmentBody({ idempotencyKey: 'k', startAt: '2026-11-23T13:00:00-08:00', details, service: lashLift, faqAcknowledged: true });
+  assert.equal(body.faq_acknowledged, true);
+  assert.equal(buildAppointmentBody({ idempotencyKey: 'k', startAt: 'x', details, service: lashLift }).faq_acknowledged, false);
+});
+
+test('a faq_acknowledged field error sends the client back to step 1', () => {
+  const mapped = mapError({ error: { code: 'VALIDATION_FAILED', fields: { faq_acknowledged: 'Please confirm you have read the FAQ.' } } });
+  assert.equal(mapped.step, 1);
+  assert.match(mapped.message, /FAQ/);
+});
+
+test('the review shows the FAQ confirmation line for a flagged service only', () => {
+  const flagged = { ...lashLift, notice: 'lip-blushing-faq' };
+  assert.match(renderReview({ service: flagged, details, timeLabel: 'Monday, November 23 · 1:00 PM' }), /Lip Blushing FAQ: confirmed/);
+  assert.doesNotMatch(renderReview({ service: lashLift, details, timeLabel: 'Monday, November 23 · 1:00 PM' }), /FAQ/);
 });

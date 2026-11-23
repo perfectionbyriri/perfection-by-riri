@@ -4,8 +4,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createApi } from '../../New Perfection/js/booking/api.js';
-import { createState, parseDeepLink, resolveDeepLink } from '../../New Perfection/js/booking/state.js';
-import { formatDuration, formatPrice, renderCatalogUnavailable, renderServices } from '../../New Perfection/js/booking/render-services.js';
+import { continueBlocked, createState, parseDeepLink, resolveDeepLink, stepFromHistory } from '../../New Perfection/js/booking/state.js';
+import { formatDuration, formatPrice, renderCatalogUnavailable, renderNotice, renderServices } from '../../New Perfection/js/booking/render-services.js';
 import { mergeCatalog, metaForMock } from '../../worker/src/catalog.js';
 import { MOCK_PROVIDER_ID, MOCK_SERVICES } from '../../worker/src/setmore/fixtures.js';
 
@@ -213,4 +213,60 @@ test('a network failure or a non-JSON reply becomes a NETWORK error', async () =
   const html = await createApi({ fetch: async () => new Response('<html>', { status: 502 }) }).fetchCatalog();
   assert.equal(html.ok, false);
   assert.equal(html.error.code, 'NETWORK');
+});
+
+// Lip Blushing carries the FAQ notice (worker/config/services-meta.json).
+const ALL = GROUPS.flatMap((group) => group.services);
+const LIP = ALL.find((service) => service.notice);
+const PLAIN = ALL.find((service) => !service.notice);
+
+test('renderNotice returns an empty string for a service without a notice', () => {
+  assert.equal(renderNotice(PLAIN), '');
+});
+
+test('a flagged service renders the notice after its card: heading, text, FAQ link, unchecked checkbox', () => {
+  const html = renderServices({ groups: GROUPS, selectedId: LIP.service_id });
+  const notice = html.match(new RegExp(`<div class="bk-notice"[^>]*data-notice-for="${LIP.service_id}"[\\s\\S]*?</div>`))?.[0] ?? '';
+  assert.ok(notice, 'notice present');
+  assert.ok(html.indexOf(notice) > html.indexOf(`data-service-id="${LIP.service_id}"`), 'notice comes after its card');
+  assert.match(notice, /Important before you book/);
+  assert.match(notice, /Please read our (&quot;|")Lip Blushing &amp; Cold Sores(&quot;|") FAQ\./);
+  assert.match(notice, /href="\/faq\/#lip-blushing-cold-sores"/);
+  assert.match(notice, /target="_blank"/);
+  assert.match(notice, /rel="noopener"/);
+  assert.match(notice, /Read the FAQ/);
+  assert.match(notice, /I have read the FAQ and understand it applies to me\./);
+  assert.doesNotMatch(notice, /\bchecked\b/);
+  assert.doesNotMatch(notice, /\shidden\b/, 'visible for the selected service');
+});
+
+test('the notice has no medical wording of its own', () => {
+  const text = renderNotice(LIP, { visible: true }).replace(/<[^>]+>/g, ' ');
+  assert.doesNotMatch(text, /herpes|HSV|virus|infect/i);
+});
+
+test('the notice is hidden until its service is selected, and shows the stored tick', () => {
+  const idle = renderServices({ groups: GROUPS, selectedId: null });
+  assert.match(idle, new RegExp(`data-notice-for="${LIP.service_id}"[^>]*hidden`));
+  const ticked = renderServices({ groups: GROUPS, selectedId: LIP.service_id, faqAcknowledged: true });
+  assert.match(ticked, /bk-notice-check[^>]*checked/);
+});
+
+test('continueBlocked is true for a flagged service until it is acknowledged', () => {
+  assert.equal(continueBlocked({ service: LIP, faqAcknowledged: false }), true);
+  assert.equal(continueBlocked({ service: LIP, faqAcknowledged: true }), false);
+  assert.equal(continueBlocked({ service: PLAIN, faqAcknowledged: false }), false);
+  assert.equal(continueBlocked({ service: null, faqAcknowledged: false }), false);
+});
+
+test('a deep link to a flagged service stays on step 1 so the notice is seen', () => {
+  const link = resolveDeepLink({ serviceId: LIP.service_id }, CATALOG);
+  assert.equal(link.step, 1);
+  assert.equal(link.serviceId, LIP.service_id);
+});
+
+test('history never lands past step 1 on a flagged service that is not acknowledged', () => {
+  const current = { catalog: CATALOG, serviceId: LIP.service_id, startAt: '2026-11-23T10:00:00-08:00', details: {} };
+  assert.equal(stepFromHistory({ step: 2 }, { ...current, faqAcknowledged: false }).step, 1);
+  assert.equal(stepFromHistory({ step: 2 }, { ...current, faqAcknowledged: true }).step, 2);
 });

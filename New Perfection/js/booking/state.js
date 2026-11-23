@@ -35,9 +35,11 @@ export function parseDeepLink(search) {
 // back to step 1: an old link must never show an error.
 export function resolveDeepLink(link, catalog) {
   const groups = catalog?.groups ?? [];
-  if (link.serviceId && groups.some((group) => group.services.some((service) => service.service_id === link.serviceId))) {
-    return { step: 2, serviceId: link.serviceId, group: null, error: null };
-  }
+  const linked = link.serviceId
+    ? groups.flatMap((group) => group.services).find((service) => service.service_id === link.serviceId)
+    : null;
+  // A service with a notice stays on step 1: the client must see and confirm it first.
+  if (linked) return { step: linked.notice ? 1 : 2, serviceId: link.serviceId, group: null, error: null };
   const group = link.group && groups.some((item) => item.key === link.group) ? link.group : null;
   return { step: 1, serviceId: null, group, error: null };
 }
@@ -53,6 +55,8 @@ export function stepFromHistory(historyState, current = {}) {
     : 1;
   let step = wanted;
   if (step >= 2 && !current.serviceId) step = 1;
+  const chosen = current.catalog?.groups?.flatMap((group) => group.services).find((service) => service.service_id === current.serviceId);
+  if (step >= 2 && continueBlocked({ service: chosen, faqAcknowledged: current.faqAcknowledged })) step = 1;
   if (step >= 3 && !current.startAt) step = 2;
   if (step >= 4 && !hasDetails(current.details)) step = 3;
   return { step, details: current.details ?? {} };
@@ -94,4 +98,10 @@ export function ribbonValues({ service, week, startAt, startLabel } = {}) {
     values.time = { title: `${day.weekday}, ${monthDay}`, sub: `${startLabel} Pacific Time` };
   }
   return values;
+}
+
+// A service that carries a notice (the Lip Blushing FAQ) cannot continue until
+// the client has confirmed it.
+export function continueBlocked({ service, faqAcknowledged } = {}) {
+  return Boolean(service?.notice) && !faqAcknowledged;
 }

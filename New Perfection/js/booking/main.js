@@ -14,7 +14,7 @@ import { buildIcs, confirmedPath, fireConfirmation, renderConfirmation, trackFun
 import { renderCatalogUnavailable, renderServices } from './render-services.js';
 import { defaultDay, renderSlotsError, renderSlotsLoading, renderWeek } from './render-slots.js';
 import { renderDetails, renderErrorSummary } from './render-details.js';
-import { createState, parseDeepLink, resolveDeepLink, ribbonValues, stepFromHistory, summaryLine } from './state.js';
+import { continueBlocked, createState, parseDeepLink, resolveDeepLink, ribbonValues, stepFromHistory, summaryLine } from './state.js';
 import { FIELD_ORDER, formatPhone, validateDetails } from './validate.js';
 import { swipeDirection } from './swipe.js';
 
@@ -60,7 +60,7 @@ if (app) {
     ? { src: elements.hero.photo.getAttribute('src'), alt: elements.hero.photo.getAttribute('alt') }
     : null;
   const state = createState({
-    step: 1, catalog: null, serviceId: null, focusGroup: null,
+    step: 1, catalog: null, serviceId: null, focusGroup: null, faqAcknowledged: false,
     week: null, weekStart: null, selectedDate: null, startAt: null, startLabel: null,
     details: {}, idempotencyKey: null, booking: null
   });
@@ -254,16 +254,19 @@ if (app) {
   }
 
   function renderStep1({ focus = false } = {}) {
-    const { catalog, serviceId, focusGroup } = state.get();
+    const { catalog, serviceId, focusGroup, faqAcknowledged } = state.get();
     updateProgress(1);
-    const hint = serviceId ? '' : '<p class="bk-hint" id="bk-continue-hint">Choose a service to continue.</p>';
+    const blocked = continueBlocked({ service: findService(serviceId), faqAcknowledged });
+    const hint = !serviceId
+      ? '<p class="bk-hint" id="bk-continue-hint">Choose a service to continue.</p>'
+      : (blocked ? '<p class="bk-hint" id="bk-continue-hint">Please confirm the notice above to continue.</p>' : '');
     elements.step.innerHTML = '<h2 class="bk-step-title" tabindex="-1">Choose a service</h2>'
-      + renderServices({ groups: catalog.groups, selectedId: serviceId, focusGroup })
+      + renderServices({ groups: catalog.groups, selectedId: serviceId, focusGroup, faqAcknowledged })
       + renderActionBar({
         step: 1,
         hint,
         primary: '<button type="button" class="button button-gold" data-action="continue"'
-          + `${serviceId ? '' : ' disabled aria-disabled="true" aria-describedby="bk-continue-hint"'}>Continue to date &amp; time</button>`
+          + `${!serviceId || blocked ? ' disabled aria-disabled="true" aria-describedby="bk-continue-hint"' : ''}>Continue to date &amp; time</button>`
       });
     elements.step.setAttribute('aria-busy', 'false');
     if (focus) focusTitle();
@@ -281,11 +284,44 @@ if (app) {
     }
   }
 
+  // Continue waits for a service, and for the FAQ confirmation when the service has a notice.
+  function syncContinue() {
+    const { serviceId, faqAcknowledged } = state.get();
+    const blocked = !serviceId || continueBlocked({ service: findService(serviceId), faqAcknowledged });
+    const continueButton = elements.step.querySelector('[data-action="continue"]');
+    if (continueButton) {
+      continueButton.disabled = blocked;
+      if (blocked) {
+        continueButton.setAttribute('aria-disabled', 'true');
+        continueButton.setAttribute('aria-describedby', 'bk-continue-hint');
+      } else {
+        continueButton.removeAttribute('aria-disabled');
+        continueButton.removeAttribute('aria-describedby');
+      }
+    }
+    let hint = elements.step.querySelector('#bk-continue-hint');
+    const text = !serviceId ? 'Choose a service to continue.' : (blocked ? 'Please confirm the notice above to continue.' : '');
+    if (!text) { hint?.remove(); return; }
+    if (!hint) {
+      hint = document.createElement('p');
+      hint.className = 'bk-hint';
+      hint.id = 'bk-continue-hint';
+      elements.step.querySelector('.bk-actions')?.insertBefore(hint, continueButton);
+    }
+    hint.textContent = text;
+  }
+
   function selectService(id) {
     const service = findService(id);
     if (!service) return;
-    if (state.get().serviceId !== id) state.set({ week: null, weekStart: null, selectedDate: null, startAt: null, startLabel: null });
+    if (state.get().serviceId !== id) state.set({ week: null, weekStart: null, selectedDate: null, startAt: null, startLabel: null, faqAcknowledged: false });
     state.set({ serviceId: id });
+    for (const notice of elements.step.querySelectorAll('.bk-notice')) {
+      const mine = notice.dataset.noticeFor === id;
+      notice.hidden = !mine;
+      const check = notice.querySelector('.bk-notice-check');
+      if (check && !mine) check.checked = false;
+    }
     for (const card of elements.step.querySelectorAll('.bk-card')) {
       card.setAttribute('aria-pressed', card.dataset.serviceId === id ? 'true' : 'false');
     }
@@ -305,13 +341,7 @@ if (app) {
         badge?.remove();
       }
     }
-    const continueButton = elements.step.querySelector('[data-action="continue"]');
-    if (continueButton) {
-      continueButton.disabled = false;
-      continueButton.removeAttribute('aria-disabled');
-      continueButton.removeAttribute('aria-describedby');
-    }
-    elements.step.querySelector('#bk-continue-hint')?.remove();
+    syncContinue();
     updateSummary();
     trackFunnel('booking_view_service', { service_id: id }, window.gtag);
     announce(`${service.name} selected.`);
@@ -360,12 +390,21 @@ if (app) {
     const target = event.target.closest('[data-action]');
     const action = target?.dataset.action;
     const { step } = state.get();
-    if (action === 'continue' && step === 1 && state.get().serviceId) goTo(2);
+    if (action === 'continue' && step === 1 && state.get().serviceId && !continueBlocked({ service: findService(state.get().serviceId), faqAcknowledged: state.get().faqAcknowledged })) goTo(2);
     else if (action === 'continue' && step === 2 && state.get().startAt) goTo(3);
     else if (action === 'back' && step > 1) goTo(step - 1);
     else if (action === 'prev-week' || action === 'next-week') loadWeek(target.dataset.week, { focusSelector: `[data-action="${action}"]` });
     else if (action === 'retry-week') loadWeek(state.get().weekStart);
     else if (action === 'add-to-calendar') downloadCalendar();
+  });
+
+  // The FAQ confirmation under a flagged service.
+  elements.step.addEventListener('change', (event) => {
+    const check = event.target.closest?.('.bk-notice-check');
+    if (!check) return;
+    state.set({ faqAcknowledged: check.checked });
+    syncContinue();
+    announce(check.checked ? 'FAQ confirmed.' : 'FAQ confirmation removed.');
   });
 
   // Step 2: swipe the week left or right, the same as the arrows. A touch that
@@ -730,6 +769,13 @@ if (app) {
       unmountWidgets();
       goTo(2);
       updateSummary();
+      showBanner(`<p>${mapped.message}</p>`);
+      return;
+    }
+    if (mapped.step === 1) {
+      unmountWidgets();
+      state.set({ faqAcknowledged: false });
+      goTo(1);
       showBanner(`<p>${mapped.message}</p>`);
       return;
     }

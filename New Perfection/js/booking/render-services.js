@@ -43,6 +43,24 @@ const SITE_MENU = [
   }
 ];
 
+const FAQ_URL = '/faq/#lip-blushing-cold-sores';
+
+// Inline notice under a flagged service's card: send the client to the owner's
+// FAQ block and ask for a confirmation. It points to the FAQ; it states no medical text itself.
+export function renderNotice(service, { visible = false, acknowledged = false } = {}) {
+  if (!service?.notice) return '';
+  const id = escapeHtml(service.service_id);
+  return `<div class="bk-notice" data-notice-for="${id}"${visible ? '' : ' hidden'}>`
+    + '<p class="bk-notice-title">Important before you book</p>'
+    + '<p class="bk-notice-text">Please read our &quot;Lip Blushing &amp; Cold Sores&quot; FAQ.</p>'
+    + `<a class="bk-notice-link" href="${FAQ_URL}" target="_blank" rel="noopener">Read the FAQ</a>`
+    + '<label class="bk-notice-label">'
+    + `<input class="bk-checkbox bk-notice-check" type="checkbox" data-notice-check="${id}"${acknowledged ? ' checked' : ''}>`
+    + '<span>I have read the FAQ and understand it applies to me.</span>'
+    + '</label>'
+    + '</div>';
+}
+
 export function formatPrice(cents) {
   const dollars = cents / 100;
   return Number.isInteger(dollars) ? `$${dollars}` : `$${dollars.toFixed(2)}`;
@@ -232,7 +250,7 @@ function defaultSubgroupKey(category, selectedId, focusGroup) {
   return category.subgroups[0]?.key ?? null;
 }
 
-export function renderServices({ groups, selectedId = null, focusGroup = null, openGroup = undefined }) {
+export function renderServices({ groups, selectedId = null, focusGroup = null, openGroup = undefined, faqAcknowledged = false }) {
   const categories = buildMenuCategories(groups);
   const focusCategoryKey = focusGroup
     ? categories.find((cat) => cat.key === focusGroup || cat.sourceKeys.includes(focusGroup))?.key ?? null
@@ -279,7 +297,10 @@ export function renderServices({ groups, selectedId = null, focusGroup = null, o
 
     const listMarkup = category.subgroups.map((sub) => {
       const hidden = hasSubtabs && sub.key !== activeSubKey ? ' hidden' : '';
-      const rows = sub.services.map((service, idx) => card(service, service.service_id === selectedId, idx)).join('');
+      const rows = sub.services.map((service, idx) => {
+        const chosen = service.service_id === selectedId;
+        return card(service, chosen, idx) + renderNotice(service, { visible: chosen, acknowledged: chosen && faqAcknowledged });
+      }).join('');
       return `<div class="bk-subpanel" data-subpanel="${escapeHtml(sub.key)}"${hidden}><div class="bk-card-grid">${rows}</div></div>`;
     }).join('');
 

@@ -55,6 +55,7 @@ export function buildAppointmentBody(attempt, tokens = {}) {
     },
     notes: trimmed(details.notes),
     policy_accepted: details.policy_accepted === true,
+    faq_acknowledged: attempt.faqAcknowledged === true,
     turnstile_token: tokens.turnstile ?? ''
   };
   if (service.deposit?.required && tokens.payment?.source_id) {
@@ -75,6 +76,7 @@ const COPY = {
   rateLimited: 'Too many attempts. Please wait a few minutes and try again, or call (425) 845 0045.',
   turnstile: 'We could not verify this request. Please try again, or call (425) 845 0045.',
   checkDetails: 'Please check your details and try again.',
+  faq: 'Please read the FAQ and confirm it before booking.',
   cardAgain: 'Please enter your card details again.'
 };
 
@@ -107,11 +109,14 @@ export function mapError(body) {
     case 'VALIDATION_FAILED': {
       const fieldErrors = {};
       let cardError = null;
+      let faqError = false;
       for (const [key, message] of Object.entries(error.fields ?? {})) {
         if (key.startsWith('customer.')) fieldErrors[key.slice('customer.'.length)] = String(message);
         else if (key === 'notes' || key === 'policy_accepted') fieldErrors[key] = String(message);
         else if (key.startsWith('payment')) cardError = COPY.cardAgain;
+        else if (key === 'faq_acknowledged') faqError = true;
       }
+      if (faqError) return { ...base, step: 1, focus: 'notice', retry: false, message: COPY.faq };
       if (Object.keys(fieldErrors).length) return { ...base, step: 3, focus: 'field', retry: false, message: COPY.checkDetails, fieldErrors };
       if (cardError) return { ...base, focus: 'card', inline: true, message: cardError };
       return { ...base, message: COPY.failed };
@@ -220,6 +225,7 @@ export function renderReview({ service, details = {}, timeLabel = '' }) {
     + `<div class="bk-cinema-col-head"><h3 class="bk-cinema-col-label">01 &middot; Treatment</h3><button type="button" class="bk-cinema-edit" data-goto-step="1">Edit ${EDIT_ARROW_SVG}</button></div>`
     + `<p class="bk-review-line bk-review-service bk-cinema-col-title">${escapeHtml(service.name)} · ${formatDuration(service.duration_minutes)}</p>`
     + priceLine
+    + (service.notice ? '<span class="bk-cinema-sub">Lip Blushing FAQ: confirmed</span>' : '')
     + '</div>'
     + '<div class="bk-cinema-col">'
     + `<div class="bk-cinema-col-head"><h3 class="bk-cinema-col-label">02 &middot; Date &amp; time</h3><button type="button" class="bk-cinema-edit" data-goto-step="2">Edit ${EDIT_ARROW_SVG}</button></div>`
