@@ -225,7 +225,7 @@ export function renderReview({ service, details = {}, timeLabel = '' }) {
     + `<div class="bk-cinema-col-head"><h3 class="bk-cinema-col-label">01 &middot; Treatment</h3><button type="button" class="bk-cinema-edit" data-goto-step="1">Edit ${EDIT_ARROW_SVG}</button></div>`
     + `<p class="bk-review-line bk-review-service bk-cinema-col-title">${escapeHtml(service.name)} · ${formatDuration(service.duration_minutes)}</p>`
     + priceLine
-    + (service.notice ? '<span class="bk-cinema-sub">Lip Blushing FAQ: confirmed</span>' : '')
+    + (service.notice ? `<span class="bk-cinema-sub">${escapeHtml(service.notice.label)} FAQ: confirmed</span>` : '')
     + '</div>'
     + '<div class="bk-cinema-col">'
     + `<div class="bk-cinema-col-head"><h3 class="bk-cinema-col-label">02 &middot; Date &amp; time</h3><button type="button" class="bk-cinema-edit" data-goto-step="2">Edit ${EDIT_ARROW_SVG}</button></div>`

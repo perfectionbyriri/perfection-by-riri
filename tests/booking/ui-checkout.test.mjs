@@ -206,7 +206,9 @@ test('a faq_acknowledged field error sends the client back to step 1', () => {
 });
 
 test('the review shows the FAQ confirmation line for a flagged service only', () => {
-  const flagged = { ...lashLift, notice: 'lip-blushing-faq' };
+  const flagged = { ...lashLift, notice: { key: 'lip-blushing-faq', label: 'Lip Blushing' } };
   assert.match(renderReview({ service: flagged, details, timeLabel: 'Monday, November 23 · 1:00 PM' }), /Lip Blushing FAQ: confirmed/);
+  const lash = { ...lashLift, notice: { key: 'lash-extensions-faq', label: 'Lash Extensions' } };
+  assert.match(renderReview({ service: lash, details, timeLabel: 'Monday, November 23 · 1:00 PM' }), /Lash Extensions FAQ: confirmed/);
   assert.doesNotMatch(renderReview({ service: lashLift, details, timeLabel: 'Monday, November 23 · 1:00 PM' }), /FAQ/);
 });

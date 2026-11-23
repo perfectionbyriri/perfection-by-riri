@@ -264,3 +264,11 @@ test('faq has the lip-blushing-cold-sores anchor on the existing subsection, wit
   assert.match(faq, /<div class="faq-subsection" id="lip-blushing-cold-sores">\s*<h3 class="faq-subsection-title">Lip Blushing &amp; Cold Sores<\/h3>/);
   assert.match(read('css/faq.css'), /#lip-blushing-cold-sores\s*\{[^}]*scroll-margin-top:\s*\d+px/);
 });
+
+test('faq.js opens the collapsed service section that holds the URL hash target, on load and on hashchange', () => {
+  const js = read('js/faq.js');
+  assert.match(js, /location\.hash/);
+  assert.match(js, /addEventListener\('hashchange'/);
+  assert.match(js, /closest\('\[data-faq-service\]'\)/);
+  assert.match(js, /setService\(service, true\)/);
+});

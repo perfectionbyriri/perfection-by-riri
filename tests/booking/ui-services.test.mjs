@@ -217,7 +217,7 @@ test('a network failure or a non-JSON reply becomes a NETWORK error', async () =
 
 // Lip Blushing carries the FAQ notice (worker/config/services-meta.json).
 const ALL = GROUPS.flatMap((group) => group.services);
-const LIP = ALL.find((service) => service.notice);
+const LIP = ALL.find((service) => service.notice?.key === 'lip-blushing-faq');
 const PLAIN = ALL.find((service) => !service.notice);
 
 test('renderNotice returns an empty string for a service without a notice', () => {
@@ -280,4 +280,26 @@ test('the notice carries a warning icon and is announced as a note', () => {
   const notice = renderNotice(LIP, { visible: true });
   assert.match(notice, /role="note"/);
   assert.match(notice, /<svg class="bk-notice-icon"[^>]*aria-hidden="true"/);
+});
+
+test('every flagged service shows its own FAQ in the notice text and link', () => {
+  const flagged = ALL.filter((service) => service.notice);
+  assert.ok(flagged.length >= 12, 'lip, lash full sets, wispy sets and lash lift are flagged');
+  const expected = {
+    'lip-blushing-faq': ['Lip Blushing &amp; Cold Sores', '/faq/#lip-blushing-cold-sores'],
+    'lash-extensions-faq': ['Lash Extensions', '/faq/#faq-title-lash'],
+    'lash-lift-faq': ['Lash Lift', '/faq/#faq-title-lift']
+  };
+  for (const service of flagged) {
+    const html = renderNotice(service, { visible: true });
+    const [title, url] = expected[service.notice.key];
+    assert.ok(html.includes(`Please read our &quot;${title}&quot; FAQ.`), `${service.name}: text`);
+    assert.ok(html.includes(`href="${url}"`), `${service.name}: link`);
+  }
+});
+
+test('refills and removal have no notice, full sets and lash lift do', () => {
+  const byName = (re) => ALL.filter((service) => re.test(service.name));
+  for (const service of byName(/refill|removal/i)) assert.equal(service.notice, null, service.name);
+  for (const service of byName(/full extension|wispy$|^lash lift/i).filter((item) => !/refill/i.test(item.name))) assert.ok(service.notice, service.name);
 });

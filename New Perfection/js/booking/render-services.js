@@ -43,10 +43,9 @@ const SITE_MENU = [
   }
 ];
 
-const FAQ_URL = '/faq/#lip-blushing-cold-sores';
-
 // Inline notice under a flagged service's card: send the client to the owner's
-// FAQ block and ask for a confirmation. It points to the FAQ; it states no medical text itself.
+// FAQ and ask for a confirmation. It points to the FAQ; it states no medical text itself.
+// service.notice = { key, title, label, faq_url } from the catalog.
 export function renderNotice(service, { visible = false, acknowledged = false } = {}) {
   if (!service?.notice) return '';
   const id = escapeHtml(service.service_id);
@@ -56,8 +55,8 @@ export function renderNotice(service, { visible = false, acknowledged = false } 
     + '<circle cx="12" cy="17.4" r="1.2" fill="currentColor"/></svg>';
   return `<div class="bk-notice" role="note" data-notice-for="${id}"${visible ? '' : ' hidden'}>`
     + `<p class="bk-notice-title">${icon}<span>Important before you book</span></p>`
-    + '<p class="bk-notice-text">Please read our &quot;Lip Blushing &amp; Cold Sores&quot; FAQ.</p>'
-    + `<a class="bk-notice-link" href="${FAQ_URL}" target="_blank" rel="noopener">Read the FAQ</a>`
+    + `<p class="bk-notice-text">Please read our &quot;${escapeHtml(service.notice.title)}&quot; FAQ.</p>`
+    + `<a class="bk-notice-link" href="${escapeHtml(service.notice.faq_url)}" target="_blank" rel="noopener">Read the FAQ</a>`
     + '<label class="bk-notice-label">'
     + `<input class="bk-checkbox bk-notice-check" type="checkbox" data-notice-check="${id}"${acknowledged ? ' checked' : ''}>`
     + '<span>I have read the FAQ and understand it applies to me.</span>'

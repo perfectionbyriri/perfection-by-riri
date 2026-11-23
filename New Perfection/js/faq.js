@@ -147,6 +147,21 @@
   if (desktopQuery.addEventListener) desktopQuery.addEventListener('change', applyViewport);
   else if (desktopQuery.addListener) desktopQuery.addListener(applyViewport);
 
+  /* A link such as /faq/#lip-blushing-cold-sores must land on visible text. On
+     phones the service sections are collapsed, so open the one that holds the
+     target (closing the others) and scroll to it. Desktop shows all sections. */
+  const openForHash = () => {
+    const id = decodeURIComponent(window.location.hash.slice(1));
+    const target = id ? document.getElementById(id) : null;
+    const service = target && target.closest('[data-faq-service]');
+    if (!service || desktopQuery.matches) return;
+    services.forEach((other) => { if (other !== service && other.classList.contains('is-open')) setService(other, false); });
+    setService(service, true);
+    window.requestAnimationFrame(() => target.scrollIntoView({ block: 'start' }));
+  };
+  openForHash();
+  window.addEventListener('hashchange', openForHash);
+
   /* 5 · Page-entry reveal. Reuses the same shared system as the Contact route
      (js/page-entry.js) so the entrance is identical; only the targets differ.
      No individual question rows are animated. */
