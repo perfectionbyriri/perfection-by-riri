@@ -45,11 +45,17 @@ export function renderDetails({ values = {}, errors = {}, policyText = POLICY_TE
     + `<input class="bk-checkbox" id="bk-policy_accepted" name="policy_accepted" type="checkbox" required${values.policy_accepted === true ? ' checked' : ''}${errorAttrs('policy_accepted', errors.policy_accepted)}>`
     + `<label class="bk-consent-label" for="bk-policy_accepted">${escapeHtml(consentLabel(policyText))}</label>`
     + `${errorText('policy_accepted', errors.policy_accepted)}</div>`;
-  return '<form class="bk-form" id="bk-details" novalidate>'
+  // Variant C §5.3: fields on the left, policy consent and privacy note on the right (8 / 4).
+  return '<form class="bk-form bk-details-split" id="bk-details" novalidate>'
+    + '<div class="bk-details-fields">'
     + '<div class="bk-error-slot"></div>'
-    + `<div class="bk-fields">${['first_name', 'last_name', 'email', 'phone'].map((name) => textField(name, values, errors)).join('')}${notes}${consent}</div>`
+    + `<div class="bk-fields">${['first_name', 'last_name', 'email', 'phone'].map((name) => textField(name, values, errors)).join('')}${notes}</div>`
+    + '</div>'
+    + '<div class="bk-details-policy">'
+    + consent
     + '<p class="bk-fine bk-privacy">We use these details only to manage your appointment. '
     + '<button type="button" class="bk-text-button" data-privacy>Privacy Policy</button></p>'
+    + '</div>'
     + '</form>';
 }
 

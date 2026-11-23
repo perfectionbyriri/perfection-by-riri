@@ -135,3 +135,10 @@ test('a busy calendar offers Try again; other failures offer the phone', () => {
   assert.match(down, /href="tel:\+14258450045"/);
   assert.match(renderSlotsError({ code: 'NETWORK' }), /data-action="retry-week"/);
 });
+
+test('Variant C: Morning and Afternoon sit side by side and name the chosen day', () => {
+  const html = renderWeek({ week: week(), selectedDate: '2026-11-23', deviceTimeZone: PACIFIC });
+  assert.match(html, /<div class="bk-slots bk-slots-split">/);
+  assert.match(html, /<h3 class="bk-slot-group-title">Morning<span class="bk-slot-group-date"> &middot; Monday, Nov 23<\/span><\/h3>/);
+  assert.match(html, /<h3 class="bk-slot-group-title">Afternoon<span class="bk-slot-group-date"> &middot; Monday, Nov 23<\/span><\/h3>/);
+});

@@ -54,3 +54,16 @@ test('the error summary links each problem to its field, in form order', () => {
   assert.deepEqual(links, [['bk-first_name', 'Please enter your first name.'], ['bk-phone', 'Please enter a 10-digit US mobile number.']]);
   assert.equal(renderErrorSummary({}), '');
 });
+
+test('Variant C: the details form is an 8/4 split with the policy consent and privacy note on the right', () => {
+  const html = renderDetails({});
+  assert.match(html, /^<form class="bk-form bk-details-split" id="bk-details" novalidate>/);
+  const fields = html.indexOf('class="bk-details-fields"');
+  const policy = html.indexOf('class="bk-details-policy"');
+  assert.ok(fields > 0 && policy > fields, 'fields, then policy');
+  const right = html.slice(policy);
+  assert.match(right, /bk-consent/);
+  assert.match(right, /bk-privacy/);
+  assert.doesNotMatch(html.slice(fields, policy), /bk-consent|bk-privacy/);
+  for (const name of ['first_name', 'last_name', 'email', 'phone', 'notes']) assert.ok(html.slice(fields, policy).includes(`id="bk-${name}"`), name);
+});

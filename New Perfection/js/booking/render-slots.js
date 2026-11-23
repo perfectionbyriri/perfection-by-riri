@@ -46,10 +46,11 @@ function dayButton(day, selectedDate) {
     + '</button></li>';
 }
 
-function slotGroup(title, slots, selectedStartAt) {
+function slotGroup(title, slots, selectedStartAt, dayLabel) {
   if (!slots.length) return '';
   const buttons = slots.map((item) => `<button type="button" class="button button-outline button-small bk-slot" data-start-at="${escapeHtml(item.start_at)}" aria-pressed="${item.start_at === selectedStartAt ? 'true' : 'false'}">${escapeHtml(item.label)}</button>`).join('');
-  return `<div class="bk-slot-group"><h3 class="bk-slot-group-title">${title}</h3><div class="bk-slot-list">${buttons}</div></div>`;
+  const date = dayLabel ? `<span class="bk-slot-group-date"> &middot; ${escapeHtml(dayLabel)}</span>` : '';
+  return `<div class="bk-slot-group"><h3 class="bk-slot-group-title">${title}${date}</h3><div class="bk-slot-list">${buttons}</div></div>`;
 }
 
 export function renderWeek({ week, selectedDate, selectedStartAt = null, deviceTimeZone }) {
@@ -73,8 +74,9 @@ export function renderWeek({ week, selectedDate, selectedStartAt = null, deviceT
 
   const day = week.days.find((item) => item.date === selectedDate);
   const { morning, afternoon } = groupSlots(day ? day.slots : []);
+  const dayLabel = day ? `${day.weekday}, ${shortDate(day.date)}` : '';
   const slots = day
-    ? `<div class="bk-slots">${slotGroup('Morning', morning, selectedStartAt)}${slotGroup('Afternoon', afternoon, selectedStartAt)}</div>`
+    ? `<div class="bk-slots bk-slots-split">${slotGroup('Morning', morning, selectedStartAt, dayLabel)}${slotGroup('Afternoon', afternoon, selectedStartAt, dayLabel)}</div>`
     : '';
   return `${head}${note}${strip}${slots}`;
 }
