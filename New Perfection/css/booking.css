@@ -2080,12 +2080,8 @@
     gap: 12px 14px;
   }
   .bk-subtabs {
-    flex-wrap: nowrap;
-    overflow-x: auto;
     padding: 14px 16px 14px 28px;
-    scrollbar-width: none;
   }
-  .bk-subtabs::-webkit-scrollbar { display: none; }
   .bk-card { padding: 18px 16px 18px 28px; }
 }
 

@@ -146,3 +146,11 @@ test('primary buttons are white with a gold border and fill gold on hover, text 
   assert.ok(contrast('#262620', '#b99a6d') >= 4.5, 'ink on the gold hover fill');
   assert.ok(contrast('#262620', '#ffffff') >= 7, 'ink on the white button');
 });
+
+test('phone sub-tabs wrap so every tab is visible without swiping', () => {
+  const mobile = css.match(/@media \(max-width: 800px\) \{[\s\S]*?\n\}\n/g)?.join('\n') ?? '';
+  const rule = mobile.match(/\n  \.bk-subtabs \{([^}]*)\}/)?.[1] ?? '';
+  assert.ok(rule, 'phone .bk-subtabs rule exists');
+  assert.doesNotMatch(rule, /nowrap|overflow-x/);
+  assert.doesNotMatch(css, /\.bk-subtabs::-webkit-scrollbar/);
+});
