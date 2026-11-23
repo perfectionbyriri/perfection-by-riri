@@ -82,3 +82,16 @@ test('no obsidian colors remain outside the dark island and the photo overlays',
 test('theme-color is the light background', () => {
   assert.match(read('book/index.html'), /<meta name="theme-color" content="#f5f2ef">/);
 });
+
+test('the phone menu is light: open header, links and footer links use the light tokens', () => {
+  assert.match(css, /\.book-page \.header-shell:has\(\.main-navigation\.is-open\)\s*\{[^}]*background:\s*var\(--bk-bg-deep\)/);
+  assert.match(css, /\.enhanced \.book-page #main-navigation > a,[\s\S]*?\{[^}]*color:\s*var\(--bk-ink\)/);
+  assert.match(css, /\.enhanced \.book-page #main-navigation \.nav-extras-row a\s*\{[^}]*color:\s*var\(--bk-muted\)/);
+});
+
+test('the Services dropdown is light on /book/: labels, descriptions and the open desktop header', () => {
+  assert.match(css, /\.book-page \.nav-services \.nav-dropdown-item\s*\{[^}]*color:\s*var\(--bk-ink\)/);
+  assert.match(css, /\.book-page \.nav-dropdown-label\s*\{[^}]*color:\s*var\(--bk-ink\)/);
+  assert.match(css, /\.book-page \.nav-dropdown-desc\s*\{[^}]*color:\s*var\(--bk-muted\)/);
+  assert.match(css, /\.book-page \.header-shell\.services-open\s*\{[^}]*background:\s*var\(--bk-bg-deep\)/);
+});

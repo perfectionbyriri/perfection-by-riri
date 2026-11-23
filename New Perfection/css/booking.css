@@ -75,11 +75,25 @@
   border-color: var(--bk-line);
 }
 
+/* Services dropdown: the shared styles draw it dark; on /book/ it stays light. */
+.book-page .header-shell.services-open { background: var(--bk-bg-deep); }
+.book-page .header-shell.services-open .site-header { color: var(--bk-ink); }
+.book-page .nav-services .nav-dropdown-item { color: var(--bk-ink); border-color: var(--bk-line); }
+.book-page .nav-dropdown-label { color: var(--bk-ink); }
+.book-page .nav-dropdown-desc { color: var(--bk-muted); }
+.book-page .nav-dropdown-arrow { color: var(--bk-gold-text); }
+
+/* Phone menu: the shared styles open it dark; on /book/ it stays light. */
 @media (max-width: 800px) {
-  .book-page .enhanced #main-navigation,
-  .book-page .main-navigation.is-open { background: var(--bk-bg-deep); }
-  .book-page .enhanced .main-navigation a,
-  .book-page .main-navigation.is-open a { color: var(--bk-ink); }
+  .book-page .header-shell:has(.main-navigation.is-open) { background: var(--bk-bg-deep); }
+  .book-page .header-shell:has(.main-navigation.is-open) .site-header { color: var(--bk-ink); }
+  .book-page .header-shell:has(.main-navigation.is-open) .menu-toggle { border-color: rgba(38, 38, 32, .32); background: transparent; }
+  .book-page .header-shell:has(.main-navigation.is-open) .menu-toggle span { background: var(--bk-ink); }
+  .enhanced .book-page #main-navigation,
+  .book-page .main-navigation.is-open { background: var(--bk-bg-deep); border-top-color: var(--bk-line); }
+  .enhanced .book-page #main-navigation > a,
+  .enhanced .book-page #main-navigation .nav-trigger { color: var(--bk-ink); border-bottom-color: var(--bk-line); }
+  .enhanced .book-page #main-navigation .nav-extras-row a { color: var(--bk-muted); }
 }
 
 .book-page .site-footer {
