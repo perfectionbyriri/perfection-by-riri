@@ -3,13 +3,15 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { createCatalogService, depositQuote, mergeCatalog, validateMeta } from '../../worker/src/catalog.js';
+import { createCatalogService, depositQuote, mergeCatalog, metaForMock, validateMeta } from '../../worker/src/catalog.js';
 import { MOCK_CATEGORIES, MOCK_PROVIDER_ID, MOCK_SERVICES, MOCK_STAFF } from '../../worker/src/setmore/fixtures.js';
 import { SetmoreBusy } from '../../worker/src/errors.js';
 import { createClock, createMemoryCache } from './helpers/fakes.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const META = JSON.parse(fs.readFileSync(path.join(ROOT, 'worker/config/services-meta.json'), 'utf8'));
+// Fixtures carry the placeholder ids, so merges against them read the meta as mock mode does.
+const MOCK_META = metaForMock(META);
 
 const PHOTO = { src: '/images/Lash%20Lift/lash-lift.webp', width: 736, height: 736, alt: 'Lash lift result' };
 const OVERRIDE_PHOTO = { src: '/images/PMU%20Services%20Content/lip-blush.webp', width: 735, height: 695, alt: 'Lip blush result' };
@@ -147,7 +149,7 @@ test('services-meta.json passes validateMeta and every photo.src exists under Ne
 });
 
 test('services-meta.json whitelists 43 mock services in 6 groups, all present in the mock catalog', () => {
-  const { groups, warnings } = merge(META);
+  const { groups, warnings } = merge(MOCK_META);
   assert.deepEqual(warnings, []);
   assert.equal(groups.length, 6);
   const ids = groups.flatMap((group) => group.services.map((service) => service.service_id));
@@ -171,7 +173,7 @@ function stubClient() {
 
 function catalogService({ client = stubClient(), clock = createClock(), cache = createMemoryCache(clock), log = () => {} } = {}) {
   const config = { setmoreProviderId: MOCK_PROVIDER_ID, depositAmountCents: 5000, cardFeeBasisPoints: 0, catalogTtlSeconds: 600 };
-  return { service: createCatalogService({ client, meta: META, config, cache, now: clock.now, log }), client, clock, cache };
+  return { service: createCatalogService({ client, meta: MOCK_META, config, cache, now: clock.now, log }), client, clock, cache };
 }
 
 test('serves stale catalog with stale:true when Setmore fails', async () => {
@@ -234,4 +236,22 @@ test('getService returns a whitelisted service with its group, or null', async (
   assert.equal(lift.price_cents, 11500);
   assert.equal(await service.getService('svc_mega_volume_wispy'), null);
   assert.equal(await service.getService('svc_unknown'), null);
+});
+
+test('services-meta uses real Setmore ids and keeps the mock id for mock mode', () => {
+  const mockIds = new Set(MOCK_SERVICES.map((service) => service.id));
+  assert.equal(META.services.length, 43);
+  for (const service of META.services) {
+    assert.ok(!service.service_id.startsWith('svc_'), service.service_id);
+    assert.match(service.service_id, /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/);
+    assert.ok(mockIds.has(service.mock_id), service.mock_id);
+  }
+  assert.equal(new Set(META.services.map((service) => service.service_id)).size, 43);
+});
+
+test('metaForMock swaps in the mock ids without touching the source meta', () => {
+  const meta = { version: 1, groups: [], services: [{ service_id: 'real-1', mock_id: 'svc_a', group: 'g' }] };
+  const mock = metaForMock(meta);
+  assert.equal(mock.services[0].service_id, 'svc_a');
+  assert.equal(meta.services[0].service_id, 'real-1');
 });

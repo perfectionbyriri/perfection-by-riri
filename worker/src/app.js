@@ -8,10 +8,10 @@
 //   POST /api/booking/appointments
 // Any other /api/* path is a JSON 404.
 
-import meta from '../config/services-meta.json' with { type: 'json' };
+import sourceMeta from '../config/services-meta.json' with { type: 'json' };
 import { createAlerts } from './alerts.js';
 import { createAppointmentService } from './appointments.js';
-import { createCatalogService } from './catalog.js';
+import { createCatalogService, metaForMock } from './catalog.js';
 import { loadConfig } from './config.js';
 import { createCustomerResolver } from './customers.js';
 import { BookingError, errorResponse, json } from './errors.js';
@@ -115,6 +115,7 @@ export function buildApp(env = {}, deps = {}) {
       apiBase: config.setmoreApiBase, tokenManager, fetch: setmoreFetch, now, cooldownSeconds: config.setmoreCooldownSeconds,
       ...(deps.sleep ? { sleep: deps.sleep } : {})
     });
+    const meta = config.setmoreMockMode ? metaForMock(sourceMeta) : sourceMeta;
     const catalog = createCatalogService({ client, meta, config, cache: config.setmoreMockMode ? null : cache, now, log });
     const slots = createSlotsService({ client, catalog, config, cache: config.setmoreMockMode ? null : cache, now });
     const customers = createCustomerResolver({ client, kv, secret: config.customerHashSecret, maxPages: config.customerScanMaxPages, log });

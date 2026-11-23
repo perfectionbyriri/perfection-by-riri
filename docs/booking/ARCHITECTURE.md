@@ -163,6 +163,10 @@ BFF rules:
 | Window keys | Setmore also returns the `end_at` date as an (empty) key. The BFF keeps only `week_start` … `week_start + 6`. |
 | Cache | `SLOTS_TTL_SECONDS` (default 30), keyed by `service_id + week_start`. The fresh check before booking **bypasses** the cache (§8). A successful booking purges that week's key in the local colo. |
 
+### 6.0 Live availability check (2026-11-23)
+
+Run [45116866123](https://github.com/perfectionbyriri/perfection-by-riri/actions/runs/45116866123) (`setmore-verify.yml`, `mode=read`, GET only) compared `/slots` with `GET /bookings/staffs/{provider}` for the next 4 studio weeks: 30 bookings, all `CONFIRMED`; slots for all 6 catalog durations (30, 60, 90, 120, 150, 180 min) with `working_hours=false` and `true`. Result: **0 slots overlapping a booking, 0 slots outside Mon–Sat 10:00–17:00**, identical slot counts for both `working_hours` values. Every service has `buffer {before: 0, after: 0}`, so buffer handling is untested by live data; if a buffer is ever set in Setmore, re-run the check (`buffer_honoured` reports it).
+
 ### 6.1 Time zone helpers (pure, unit-tested, no dependencies)
 
 Built on `Intl.DateTimeFormat` with `timeZone: 'America/Los_Angeles'`. This is the same technique as the live voice agent's `pacificSlotTimestamp` (`virtual-phone-agent/src/setmore.ts`), which is proven in production.
@@ -593,7 +597,7 @@ Findings (2026-11-22):
 | O1 | Square production `application_id`, `location_id`, access token (the same Square account the salon already uses?). | Live payments | Owner sets the secrets in Cloudflare. |
 | O2 | Google Ads conversion action for the new `purchase` event. | Ads measurement | Owner-approved plan in `google-ads-reports`. |
 | O3 | Email Routing destination for salon alerts. The owner will set up Cloudflare Email Routing before Task 23 (owner, 2026-11-22). | Alerts | Owner verifies the address in Cloudflare. |
-| O4 | Fill in real `service_id` values in `services-meta.json`. | Live catalog | Output of V2. |
+| O4 | **Resolved 2026-11-23** (verification runs [45116299041](https://github.com/perfectionbyriri/perfection-by-riri/actions/runs/45116299041) and [45116866123](https://github.com/perfectionbyriri/perfection-by-riri/actions/runs/45116866123)). `services-meta.json` holds the real Setmore ids for all 43 whitelisted services; each entry keeps its placeholder as `mock_id`, which mock mode reads through `metaForMock`. 17 live titles differ from the placeholder names ("Touch-Up Session", "Wispy Effect", "Refill 2 Week", "Wet Effect"); the owner confirmed the pairs on 2026-11-23 (`TITLE_ALIASES` in `worker/tools/setmore-verify/checks.js`). | — | — |
 
 Owner-approved 2026-11-22: Turnstile + rate limiting, alerts by e-mail, `PT48H` authorization with immediate cancel, fee 0%.
 

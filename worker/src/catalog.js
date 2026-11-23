@@ -27,6 +27,15 @@ function checkPhoto(photo, where) {
   if (!ok) throw invalidMeta(`photo of ${where}`);
 }
 
+// Mock mode serves the placeholder fixtures (worker/src/setmore/fixtures.js),
+// so it reads each service's `mock_id` instead of the real Setmore id.
+export function metaForMock(meta) {
+  return {
+    ...meta,
+    services: meta.services.map((service) => (service.mock_id ? { ...service, service_id: service.mock_id } : service))
+  };
+}
+
 export function validateMeta(meta) {
   if (!meta || meta.version !== 1) throw invalidMeta('unsupported version');
   if (!Array.isArray(meta.groups) || !Array.isArray(meta.services)) throw invalidMeta('groups and services must be arrays');

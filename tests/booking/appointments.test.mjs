@@ -5,7 +5,7 @@ import path from 'node:path';
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { createAppointmentService, validateAppointmentInput } from '../../worker/src/appointments.js';
-import { createCatalogService } from '../../worker/src/catalog.js';
+import { createCatalogService, metaForMock } from '../../worker/src/catalog.js';
 import { createSlotsService } from '../../worker/src/slots.js';
 import { createCustomerResolver } from '../../worker/src/customers.js';
 import { createMockSquare } from '../../worker/src/payments/mock.js';
@@ -18,7 +18,8 @@ import { BookingError, PaymentDeclined, SetmoreUnavailable, toBookingError } fro
 import { createClock, createMemoryCache, createMemoryKV } from './helpers/fakes.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const META = JSON.parse(fs.readFileSync(path.join(ROOT, 'worker/config/services-meta.json'), 'utf8'));
+// Fixtures carry the placeholder ids, so tests read the meta as mock mode does.
+const META = metaForMock(JSON.parse(fs.readFileSync(path.join(ROOT, 'worker/config/services-meta.json'), 'utf8')));
 const API = 'https://developer.setmore.com/api/v2';
 const KEY = '6f1c2a3b-4d5e-4f60-8a7b-9c0d1e2f3a4b';
 const IDEM = `idem:${createHash('sha256').update(KEY).digest('hex')}`;

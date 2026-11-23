@@ -571,7 +571,7 @@ New content must state: the booking form collects first and last name, email, ph
 
 - [x] **Step 1:** Remove the `push` trigger from `setmore-probe.yml` (keep `workflow_dispatch`). Done in Task 1.
 - [ ] **Step 2 (owner approval required):** V3 notification check. Create one booking through the deployed preview in live mode, on the owner's own email. Check for the Setmore email, then cancel it in Setmore. Record the result in A§17 and set the confirmation copy (D§4 step 5) accordingly.
-- [ ] **Step 3:** Fill in the real `service_id` values in `services-meta.json` from the Task 1 output (O4). Run the full tests.
+- [x] **Step 3:** Fill in the real `service_id` values in `services-meta.json` from the Task 1 output (O4). Run the full tests.
 - [ ] **Step 4:** Open the PR using `.github/pull_request_template.md` (What Changed / Assumptions / Evidence / Not Verified). Include CI run IDs.
 - [ ] **Step 5:** After merge, prepare the `project-context` update (`context/ads-analytics.md` and `context/site.md`): only confirmed facts with PR, commit and run IDs, via a PR in `perfectionbyriri/project-context`.
 

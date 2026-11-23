@@ -6,11 +6,12 @@ import { fileURLToPath } from 'node:url';
 import { createApi } from '../../New Perfection/js/booking/api.js';
 import { createState, parseDeepLink, resolveDeepLink } from '../../New Perfection/js/booking/state.js';
 import { formatDuration, formatPrice, renderCatalogUnavailable, renderServices } from '../../New Perfection/js/booking/render-services.js';
-import { mergeCatalog } from '../../worker/src/catalog.js';
+import { mergeCatalog, metaForMock } from '../../worker/src/catalog.js';
 import { MOCK_PROVIDER_ID, MOCK_SERVICES } from '../../worker/src/setmore/fixtures.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const META = JSON.parse(fs.readFileSync(path.join(ROOT, 'worker/config/services-meta.json'), 'utf8'));
+// Fixtures carry the placeholder ids, so tests read the meta as mock mode does.
+const META = metaForMock(JSON.parse(fs.readFileSync(path.join(ROOT, 'worker/config/services-meta.json'), 'utf8')));
 // The same shape GET /api/booking/catalog returns.
 const { groups: GROUPS } = mergeCatalog({ services: MOCK_SERVICES, meta: META, providerId: MOCK_PROVIDER_ID, depositCents: 5000, feeBasisPoints: 0 });
 const CATALOG = { timezone: 'America/Los_Angeles', stale: false, groups: GROUPS };

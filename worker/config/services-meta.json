@@ -76,7 +76,8 @@
   ],
   "services": [
     {
-      "service_id": "svc_lip_blushing",
+      "service_id": "f3bca511-c286-4e15-a24b-847b2670ec37",
+      "mock_id": "svc_lip_blushing",
       "group": "permanent-makeup",
       "order": 10,
       "photo": {
@@ -88,7 +89,8 @@
       "deposit": "standard"
     },
     {
-      "service_id": "svc_ombre_powder_eyebrows",
+      "service_id": "80ccb3c0-4a08-431b-b402-8468102223df",
+      "mock_id": "svc_ombre_powder_eyebrows",
       "group": "permanent-makeup",
       "order": 20,
       "photo": {
@@ -100,7 +102,8 @@
       "deposit": "standard"
     },
     {
-      "service_id": "svc_eyeliner_tattoo",
+      "service_id": "6f9a994f-1408-4d06-957b-d182a07e79c9",
+      "mock_id": "svc_eyeliner_tattoo",
       "group": "permanent-makeup",
       "order": 30,
       "photo": {
@@ -112,7 +115,8 @@
       "deposit": "standard"
     },
     {
-      "service_id": "svc_lash_line_tattoo",
+      "service_id": "e30b230a-c796-4ac8-9d89-32826b835bf6",
+      "mock_id": "svc_lash_line_tattoo",
       "group": "permanent-makeup",
       "order": 40,
       "photo": {
@@ -124,7 +128,8 @@
       "deposit": "standard"
     },
     {
-      "service_id": "svc_bottom_eyeliner_tattoo",
+      "service_id": "5cc0bbba-740e-4c25-bc15-99982c33fd62",
+      "mock_id": "svc_bottom_eyeliner_tattoo",
       "group": "permanent-makeup",
       "order": 50,
       "photo": {
@@ -136,266 +141,304 @@
       "deposit": "standard"
     },
     {
-      "service_id": "svc_lip_blushing_touch_up",
+      "service_id": "87dc8e16-ab13-4284-a6c1-deaaf096ca65",
+      "mock_id": "svc_lip_blushing_touch_up",
       "group": "permanent-makeup",
       "order": 60,
       "photo": null,
       "deposit": "standard"
     },
     {
-      "service_id": "svc_ombre_powder_eyebrows_touch_up",
+      "service_id": "c9abc91f-d087-46d6-95bc-bb2c11c5d40f",
+      "mock_id": "svc_ombre_powder_eyebrows_touch_up",
       "group": "permanent-makeup",
       "order": 70,
       "photo": null,
       "deposit": "standard"
     },
     {
-      "service_id": "svc_eyeliner_touch_up",
+      "service_id": "2d3741ac-237a-47ec-918e-7fa48ca8fa7a",
+      "mock_id": "svc_eyeliner_touch_up",
       "group": "permanent-makeup",
       "order": 80,
       "photo": null,
       "deposit": "standard"
     },
     {
-      "service_id": "svc_lash_line_touch_up",
+      "service_id": "1bc8a84c-2444-480e-9ab5-0bbf4b61606b",
+      "mock_id": "svc_lash_line_touch_up",
       "group": "permanent-makeup",
       "order": 90,
       "photo": null,
       "deposit": "standard"
     },
     {
-      "service_id": "svc_bottom_eyeliner_touch_up",
+      "service_id": "82644c5f-5c73-439f-8967-8022adc38541",
+      "mock_id": "svc_bottom_eyeliner_touch_up",
       "group": "permanent-makeup",
       "order": 100,
       "photo": null,
       "deposit": "standard"
     },
     {
-      "service_id": "svc_classic_full_extension",
+      "service_id": "cede126c-2553-4357-9916-6762843f0121",
+      "mock_id": "svc_classic_full_extension",
       "group": "lash-extensions",
       "order": 10,
       "photo": null,
       "deposit": "standard"
     },
     {
-      "service_id": "svc_hybrid_full_extension_2d_3d",
+      "service_id": "007cb9ee-0439-457e-9365-76806f45544b",
+      "mock_id": "svc_hybrid_full_extension_2d_3d",
       "group": "lash-extensions",
       "order": 20,
       "photo": null,
       "deposit": "standard"
     },
     {
-      "service_id": "svc_volume_full_extension_4d_5d",
+      "service_id": "829d9ffc-254e-4e8e-800d-f7e58dcf70b7",
+      "mock_id": "svc_volume_full_extension_4d_5d",
       "group": "lash-extensions",
       "order": 30,
       "photo": null,
       "deposit": "standard"
     },
     {
-      "service_id": "svc_mega_volume_full_extension_8d_10d",
+      "service_id": "8fef1003-d90e-4a6f-bcfa-afc168a499c8",
+      "mock_id": "svc_mega_volume_full_extension_8d_10d",
       "group": "lash-extensions",
       "order": 40,
       "photo": null,
       "deposit": "standard"
     },
     {
-      "service_id": "svc_wet_effect_full_extension",
+      "service_id": "67a291cd-2f4c-4aad-98a9-1ab28b36b818",
+      "mock_id": "svc_wet_effect_full_extension",
       "group": "lash-extensions",
       "order": 50,
       "photo": null,
       "deposit": "standard"
     },
     {
-      "service_id": "svc_lash_removal",
+      "service_id": "a74fa0e6-5e61-44f4-847c-627ab9f5b26b",
+      "mock_id": "svc_lash_removal",
       "group": "lash-extensions",
       "order": 60,
       "photo": null,
       "deposit": "none"
     },
     {
-      "service_id": "svc_classic_wispy",
+      "service_id": "bd70111c-4b7a-4b87-bd0b-e7f8e3e08c59",
+      "mock_id": "svc_classic_wispy",
       "group": "wispy-lashes",
       "order": 10,
       "photo": null,
       "deposit": "standard"
     },
     {
-      "service_id": "svc_hybrid_wispy",
+      "service_id": "97e5ce4c-4dd7-486b-9b8e-bd15d0250718",
+      "mock_id": "svc_hybrid_wispy",
       "group": "wispy-lashes",
       "order": 20,
       "photo": null,
       "deposit": "standard"
     },
     {
-      "service_id": "svc_volume_wispy",
+      "service_id": "af3e8143-6476-448f-9837-e19b477e61c4",
+      "mock_id": "svc_volume_wispy",
       "group": "wispy-lashes",
       "order": 30,
       "photo": null,
       "deposit": "standard"
     },
     {
-      "service_id": "svc_lash_lift_tinting",
+      "service_id": "d036bbc1-8fdf-4a23-879e-10c9b2c7b698",
+      "mock_id": "svc_lash_lift_tinting",
       "group": "lash-lift",
       "order": 10,
       "photo": null,
       "deposit": "standard"
     },
     {
-      "service_id": "svc_lash_lift",
+      "service_id": "8181342c-622a-43e1-88b4-21dcac151319",
+      "mock_id": "svc_lash_lift",
       "group": "lash-lift",
       "order": 20,
       "photo": null,
       "deposit": "standard"
     },
     {
-      "service_id": "svc_eyebrow_lamination_tinting_shaping",
+      "service_id": "c067d607-c3fd-48bc-9651-0da6d75c7f0e",
+      "mock_id": "svc_eyebrow_lamination_tinting_shaping",
       "group": "brows",
       "order": 10,
       "photo": null,
       "deposit": "standard"
     },
     {
-      "service_id": "svc_eyebrow_lamination",
+      "service_id": "72d87bc4-1f63-4a0b-869b-4619e76c861a",
+      "mock_id": "svc_eyebrow_lamination",
       "group": "brows",
       "order": 20,
       "photo": null,
       "deposit": "standard"
     },
     {
-      "service_id": "svc_eyebrow_tint_shaping",
+      "service_id": "10bfffe1-ca8f-49d2-a3ff-f5ed6a1126e9",
+      "mock_id": "svc_eyebrow_tint_shaping",
       "group": "brows",
       "order": 30,
       "photo": null,
       "deposit": "standard"
     },
     {
-      "service_id": "svc_eyebrow_shaping",
+      "service_id": "956582ea-b82b-4ef8-9d65-e10f4e3dae2c",
+      "mock_id": "svc_eyebrow_shaping",
       "group": "brows",
       "order": 40,
       "photo": null,
       "deposit": "none"
     },
     {
-      "service_id": "svc_classic_refill_2_weeks",
+      "service_id": "e0bf5b63-d4ef-4e6d-9f11-e6baec0a60b1",
+      "mock_id": "svc_classic_refill_2_weeks",
       "group": "lash-refills",
       "order": 10,
       "photo": null,
       "deposit": "standard"
     },
     {
-      "service_id": "svc_classic_refill_3_weeks",
+      "service_id": "075f687e-ed0c-4762-90b3-d8912e99b60d",
+      "mock_id": "svc_classic_refill_3_weeks",
       "group": "lash-refills",
       "order": 20,
       "photo": null,
       "deposit": "standard"
     },
     {
-      "service_id": "svc_hybrid_refill_2_weeks",
+      "service_id": "5899c776-3cab-434c-9112-0412a56425ae",
+      "mock_id": "svc_hybrid_refill_2_weeks",
       "group": "lash-refills",
       "order": 30,
       "photo": null,
       "deposit": "standard"
     },
     {
-      "service_id": "svc_hybrid_refill_3_weeks",
+      "service_id": "76d1a2d0-6d86-451a-8b7b-e46bf5819e78",
+      "mock_id": "svc_hybrid_refill_3_weeks",
       "group": "lash-refills",
       "order": 40,
       "photo": null,
       "deposit": "standard"
     },
     {
-      "service_id": "svc_volume_refill_2_weeks",
+      "service_id": "3560ab47-a878-4ead-8ace-e2963c47ea2a",
+      "mock_id": "svc_volume_refill_2_weeks",
       "group": "lash-refills",
       "order": 50,
       "photo": null,
       "deposit": "standard"
     },
     {
-      "service_id": "svc_volume_refill_3_weeks",
+      "service_id": "494e3e94-9de5-4fae-b86f-ea8312136ffb",
+      "mock_id": "svc_volume_refill_3_weeks",
       "group": "lash-refills",
       "order": 60,
       "photo": null,
       "deposit": "standard"
     },
     {
-      "service_id": "svc_mega_volume_refill_2_weeks",
+      "service_id": "dba2f869-8b32-4f39-afab-b3758c4d0a35",
+      "mock_id": "svc_mega_volume_refill_2_weeks",
       "group": "lash-refills",
       "order": 70,
       "photo": null,
       "deposit": "standard"
     },
     {
-      "service_id": "svc_mega_volume_refill_3_weeks",
+      "service_id": "ab623266-ec89-4cdb-812f-5ff22db1c377",
+      "mock_id": "svc_mega_volume_refill_3_weeks",
       "group": "lash-refills",
       "order": 80,
       "photo": null,
       "deposit": "standard"
     },
     {
-      "service_id": "svc_wet_effect_refill_2_weeks",
+      "service_id": "a42fb71f-fbd1-4b49-951c-e0218d49c28f",
+      "mock_id": "svc_wet_effect_refill_2_weeks",
       "group": "lash-refills",
       "order": 90,
       "photo": null,
       "deposit": "standard"
     },
     {
-      "service_id": "svc_wet_effect_refill_3_weeks",
+      "service_id": "dffc5e26-2114-46ab-a1de-906af11f1dae",
+      "mock_id": "svc_wet_effect_refill_3_weeks",
       "group": "lash-refills",
       "order": 100,
       "photo": null,
       "deposit": "standard"
     },
     {
-      "service_id": "svc_classic_wispy_refill_2_weeks",
+      "service_id": "81c0efe8-4235-40d9-8602-69f2cb29d0a3",
+      "mock_id": "svc_classic_wispy_refill_2_weeks",
       "group": "lash-refills",
       "order": 110,
       "photo": null,
       "deposit": "standard"
     },
     {
-      "service_id": "svc_classic_wispy_refill_3_weeks",
+      "service_id": "1778dfdf-66ca-4a95-a040-fa2f6f6954cb",
+      "mock_id": "svc_classic_wispy_refill_3_weeks",
       "group": "lash-refills",
       "order": 120,
       "photo": null,
       "deposit": "standard"
     },
     {
-      "service_id": "svc_hybrid_wispy_refill_2_weeks",
+      "service_id": "e177e39a-5a7c-48af-803b-b35b2b7e2aa5",
+      "mock_id": "svc_hybrid_wispy_refill_2_weeks",
       "group": "lash-refills",
       "order": 130,
       "photo": null,
       "deposit": "standard"
     },
     {
-      "service_id": "svc_hybrid_wispy_refill_3_weeks",
+      "service_id": "b284a64f-588e-4b35-b3b4-a37768388c71",
+      "mock_id": "svc_hybrid_wispy_refill_3_weeks",
       "group": "lash-refills",
       "order": 140,
       "photo": null,
       "deposit": "standard"
     },
     {
-      "service_id": "svc_volume_wispy_refill_2_weeks",
+      "service_id": "eda39224-6d3d-4a35-9e1c-3247f0aaf554",
+      "mock_id": "svc_volume_wispy_refill_2_weeks",
       "group": "lash-refills",
       "order": 150,
       "photo": null,
       "deposit": "standard"
     },
     {
-      "service_id": "svc_volume_wispy_refill_3_weeks",
+      "service_id": "f143e8a4-b4be-48f3-9b90-9d93339b1ea7",
+      "mock_id": "svc_volume_wispy_refill_3_weeks",
       "group": "lash-refills",
       "order": 160,
       "photo": null,
       "deposit": "standard"
     },
     {
-      "service_id": "svc_mega_volume_wispy_refill_2_weeks",
+      "service_id": "dd463770-7f81-4a2d-84c7-9c5fc0eb98bc",
+      "mock_id": "svc_mega_volume_wispy_refill_2_weeks",
       "group": "lash-refills",
       "order": 170,
       "photo": null,
       "deposit": "standard"
     },
     {
-      "service_id": "svc_mega_volume_wispy_refill_3_weeks",
+      "service_id": "754ca23b-98ad-4c5f-888f-de380535297a",
+      "mock_id": "svc_mega_volume_wispy_refill_3_weeks",
       "group": "lash-refills",
       "order": 180,
       "photo": null,

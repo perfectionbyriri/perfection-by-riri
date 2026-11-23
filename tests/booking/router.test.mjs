@@ -202,7 +202,9 @@ test('the X-Mock-Scenario header is ignored when mock is off', async () => {
   };
   const seen = [];
   const { app } = setup({ env, fetch: (input, init = {}) => { seen.push(new Headers(init.headers).get('X-Mock-Scenario')); return upstream(input, init); } });
-  const response = await app.fetch(get('/api/booking/slots?service_id=svc_lash_lift&week_start=2026-11-23', { 'X-Mock-Scenario': 'rate_limited' }));
+  // Mock off reads the real-id meta, which the placeholder fixtures do not match; the catalog
+  // route still calls upstream, which is all this test needs.
+  const response = await app.fetch(get('/api/booking/catalog', { 'X-Mock-Scenario': 'rate_limited' }));
   assert.equal(response.status, 200);
   assert.ok(seen.length > 0 && seen.every((value) => value === null), 'the header is never forwarded upstream');
 });
