@@ -208,12 +208,9 @@ function buildMenuCategories(groups) {
 
 function card(service, selected, index) {
   const blurb = service.blurb ? `<span class="bk-card-blurb">${escapeHtml(service.blurb)}</span>` : '';
-  const deposit = service.deposit?.required
-    ? `<span class="bk-card-deposit">${formatPrice(service.deposit.deposit_cents)} deposit to book</span>`
-    : '';
   const stagger = Math.min(index, MAX_STAGGER);
   return `<button type="button" class="bk-card" data-service-id="${escapeHtml(service.service_id)}" aria-pressed="${selected ? 'true' : 'false'}" style="--bk-i: ${stagger}">`
-    + `<span class="bk-card-body"><span class="bk-card-name">${escapeHtml(service.name)}</span>${blurb}${deposit}</span>`
+    + `<span class="bk-card-body"><span class="bk-card-name">${escapeHtml(service.name)}</span>${blurb}</span>`
     + `<span class="bk-card-aside"><span class="bk-card-meta">${formatDuration(service.duration_minutes)} · ${formatPrice(service.price_cents)}</span>`
     + '<span class="bk-card-indicator" aria-hidden="true"><svg viewBox="0 0 16 16" width="12" height="12" focusable="false"><path d="M3 8.5 6.4 11.8 13 4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square" stroke-linejoin="miter"/></svg></span></span>'
     + '</button>';

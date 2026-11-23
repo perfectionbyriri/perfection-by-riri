@@ -98,10 +98,10 @@ test('the price is rendered from price_cents as $165 and the duration from minut
   assert.equal(formatDuration(30), '30 min');
 });
 
-test('the deposit line appears only when deposit.required', () => {
+test('cards show the service blurb instead of a deposit line', () => {
   const html = renderServices({ groups: GROUPS });
-  assert.match(cardFor(html, 'svc_classic_full_extension'), /\$50 deposit to book/);
-  assert.doesNotMatch(cardFor(html, 'svc_lash_removal'), /deposit/i);
+  assert.match(cardFor(html, 'svc_classic_full_extension'), /bk-card-blurb">One extension per natural lash[^<]*From 150 lashes per eye\./);
+  assert.doesNotMatch(html, /deposit/i);
 });
 
 test('catalog text is escaped', () => {

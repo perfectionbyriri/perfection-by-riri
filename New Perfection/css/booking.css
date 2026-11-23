@@ -723,13 +723,6 @@
   color: var(--bk-muted);
 }
 
-.bk-card-deposit {
-  margin-top: 2px;
-  font-size: 12px;
-  letter-spacing: .3px;
-  color: var(--bk-subtle);
-}
-
 .bk-card-aside {
   display: flex;
   align-items: center;
@@ -786,10 +779,6 @@
 
 .bk-card[aria-pressed="true"] .bk-card-name {
   color: var(--bk-gold-bright);
-}
-
-.bk-card[aria-pressed="true"] .bk-card-deposit {
-  color: var(--bk-muted);
 }
 
 .bk-card[aria-pressed="true"] .bk-card-indicator {
