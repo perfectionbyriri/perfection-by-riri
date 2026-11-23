@@ -133,18 +133,18 @@ test('Bodoni at small and medium sizes is sturdier: weight 550, opsz 9; open/sel
   assert.match(css, /\.bk-card\[aria-pressed="true"\] \.bk-card-name\s*\{\s*color:\s*var\(--bk-ink\)/);
 });
 
-test('primary buttons are white with a gold border and fill gold on hover, text always readable', () => {
+test('primary buttons are black with light text and fill gold on hover with dark text', () => {
   const base = css.match(/\.book-page \.bk \.button-gold,\s*\.book-page \.bk-bar \.button-gold\s*\{([^}]*)\}/)?.[1] ?? '';
-  assert.match(base, /background:\s*#fff\b/);
-  assert.match(base, /color:\s*var\(--bk-ink\)/);
-  assert.match(base, /border-color:\s*var\(--bk-gold\)/);
+  assert.match(base, /background:\s*#0b0b0a/);
+  assert.match(base, /color:\s*#f5f2ef/);
+  assert.match(base, /border-color:\s*#0b0b0a/);
   const sweep = css.match(/\.book-page \.bk \.button-gold::before,[\s\S]*?\{([^}]*)\}/)?.[1] ?? '';
   assert.match(sweep, /background:\s*var\(--bk-gold\)/);
   const hover = css.match(/\.book-page \.bk \.button-gold:hover,[\s\S]*?\{([^}]*)\}/)?.[1] ?? '';
   assert.match(hover, /background:\s*var\(--bk-gold\)/);
   assert.match(hover, /color:\s*var\(--bk-ink\)/);
+  assert.ok(contrast('#f5f2ef', '#0b0b0a') >= 7, 'light text on the black button');
   assert.ok(contrast('#262620', '#b99a6d') >= 4.5, 'ink on the gold hover fill');
-  assert.ok(contrast('#262620', '#ffffff') >= 7, 'ink on the white button');
 });
 
 test('sub-tabs wrap only on phones (max-width 540px); wider screens keep their layout', () => {

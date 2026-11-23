@@ -159,12 +159,12 @@
 .book-page .detail-dialog p,
 .book-page .detail-dialog li { color: var(--bk-muted); }
 
-/* Primary buttons: white with a gold border, filling gold on hover. Outline buttons: hairline. */
+/* Primary buttons: black with light text, filling gold on hover. Outline buttons: hairline. */
 .book-page .bk .button-gold,
 .book-page .bk-bar .button-gold {
-  background: #fff;
-  color: var(--bk-ink);
-  border-color: var(--bk-gold);
+  background: #0b0b0a;
+  color: #f5f2ef;
+  border-color: #0b0b0a;
 }
 
 .book-page .bk .button-gold::before,
