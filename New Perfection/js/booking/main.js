@@ -100,6 +100,24 @@ if (app) {
     else elements.step.classList.add('is-entering-forward');
   }
 
+  // Animate a container from its old height to its new one so swapping its
+  // content does not make the page jump. Skipped with reduced motion.
+  function morphHeight(box, update) {
+    if (prefersReducedMotion() || !box.isConnected) { update(); return; }
+    const from = box.offsetHeight;
+    update();
+    const to = box.offsetHeight;
+    if (!from || from === to) return;
+    box.style.overflow = 'hidden';
+    box.style.height = `${from}px`;
+    void box.offsetHeight;
+    box.style.transition = 'height 320ms var(--bk-ease)';
+    box.style.height = `${to}px`;
+    const done = () => { box.style.overflow = box.style.height = box.style.transition = ''; };
+    box.addEventListener('transitionend', done, { once: true });
+    setTimeout(done, 400);
+  }
+
   function setSummaryValue(el, { title, sub }) {
     const titleEl = el?.querySelector('.bk-ribbon-title');
     const subEl = el?.querySelector('.bk-ribbon-sub');
@@ -298,7 +316,7 @@ if (app) {
     scheduleAutoAdvance(id);
   }
 
-  // On small screens a tap on a service card moves on by itself after 250ms
+  // On small screens a tap on a service card moves on by itself after 400ms (long enough for the check mark to draw)
   // (at once with reduced motion). Desktop keeps the explicit Continue.
   let advanceTimer = null;
   function scheduleAutoAdvance(id) {
@@ -306,7 +324,7 @@ if (app) {
     if (!window.matchMedia('(max-width: 800px)').matches) return;
     const go = () => { if (state.get().step === 1 && state.get().serviceId === id) goTo(2); };
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) go();
-    else advanceTimer = setTimeout(go, 250);
+    else advanceTimer = setTimeout(go, 400);
   }
 
   elements.step.addEventListener('click', (event) => {
@@ -396,7 +414,9 @@ if (app) {
       renderStep2({ focusSelector });
       return;
     }
-    weekBox.innerHTML = week ? renderWeek({ week, selectedDate, selectedStartAt: startAt, deviceTimeZone }) : renderSlotsLoading();
+    morphHeight(weekBox, () => {
+      weekBox.innerHTML = week ? renderWeek({ week, selectedDate, selectedStartAt: startAt, deviceTimeZone }) : renderSlotsLoading();
+    });
     actions.outerHTML = step2Actions();
     elements.step.setAttribute('aria-busy', week ? 'false' : 'true');
     if (focusSelector) elements.step.querySelector(focusSelector)?.focus({ preventScroll: true });
@@ -823,31 +843,44 @@ if (app) {
     hideBanner();
     state.set({ step });
     updateProgress(step);
+    // The step swaps through a view transition when the browser has one: the
+    // old step fades out before the new one slides in, instead of vanishing.
+    const viaTransition = !prefersReducedMotion() && typeof document.startViewTransition === 'function';
     const finish = () => {
-      animateStep(direction);
+      if (!viaTransition) animateStep(direction);
       const head = document.querySelector('.bk-head');
       if (head && head.getBoundingClientRect().top < 0) {
         head.scrollIntoView({ behavior: prefersReducedMotion() ? 'auto' : 'smooth', block: 'start' });
       }
     };
-    if (step === 1) {
-      renderStep1({ focus: true });
+    const render = () => {
+      if (step === 1) {
+        renderStep1({ focus: true });
+        finish();
+        return;
+      }
+      if (step === 3) {
+        renderStep3({ focus: true });
+        finish();
+        return;
+      }
+      if (step === 4) {
+        renderStep4({ focus: true });
+        finish();
+        return;
+      }
+      renderStep2({ focus: true });
       finish();
+      if (!state.get().week) loadWeek(state.get().weekStart);
+    };
+    if (!viaTransition) {
+      render();
       return;
     }
-    if (step === 3) {
-      renderStep3({ focus: true });
-      finish();
-      return;
-    }
-    if (step === 4) {
-      renderStep4({ focus: true });
-      finish();
-      return;
-    }
-    renderStep2({ focus: true });
-    finish();
-    if (!state.get().week) loadWeek(state.get().weekStart);
+    const root = document.documentElement;
+    root.dataset.bkDir = direction;
+    const transition = document.startViewTransition(render);
+    transition.finished.catch(() => {}).finally(() => { delete root.dataset.bkDir; });
   }
 
   window.addEventListener('popstate', (event) => {

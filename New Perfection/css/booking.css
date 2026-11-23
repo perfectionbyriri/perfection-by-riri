@@ -1885,15 +1885,38 @@
   .bk-skeleton-row { animation: bk-pulse 1.5s ease-in-out infinite alternate; }
 }
 
+/* Step swap (js/booking/main.js goTo): the old step fades out, the new one
+   slides in. Only the step is animated; the rest of the page stays still. */
+@media (prefers-reduced-motion: no-preference) {
+  .bk-step { view-transition-name: bk-step; }
+  ::view-transition-old(root),
+  ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
+  ::view-transition-old(bk-step) { animation: bk-step-out 140ms ease both; mix-blend-mode: normal; }
+  ::view-transition-new(bk-step) { animation: bk-step-forward 420ms var(--bk-ease) 90ms both; mix-blend-mode: normal; }
+  html[data-bk-dir="backward"]::view-transition-old(bk-step) { animation-name: bk-step-out-back; }
+  html[data-bk-dir="backward"]::view-transition-new(bk-step) { animation-name: bk-step-backward; }
+}
+
+@keyframes bk-step-out {
+  to { opacity: 0; transform: translateX(-10px); }
+}
+
+@keyframes bk-step-out-back {
+  to { opacity: 0; transform: translateX(10px); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .bk-cat-panel,
   .bk-cat-icon span,
   .bk-card { transition: none; }
+  .book-page *,
+  .book-page *::before,
+  .book-page *::after { transition-duration: .01ms !important; }
 }
 
 @keyframes bk-focus-in {
-  from { opacity: 0; transform: translateY(14px); filter: blur(6px); }
-  to { opacity: 1; transform: none; filter: blur(0); }
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: none; }
 }
 
 @keyframes bk-fade-up {

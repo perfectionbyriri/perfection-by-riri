@@ -243,3 +243,18 @@ test('the header stack sits above every booking layer so the phone menu is not o
   const bookingTop = Math.max(...layers.filter((z) => z !== shellZ));
   assert.ok(shellZ > bookingTop, `header z-index ${shellZ} must exceed ${bookingTop}`);
 });
+
+test('motion: steps swap through a named view transition, no blur keyframes, full reduced-motion rule', () => {
+  const css = read('css/booking.css');
+  const js = read('js/booking/main.js');
+  assert.match(css, /\.bk-step\s*\{\s*view-transition-name:\s*bk-step/);
+  assert.match(css, /::view-transition-old\(bk-step\)/);
+  assert.match(css, /::view-transition-new\(bk-step\)/);
+  const focusIn = css.match(/@keyframes bk-focus-in\s*\{[\s\S]*?\n\}/)?.[0] ?? '';
+  assert.ok(focusIn && !/blur\(/.test(focusIn), 'bk-focus-in must not animate blur');
+  const reduce = css.match(/@media \(prefers-reduced-motion: reduce\)\s*\{[\s\S]*?\n\}/)?.[0] ?? '';
+  assert.match(reduce, /\.book-page[\s\S]*transition-duration/);
+  assert.match(js, /startViewTransition/);
+  assert.match(js, /setTimeout\(go, 400\)/);
+  assert.match(js, /morphHeight\(weekBox/);
+});
