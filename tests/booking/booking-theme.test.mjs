@@ -157,3 +157,15 @@ test('sub-tabs wrap only on phones (max-width 540px); wider screens keep their l
   assert.match(r540, /flex-wrap:\s*wrap/);
   assert.match(r540, /overflow(-x)?:\s*visible/);
 });
+
+test('digits and the dollar sign use Jost Light everywhere, also inside Bodoni text', () => {
+  const face = css.match(/@font-face\s*\{[^}]*unicode-range[^}]*\}/)?.[0] ?? '';
+  assert.match(face, /font-family:\s*'Bk Digits'/);
+  assert.match(face, /jost\.woff2/);
+  assert.match(face, /font-weight:\s*300\s*;/);
+  assert.match(face, /unicode-range:[^;]*U\+0030-0039/);
+  assert.match(face, /unicode-range:[^;]*U\+0024/);
+  assert.match(css, /\.book-page\s*\{[^}]*font-synthesis-weight:\s*none/, 'no faux bold on the Light digits');
+  assert.match(css, /--bk-serif:\s*'Bk Digits',\s*var\(--serif\)/);
+  assert.doesNotMatch(css, /font-family:\s*var\(--serif\)/, 'every serif rule goes through --bk-serif so digits stay Jost Light');
+});
