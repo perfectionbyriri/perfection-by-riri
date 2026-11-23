@@ -100,3 +100,11 @@ test('runRead logs the public catalog map but never consumer or booking data', a
   assert.match(text, /real-lip/);
   for (const secret of ['c-secret', 'Jane Doe', 'booking-secret-id', 'consumer_ids']) assert.ok(!text.includes(secret), secret);
 });
+
+test('runRead logs a histogram of raw slot start times per duration (times only)', async () => {
+  const { client, clock, log, lines } = setup({ slotsFor: () => freeSlot });
+  await runRead({ client, meta: META, config: CONFIG, now: clock.now, log });
+  const line = lines.find((item) => item.startsWith('slot_times duration=60 working_hours=false'));
+  assert.ok(line, 'histogram line present');
+  assert.match(line, /"13:00":4/);
+});

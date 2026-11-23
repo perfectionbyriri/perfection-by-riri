@@ -86,10 +86,17 @@ export async function runRead({ client, meta, config, now = () => new Date(), lo
     if (hasBuffer) bufferedPairs += 1;
     for (const workingHours of [false, true]) {
       let slotCount = 0;
+      const startTimes = {};
       for (const weekStart of weekStarts) {
         const { startAt, endAt } = weekWindow(weekStart, tz);
         const days = await fetchSlots(client, config, { duration: pair.duration, startAt, endAt, workingHours });
         slotCount += Object.values(days).reduce((sum, list) => sum + (Array.isArray(list) ? list.length : 0), 0);
+        for (const list of Object.values(days)) {
+          for (const slot of Array.isArray(list) ? list : []) {
+            const time = instantToZonedParts(new Date(Date.parse(slot.start_at)), tz).time;
+            startTimes[time] = (startTimes[time] ?? 0) + 1;
+          }
+        }
         const withBuffers = findSlotConflicts(days, bookings, { bufferBefore: pair.buffer_before, bufferAfter: pair.buffer_after }, tz);
         if (hasBuffer && !workingHours) {
           bufferOnlyConflicts += withBuffers.length - findSlotConflicts(days, bookings, {}, tz).length;
@@ -98,6 +105,8 @@ export async function runRead({ client, meta, config, now = () => new Date(), lo
         for (const o of slotsOutsideHours(days, STUDIO_HOURS, tz)) outsideHours.push({ working_hours: workingHours, ...o });
       }
       log(`slots: duration=${pair.duration} buffer=${pair.buffer_before}/${pair.buffer_after} working_hours=${workingHours} slots=${slotCount}`);
+      const sortedTimes = Object.fromEntries(Object.entries(startTimes).sort(([a], [b]) => a.localeCompare(b)));
+      log(`slot_times duration=${pair.duration} working_hours=${workingHours} ${JSON.stringify(sortedTimes)}`);
     }
   }
 
