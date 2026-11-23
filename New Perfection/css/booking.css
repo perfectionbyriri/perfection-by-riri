@@ -574,7 +574,7 @@
 }
 
 .bk-group.is-open .bk-cat-title {
-  color: var(--bk-gold-bright);
+  color: var(--bk-ink);
 }
 
 .bk-group.is-open .bk-cat-meta {
@@ -814,7 +814,7 @@
 }
 
 .bk-card[aria-pressed="true"] .bk-card-name {
-  color: var(--bk-gold-bright);
+  color: var(--bk-ink);
 }
 
 .bk-card[aria-pressed="true"] .bk-card-indicator {
@@ -2202,4 +2202,19 @@
 @media (min-width: 801px) {
   .bk-bar { display: none !important; }
   .bk-sheet { display: none !important; }
+}
+
+/* Bodoni legibility: at 20-28px the display cut's hairlines vanish, so small
+   and medium serif text gets a sturdier weight and optical size. Big display
+   headings (hero, confirmation) keep their own tuning. */
+.bk-card-name,
+.bk-cat-title,
+.bk-ribbon-title,
+.bk-day-date,
+.bk-step-title,
+.bk-cinema-col-title,
+.bk-review-service,
+.bk-confirm-service {
+  font-weight: 500;
+  font-variation-settings: "opsz" 12;
 }
