@@ -1425,6 +1425,7 @@
   font-weight: 400;
   line-height: 1.12;
   letter-spacing: .01em;
+  text-wrap: balance;
   color: var(--bk-ink);
 }
 

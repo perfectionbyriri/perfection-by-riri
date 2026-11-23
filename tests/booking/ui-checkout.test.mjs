@@ -134,7 +134,7 @@ test('a no-deposit service hides the card block and labels the button BOOK APPOI
 test('the review shows the server quote, the card field and no fee line at 0%', () => {
   const html = renderReview({ service: lashLift, details, timeLabel: 'Thursday, November 27 · 1:00 PM' });
   assert.match(html, /Lash lift · 1 hr/);
-  assert.match(html, /Thursday, November 27<\/p><span class="bk-cinema-sub">1:00 PM Pacific Time<\/span>/);
+  assert.match(html, /Thursday, November&nbsp;27<\/p><span class="bk-cinema-sub">1:00 PM Pacific Time<\/span>/);
   assert.match(html, /Anna Smith<\/p><span class="bk-cinema-sub bk-cinema-sub--contact">Anna@Example\.com<br>\(425\) 845 0045<\/span>/);
   assert.match(html, /Due today[\s\S]*\$50\.00/);
   assert.match(html, /<div class="bk-card-field" id="bk-card"><\/div>/);
