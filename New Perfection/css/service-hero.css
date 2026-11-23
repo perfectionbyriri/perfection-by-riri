@@ -20,6 +20,9 @@
   min-height: 650px;
   color: var(--ivory);
   background: var(--dark);
+  /* page-entry.js settles the hero photo from scale(1.06): clip it so the
+     page never scrolls sideways while it animates. */
+  overflow: hidden;
 }
 .le-hero-photo { grid-area: 1 / 1 / 3 / 3; min-width: 0; min-height: 0; margin: 0; }
 .le-hero-photo img { width: 100%; height: 100%; position: absolute; inset: 0; object-fit: cover; object-position: 50% 45%; }

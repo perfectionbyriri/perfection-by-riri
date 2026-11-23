@@ -34,7 +34,7 @@
 /* The bordered "Let's find your look" button shares .le-text-link but fills
    on hover instead of drawing an underline: keep its own fill transition. */
 .le-text-link.le-result-cta {
-  background: transparent;
+  background-image: none;
   transition: background-color 250ms var(--ease-premium), color 250ms var(--ease-premium), border-color 250ms var(--ease-premium);
 }
 
@@ -73,6 +73,11 @@
     max-height: none;
     padding: 12px max(24px, 6vw) calc(28px + env(safe-area-inset-bottom, 0px));
     border-top: 1px solid rgba(185, 154, 109, .22);
+    /* Short or landscape phones: the sheet scrolls on its own and the scroll
+       never chains to the page underneath. */
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
   }
   .enhanced #main-navigation > a,
   .enhanced #main-navigation .nav-trigger {
