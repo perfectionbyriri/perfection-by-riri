@@ -158,14 +158,14 @@ test('sub-tabs wrap only on phones (max-width 540px); wider screens keep their l
   assert.match(r540, /overflow(-x)?:\s*visible/);
 });
 
-test('digits and the dollar sign use Jost Light everywhere, also inside Bodoni text', () => {
-  const face = css.match(/@font-face\s*\{[^}]*unicode-range[^}]*\}/)?.[0] ?? '';
-  assert.match(face, /font-family:\s*'Bk Digits'/);
-  assert.match(face, /jost\.woff2/);
-  assert.match(face, /font-weight:\s*300\s*;/);
-  assert.match(face, /unicode-range:[^;]*U\+0030-0039/);
-  assert.match(face, /unicode-range:[^;]*U\+0024/);
-  assert.match(css, /\.book-page\s*\{[^}]*font-synthesis-weight:\s*none/, 'no faux bold on the Light digits');
-  assert.match(css, /--bk-serif:\s*'Bk Digits',\s*var\(--serif\)/);
-  assert.doesNotMatch(css, /font-family:\s*var\(--serif\)/, 'every serif rule goes through --bk-serif so digits stay Jost Light');
+test('Jost Light is used only for standalone numbers and prices, never for digits next to letters', () => {
+  assert.doesNotMatch(css, /Bk Digits|--bk-serif|font-synthesis-weight/, 'no global digit face');
+  const day = css.match(/\n\.bk-day-date\s*\{([^}]*)\}/)?.[1] ?? '';
+  assert.match(day, /font-family:\s*var\(--price-font\)/);
+  assert.match(day, /font-weight:\s*var\(--price-weight\)/);
+  const price = css.match(/\.bk-ribbon-title\.is-numeric\s*\{([^}]*)\}/)?.[1] ?? '';
+  assert.match(price, /font-family:\s*var\(--price-font\)/);
+  assert.match(price, /font-weight:\s*var\(--price-weight\)/);
+  const js = read('js/booking/main.js');
+  assert.match(js, /classList\.toggle\('is-numeric', \/\^\[\$\\d\.,\\s\]\+\$\/\.test\(title\)\)/);
 });

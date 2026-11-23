@@ -123,6 +123,7 @@ if (app) {
     const subEl = el?.querySelector('.bk-ribbon-sub');
     if (!titleEl || !subEl || (titleEl.textContent === title && subEl.textContent === sub)) return;
     titleEl.textContent = title;
+    titleEl.classList.toggle('is-numeric', /^[$\d.,\s]+$/.test(title));
     subEl.textContent = sub;
     if (prefersReducedMotion()) return;
     el.classList.remove('is-updated');
