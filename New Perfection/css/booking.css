@@ -35,11 +35,12 @@
   color: var(--bk-ink);
 }
 
-/* Dark island: the photo banners and the site header stay black, so inside
+/* Dark island: the photo banners, the site header and the footer stay black, so inside
    them the tokens go back to light-on-dark values. */
 .bk-monolith,
 .bk-cinema-hero,
 .book-page .header-shell,
+.book-page .site-footer,
 .bk-dark-island {
   --bk-bg-deep: #080807;
   --bk-ink: #f4efe8;

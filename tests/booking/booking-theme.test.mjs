@@ -101,3 +101,7 @@ test('the site header is always black on /book/, desktop and phone, open or clos
   assert.ok(luminance(island['--bk-bg-deep']) < 0.05, 'island --bk-bg-deep is black');
   assert.doesNotMatch(css, /rgba\(38, 38, 32, \.32\)/, 'menu toggle border must not be dark ink');
 });
+
+test('the footer is black on /book/ like the header', () => {
+  assert.ok(islandMatch && /\.book-page \.site-footer/.test(islandMatch[1]), 'site-footer is part of the dark island');
+});
