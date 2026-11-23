@@ -341,6 +341,8 @@ Request-path resolve algorithm (`resolve()`):
 
 Match priority: email first, then phone. If the email matches customer X and the phone matches customer Y, use X and log `customer_identity_conflict` (no PII in the log).
 
+**Preview verification (2026-11-23, Workers observability, `perfection-by-riri-preview`):** the preview cron `*/15 * * * *` is registered since the 07:20 UTC deployment of `72fec0a`. Every cron run from about 07:31 to 08:46 UTC logged `customer_sync_finished {"complete": true, "pages": 2, "contacts": 178}` (cron wall time 15–90 s). Owner test bookings of a no-deposit service: `POST /api/booking/appointments` returned 201 in **3536 ms** wall time (07:33 UTC, existing contact, also logged `customer_identity_conflict`) and 201 in **3203 ms** (07:39 UTC), against 59 s before the change. Between them, two requests returned 502 `SetmoreRejected` (2203 ms and 1294 ms) and one returned 403 in 1 ms; their Setmore error codes are not in the log, so their cause is not verified.
+
 ---
 
 ## 10. Analytics and Google Ads
