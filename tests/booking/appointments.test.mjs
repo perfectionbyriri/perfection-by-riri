@@ -32,6 +32,7 @@ const RAW = {
   customer: { first_name: 'Anna', last_name: 'Smith', email: 'anna@example.com', phone: '(425) 845-0045' },
   notes: 'First visit',
   policy_accepted: true,
+  faq_acknowledged: true,
   turnstile_token: 'turnstile-ok',
   payment: { source_id: 'cnon:card-nonce-ok', verification_token: 'verf-1' }
 };
@@ -293,7 +294,7 @@ test('end_at is computed from the catalog duration', async () => {
 
 test('booking notes contain the Square payment id and no fee clause when fee is 0', async () => {
   const { service, state } = setup();
-  await service.create(RAW);
+  await service.create({ ...RAW, service_id: 'svc_eyebrow_lamination', faq_acknowledged: undefined });
   const [booking] = state.bookings.values();
   assert.equal(booking.notes, 'First visit\n\nDeposit paid online via Square: $50.00. Square payment mock_pay_000001. Booked on perfectionbyriri.com.');
   assert.ok(!/fee/i.test(booking.notes));
@@ -315,7 +316,7 @@ test('validateAppointmentInput normalizes input and drops unknown fields', () =>
     startAt: '2026-11-23T13:00:00-08:00',
     customer: { firstName: 'Anna', lastName: 'Smith', email: 'anna@example.com', phone: '+14258450045' },
     notes: 'First visit',
-    faqAcknowledged: false,
+    faqAcknowledged: true,
     payment: { sourceId: 'cnon:card-nonce-ok', verificationToken: 'verf-1' }
   });
 });
@@ -336,7 +337,7 @@ test('validateAppointmentInput reports every invalid field', () => {
 });
 
 // Lip Blushing carries the FAQ notice: the server must see the client's confirmation.
-const LIP = { ...RAW, service_id: 'svc_lip_blushing', start_at: '2026-11-23T10:00:00-08:00' };
+const LIP = { ...RAW, service_id: 'svc_lip_blushing', start_at: '2026-11-23T10:00:00-08:00', faq_acknowledged: false };
 
 test('Lip Blushing without faq_acknowledged is rejected with the field error, nothing is charged or booked', async () => {
   const { service, payments, state } = setup();
@@ -357,7 +358,7 @@ test('Lip Blushing with faq_acknowledged books and the Setmore note records the 
 
 test('an unflagged service ignores faq_acknowledged and adds no confirmation line', async () => {
   const { service, state } = setup();
-  const { status } = await service.create({ ...RAW, faq_acknowledged: true });
+  const { status } = await service.create({ ...RAW, service_id: 'svc_eyebrow_shaping', faq_acknowledged: true });
   assert.equal(status, 201);
   const [booking] = state.bookings.values();
   assert.doesNotMatch(booking.notes, /FAQ/);
@@ -370,4 +371,26 @@ test('a 500-character client note still books for a flagged service', async () =
   const [booking] = state.bookings.values();
   assert.ok(booking.notes.startsWith('n'.repeat(500)));
   assert.match(booking.notes, /Lip Blushing FAQ read and confirmed online:/);
+});
+
+test('lash full sets and lash lift need the confirmation and name their FAQ in the Setmore note', async () => {
+  for (const [serviceId, label] of [['svc_classic_full_extension', 'Lash Extensions'], ['svc_volume_wispy', 'Lash Extensions'], ['svc_lash_lift', 'Lash Lift'], ['svc_lash_lift_tinting', 'Lash Lift']]) {
+    const raw = { ...RAW, service_id: serviceId };
+    const rejected = setup();
+    const err = await rejectsWith(rejected.service.create({ ...raw, faq_acknowledged: false }), 'VALIDATION_FAILED');
+    assert.equal(err.fields.faq_acknowledged, 'Please confirm you have read the FAQ.', serviceId);
+    const ok = setup();
+    const { status } = await ok.service.create(raw);
+    assert.equal(status, 201, serviceId);
+    const [booking] = ok.state.bookings.values();
+    assert.match(booking.notes, new RegExp(`${label} FAQ read and confirmed online: \\d{4}-\\d{2}-\\d{2}`), serviceId);
+  }
+});
+
+test('refills and removal book without the confirmation', async () => {
+  for (const serviceId of ['svc_classic_refill_2_weeks', 'svc_lash_removal']) {
+    const { service } = setup();
+    const { status } = await service.create({ ...RAW, service_id: serviceId, faq_acknowledged: undefined, payment: serviceId === 'svc_lash_removal' ? undefined : RAW.payment });
+    assert.equal(status, 201, serviceId);
+  }
 });

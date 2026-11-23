@@ -50,6 +50,7 @@ const BODY = {
   start_at: '2026-11-23T13:00:00-08:00',
   customer: { first_name: 'Anna', last_name: 'Smith', email: 'anna@example.com', phone: '4258450045' },
   policy_accepted: true,
+  faq_acknowledged: true,
   turnstile_token: 'turnstile-ok',
   payment: { source_id: 'cnon:card-nonce-ok' }
 };
@@ -303,4 +304,13 @@ test('wrangler.jsonc preview env: live Setmore, mock payments, 15-min cron, no e
   assert.equal(config.name, 'perfection-by-riri');
   assert.equal(config.vars.ENVIRONMENT, 'production');
   assert.equal(config.vars.PAYMENTS_MOCK_MODE, 'false');
+});
+
+test('POST for a flagged service without faq_acknowledged → 400 VALIDATION_FAILED with the field error', async () => {
+  const { app } = setup();
+  const response = await app.fetch(post({ ...BODY, faq_acknowledged: false }));
+  assert.equal(response.status, 400);
+  const body = await response.json();
+  assert.equal(body.error.code, 'VALIDATION_FAILED');
+  assert.equal(body.error.fields.faq_acknowledged, 'Please confirm you have read the FAQ.');
 });

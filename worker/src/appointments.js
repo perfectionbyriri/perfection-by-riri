@@ -158,7 +158,7 @@ export function createAppointmentService({ client, catalog, slots, customers, pa
 
     // Recorded in the Setmore note so the owner can show the client confirmed the FAQ.
     const faqConfirmation = service.notice
-      ? `Lip Blushing FAQ read and confirmed online: ${instantToZonedParts(now(), tz).date} ${formatSlotLabel(now(), tz)} Pacific.`
+      ? `${service.notice.label} FAQ read and confirmed online: ${instantToZonedParts(now(), tz).date} ${formatSlotLabel(now(), tz)} Pacific.`
       : '';
 
     const instant = parseInstant(input.startAt);

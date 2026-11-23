@@ -273,19 +273,34 @@ test('a service meta notice flows to the catalog service, others get null', () =
   const { groups } = merge(smallMeta([
     { service_id: 'svc_lash_lift', group: 'lash-lift', order: 10, deposit: 'standard', notice: 'lip-blushing-faq' }
   ]));
-  assert.equal(groups[0].services[0].notice, 'lip-blushing-faq');
+  assert.deepEqual(groups[0].services[0].notice, { key: 'lip-blushing-faq', title: 'Lip Blushing & Cold Sores', label: 'Lip Blushing', faq_url: '/faq/#lip-blushing-cold-sores' });
   const plain = merge(smallMeta([{ service_id: 'svc_lash_lift', group: 'lash-lift', order: 10, deposit: 'standard' }]));
   assert.equal(plain.groups[0].services[0].notice, null);
 });
 
 test('a non-string or empty notice is invalid meta', () => {
-  for (const notice of [5, '', '   ', {}]) {
+  for (const notice of [5, '', '   ', {}, 'no-such-notice']) {
     assert.throws(() => validateMeta(smallMeta([{ service_id: 'svc_lash_lift', group: 'lash-lift', order: 10, deposit: 'standard', notice }])), /notice/);
   }
 });
 
-test('services-meta.json flags exactly the two lip services with the FAQ notice', () => {
+test('services-meta.json flags exactly the lip, lash full-set and lash lift services', () => {
   const real = JSON.parse(fs.readFileSync(new URL('../../worker/config/services-meta.json', import.meta.url), 'utf8'));
-  const flagged = real.services.filter((s) => s.notice).map((s) => [s.mock_id, s.notice]);
-  assert.deepEqual(flagged, [['svc_lip_blushing', 'lip-blushing-faq'], ['svc_lip_blushing_touch_up', 'lip-blushing-faq']]);
+  const flagged = Object.fromEntries(real.services.filter((s) => s.notice).map((s) => [s.mock_id, s.notice]));
+  assert.deepEqual(flagged, {
+    svc_lip_blushing: 'lip-blushing-faq',
+    svc_lip_blushing_touch_up: 'lip-blushing-faq',
+    svc_classic_full_extension: 'lash-extensions-faq',
+    svc_hybrid_full_extension_2d_3d: 'lash-extensions-faq',
+    svc_volume_full_extension_4d_5d: 'lash-extensions-faq',
+    svc_mega_volume_full_extension_8d_10d: 'lash-extensions-faq',
+    svc_wet_effect_full_extension: 'lash-extensions-faq',
+    svc_classic_wispy: 'lash-extensions-faq',
+    svc_hybrid_wispy: 'lash-extensions-faq',
+    svc_volume_wispy: 'lash-extensions-faq',
+    svc_lash_lift: 'lash-lift-faq',
+    svc_lash_lift_tinting: 'lash-lift-faq'
+  });
+  assert.ok(!('svc_lash_removal' in flagged), 'removal has no notice');
+  assert.ok(![...Object.keys(flagged)].some((id) => id.includes('refill')), 'refills have no notice');
 });

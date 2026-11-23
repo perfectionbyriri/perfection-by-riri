@@ -199,7 +199,8 @@
       "order": 10,
       "photo": null,
       "deposit": "standard",
-      "blurb": "One extension per natural lash for a clean, individual finish. From 150 lashes per eye."
+      "blurb": "One extension per natural lash for a clean, individual finish. From 150 lashes per eye.",
+      "notice": "lash-extensions-faq"
     },
     {
       "service_id": "007cb9ee-0439-457e-9365-76806f45544b",
@@ -208,7 +209,8 @@
       "order": 20,
       "photo": null,
       "deposit": "standard",
-      "blurb": "Individual extensions blended with light fans, soft and airy. From 150 lashes per eye."
+      "blurb": "Individual extensions blended with light fans, soft and airy. From 150 lashes per eye.",
+      "notice": "lash-extensions-faq"
     },
     {
       "service_id": "829d9ffc-254e-4e8e-800d-f7e58dcf70b7",
@@ -217,7 +219,8 @@
       "order": 30,
       "photo": null,
       "deposit": "standard",
-      "blurb": "Fine fans for a fuller, fluffy lash line. From 150 lashes per eye."
+      "blurb": "Fine fans for a fuller, fluffy lash line. From 150 lashes per eye.",
+      "notice": "lash-extensions-faq"
     },
     {
       "service_id": "8fef1003-d90e-4a6f-bcfa-afc168a499c8",
@@ -226,7 +229,8 @@
       "order": 40,
       "photo": null,
       "deposit": "standard",
-      "blurb": "Denser fans for the boldest, high-impact finish. From 150 lashes per eye."
+      "blurb": "Denser fans for the boldest, high-impact finish. From 150 lashes per eye.",
+      "notice": "lash-extensions-faq"
     },
     {
       "service_id": "67a291cd-2f4c-4aad-98a9-1ab28b36b818",
@@ -235,7 +239,8 @@
       "order": 50,
       "photo": null,
       "deposit": "standard",
-      "blurb": "Defined, piecey finish with striking separation. From 150 lashes per eye."
+      "blurb": "Defined, piecey finish with striking separation. From 150 lashes per eye.",
+      "notice": "lash-extensions-faq"
     },
     {
       "service_id": "a74fa0e6-5e61-44f4-847c-627ab9f5b26b",
@@ -252,7 +257,8 @@
       "order": 10,
       "photo": null,
       "deposit": "standard",
-      "blurb": "Classic with longer accents and added texture. From 150 lashes per eye."
+      "blurb": "Classic with longer accents and added texture. From 150 lashes per eye.",
+      "notice": "lash-extensions-faq"
     },
     {
       "service_id": "97e5ce4c-4dd7-486b-9b8e-bd15d0250718",
@@ -261,7 +267,8 @@
       "order": 20,
       "photo": null,
       "deposit": "standard",
-      "blurb": "Hybrid with longer accents and added texture. From 150 lashes per eye."
+      "blurb": "Hybrid with longer accents and added texture. From 150 lashes per eye.",
+      "notice": "lash-extensions-faq"
     },
     {
       "service_id": "af3e8143-6476-448f-9837-e19b477e61c4",
@@ -270,7 +277,8 @@
       "order": 30,
       "photo": null,
       "deposit": "standard",
-      "blurb": "Volume with longer accents and added texture. From 150 lashes per eye."
+      "blurb": "Volume with longer accents and added texture. From 150 lashes per eye.",
+      "notice": "lash-extensions-faq"
     },
     {
       "service_id": "d036bbc1-8fdf-4a23-879e-10c9b2c7b698",
@@ -279,7 +287,8 @@
       "order": 10,
       "photo": null,
       "deposit": "standard",
-      "blurb": "A custom lash lift finished with tint for darker, defined lashes."
+      "blurb": "A custom lash lift finished with tint for darker, defined lashes.",
+      "notice": "lash-lift-faq"
     },
     {
       "service_id": "8181342c-622a-43e1-88b4-21dcac151319",
@@ -288,7 +297,8 @@
       "order": 20,
       "photo": null,
       "deposit": "standard",
-      "blurb": "Lifts and shapes your natural lashes for a more open look."
+      "blurb": "Lifts and shapes your natural lashes for a more open look.",
+      "notice": "lash-lift-faq"
     },
     {
       "service_id": "c067d607-c3fd-48bc-9651-0da6d75c7f0e",

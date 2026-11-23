@@ -27,7 +27,7 @@ test('parseDeepLink reads the service parameter', () => {
 });
 
 test('a known service in the deep link opens step 2 with it selected', () => {
-  assert.deepEqual(resolveDeepLink({ serviceId: 'svc_lash_lift' }, CATALOG), { step: 2, serviceId: 'svc_lash_lift', group: null, error: null });
+  assert.deepEqual(resolveDeepLink({ serviceId: 'svc_eyebrow_lamination' }, CATALOG), { step: 2, serviceId: 'svc_eyebrow_lamination', group: null, error: null });
 });
 
 test('an unknown service in the deep link falls back to step 1 with no error', () => {

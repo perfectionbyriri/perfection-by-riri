@@ -55,3 +55,13 @@ Unit tests for catalog meta, the server rule (rejected without the flag, accepte
 ## Left to the builder
 
 Exact class names and spacing; the date format in the Setmore note; focus handling for the checkbox.
+
+## Addendum (2026-11-23): lash full sets and lash lift
+
+Owner approved (in chat) the same notice for: all Full Sets (Classic, Hybrid, Volume, Mega Volume, Wet Effect), all three Wispy Full Sets, Lash Lift and Lash Lift + Tinting. Not for Refills or Removal.
+
+- Notice keys, defined once in `worker/src/notices.js`: `lip-blushing-faq` ("Lip Blushing & Cold Sores", `/faq/#lip-blushing-cold-sores`), `lash-extensions-faq` ("Lash Extensions", `/faq/#faq-title-lash`), `lash-lift-faq` ("Lash Lift", `/faq/#faq-title-lift`). The catalog expands the meta key to `{ key, title, label, faq_url }`; an unknown key is invalid meta.
+- Text: `Please read our "<title>" FAQ.` The heading, link text and checkbox label stay as for Lip Blushing.
+- Setmore note and review line name the FAQ: `<label> FAQ read and confirmed online: ...`, `<label> FAQ: confirmed`.
+- Defect found while checking: on phones the FAQ service sections are collapsed, so the anchor landed on hidden content. `js/faq.js` now opens the section that contains the URL hash target on load and on `hashchange`, then scrolls to it.
+- Calls: no dedicated lash block exists in the FAQ, so the links go to the whole "Lash Extensions" and "Lash Lift" sections.
