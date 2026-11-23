@@ -223,6 +223,7 @@ if (app) {
     const show = Boolean(serviceId) && step < 5 && !booking && Boolean(catalog);
     elements.bar.hidden = !show;
     document.documentElement.classList.toggle('bk-has-bar', show);
+    if (show) document.documentElement.style.setProperty('--bk-bar-h', `${Math.round(elements.bar.offsetHeight)}px`);
     const button = primaryButton();
     // While Turnstile is pending the bar says why Pay is disabled; the page hint is off screen on phones.
     const waitingForCheck = step === 4 && Boolean(elements.step.querySelector('#bk-pay-hint'));
@@ -236,6 +237,14 @@ if (app) {
   }
 
   elements.barAction.addEventListener('click', () => primaryButton()?.click());
+
+  // A keyboard-focused control must not sit under the fixed phone bar. Chromium
+  // leaves a partly visible control where it is, so nudge the page up by the overlap.
+  elements.step.addEventListener('focusin', (event) => {
+    if (elements.bar.hidden || !event.target.matches(':focus-visible')) return;
+    const overlap = event.target.getBoundingClientRect().bottom - elements.bar.getBoundingClientRect().top + 16;
+    if (overlap > 0) window.scrollBy({ top: overlap, behavior: 'auto' });
+  });
   elements.ribbon?.addEventListener('click', (event) => {
     navigateFromProgress(event.target.closest('.bk-cinema-edit[data-goto-step]'));
   });
@@ -433,9 +442,12 @@ if (app) {
     elements.step.querySelector(`[data-action="${direction}-week"]:not(:disabled)`)?.click();
   }, { passive: true });
 
+  // Banner buttons live outside #bk-step, so their actions are handled here.
   elements.banner.addEventListener('click', (event) => {
     if (event.target.closest('[data-action="retry-submit"]')) {
       elements.step.querySelector('#bk-checkout')?.requestSubmit();
+    } else if (event.target.closest('[data-action="retry-week"]') && state.get().step === 2) {
+      loadWeek(failedWeekStart ?? state.get().weekStart);
     }
   });
 
@@ -491,8 +503,14 @@ if (app) {
     return new Promise((resolve) => { setTimeout(resolve, 140); });
   }
 
+  // The week a failed request asked for (Try again repeats it) and the one in flight.
+  let failedWeekStart = null;
+  let loadingWeek;
+
   async function loadWeek(weekStart, { focusSelector = null } = {}) {
-    const { serviceId, weekStart: from } = state.get();
+    if (loadingWeek !== undefined && loadingWeek === (weekStart ?? null)) return; // A double click asks once.
+    loadingWeek = weekStart ?? null;
+    const { serviceId, weekStart: from, week: previousWeek } = state.get();
     const direction = weekStart && from && weekStart !== from ? (weekStart > from ? 'next' : 'prev') : null;
     const request = api.fetchWeek(serviceId, weekStart ?? undefined);
     await slideOutWeek(direction);
@@ -500,13 +518,22 @@ if (app) {
     refreshWeek();
     announce('Loading available times…');
     const result = await request;
+    if (loadingWeek === (weekStart ?? null)) loadingWeek = undefined;
     if (state.get().serviceId !== serviceId || state.get().step !== 2) return;
     if (!result.ok) {
-      elements.step.setAttribute('aria-busy', 'false');
-      elements.step.querySelector('.bk-week').innerHTML = '';
+      // Keep the last good week (and its arrows) on screen; Try again repeats the failed week.
+      failedWeekStart = weekStart ?? null;
+      if (previousWeek) {
+        state.set({ week: previousWeek, weekStart: previousWeek.week_start });
+        refreshWeek();
+      } else {
+        elements.step.setAttribute('aria-busy', 'false');
+        elements.step.querySelector('.bk-week').innerHTML = '';
+      }
       showBanner(renderSlotsError(result.error));
       return;
     }
+    failedWeekStart = null;
     hideBanner();
     const week = result.data;
     const keepDate = week.days.some((day) => day.date === state.get().selectedDate && day.slots.length);

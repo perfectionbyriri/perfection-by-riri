@@ -191,7 +191,7 @@ test('Variant C: the head is a monolith hero with the studio photo, one h1 and t
 });
 
 test('Variant C: the live selection ribbon replaces the sidebar and keeps Edit outside the copied list', () => {
-  const ribbon = /<aside class="bk-ribbon"[^>]*>([\s\S]*?)<\/aside>/.exec(html);
+  const ribbon = /<section class="bk-ribbon"[^>]*>([\s\S]*?)<\/section>/.exec(html);
   assert.ok(ribbon, 'ribbon');
   for (const label of ['01 &middot; Treatment', '02 &middot; Date &amp; time', '03 &middot; Due today']) assert.ok(ribbon[1].includes(label), label);
   const list = /<dl class="bk-summary-list" id="bk-summary-list">([\s\S]*?)<\/dl>/.exec(ribbon[1]);
@@ -276,4 +276,53 @@ test('faq.js opens the collapsed service section that holds the URL hash target,
   assert.match(js, /addEventListener\('hashchange'/);
   assert.match(js, /closest\('\[data-faq-service\]'\)/);
   assert.match(js, /setService\(service, true\)/);
+});
+
+// Full /book/ audit, 2026-11-23: axe, keyboard and phone findings.
+const luminance = (hex) => {
+  const c = hex.replace('#', '').match(/../g).map((x) => parseInt(x, 16) / 255)
+    .map((x) => (x <= 0.03928 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4));
+  return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+};
+const contrast = (a, b) => { const [x, y] = [luminance(a), luminance(b)].sort((m, n) => n - m); return (x + 0.05) / (y + 0.05); };
+
+test('the selected day keeps text contrast of at least 4.5:1 on its background', () => {
+  const css = read('css/booking.css');
+  const token = (name) => css.match(new RegExp(`${name}:\\s*(#[0-9a-f]{6})`, 'i'))[1];
+  const bg = token('--bk-surface-active');
+  const name = css.match(/\.bk-day\[aria-pressed="true"\] \.bk-day-name,\s*\.bk-day\[aria-pressed="true"\] \.bk-day-date\s*\{\s*color:\s*(#[0-9a-f]{6})/i)?.[1];
+  const count = css.match(/\.bk-day\[aria-pressed="true"\] \.bk-day-count\s*\{\s*color:\s*(#[0-9a-f]{6})/i)?.[1];
+  assert.ok(name && count, 'selected day colours are set as hex');
+  assert.ok(contrast(name, bg) >= 4.5, `name/date ${contrast(name, bg).toFixed(2)}`);
+  assert.ok(contrast(count, bg) >= 4.5, `count ${contrast(count, bg).toFixed(2)}`);
+});
+
+test('while the phone bar shows, focused controls scroll clear of it', () => {
+  const css = read('css/booking.css');
+  assert.match(css, /html\.bk-has-bar\s*\{[^}]*scroll-padding-bottom:\s*calc\(var\(--bk-bar-h, \d+px\) \+ \d+px\)/);
+  assert.match(read('js/booking/main.js'), /setProperty\('--bk-bar-h'/);
+  // Chromium does not scroll a partly visible focused control out from under a fixed bar; main.js nudges it.
+  assert.match(read('js/booking/main.js'), /addEventListener\('focusin'[\s\S]{0,400}:focus-visible[\s\S]{0,400}scrollBy/);
+});
+
+test('the disabled bar button stays readable (no opacity fade) and banner buttons are not underlined', () => {
+  const css = read('css/booking.css');
+  const rule = css.match(/\.book-page \.bk-bar \.bk-bar-action:disabled[^{]*\{([^}]*)\}/)?.[1] ?? '';
+  const bg = rule.match(/background:\s*(#[0-9a-f]{6})/i)?.[1];
+  const fg = rule.match(/(?:^|[;\s])color:\s*(#[0-9a-f]{6})/i)?.[1];
+  assert.ok(bg && fg, 'explicit disabled colours');
+  assert.match(rule, /opacity:\s*1/);
+  assert.ok(contrast(fg, bg) >= 4.5, `disabled bar ${contrast(fg, bg).toFixed(2)}`);
+  assert.match(css, /\.bk-banner a\.button\s*\{[^}]*text-decoration:\s*none/);
+});
+
+test('done steps in the progress row are at least 24px tall to tap', () => {
+  assert.match(read('css/booking.css'), /\.bk-progress-item\[data-goto-step\] \.bk-progress-label\s*\{[^}]*min-height:\s*24px/);
+});
+
+test('the announcement sits in a labelled landmark, keeps "Lynnwood, WA" together, and main has no nested aside', () => {
+  const html = read('book/index.html');
+  assert.match(html, /<aside class="announcement" aria-label="Studio announcement">[\s\S]*?LYNNWOOD,&nbsp;WA<\/aside>/);
+  const main = html.match(/<main[\s\S]*?<\/main>/)[0];
+  assert.doesNotMatch(main, /<aside\b/);
 });

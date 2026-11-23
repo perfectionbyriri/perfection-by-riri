@@ -58,6 +58,7 @@
 
 /* Announcement, header, footer and legal modal harmonized with the light page */
 .book-page .announcement {
+  text-wrap: balance;
   background: var(--bk-bg-announcement);
   color: #dcd3c6;
   border-bottom: 1px solid rgba(212, 187, 150, .08);
@@ -287,6 +288,11 @@
 }
 
 .bk-progress-item[data-goto-step] { cursor: pointer; }
+.bk-progress-item[data-goto-step] .bk-progress-label {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+}
 .bk-progress-item[data-goto-step] .bk-progress-label:focus-visible { outline: none; }
 .bk-progress-item[data-goto-step]:has(.bk-progress-label:focus-visible) { outline: 2px solid var(--bk-gold-bright); outline-offset: 4px; }
 @media (hover: hover) and (pointer: fine) {
@@ -381,6 +387,10 @@
   color: var(--bk-gold-bright);
   text-decoration: underline;
   text-underline-offset: 3px;
+}
+
+.bk-banner a.button {
+  text-decoration: none;
 }
 
 /* Banner: conflict, busy and unavailable messages (§7). */
@@ -951,9 +961,14 @@
   background: var(--bk-surface-active);
 }
 
+/* Darker gold and ink keep 4.5:1 on the selected day's background (#e4ded6). */
 .bk-day[aria-pressed="true"] .bk-day-name,
 .bk-day[aria-pressed="true"] .bk-day-date {
-  color: var(--bk-gold-bright);
+  color: #6e532e;
+}
+
+.bk-day[aria-pressed="true"] .bk-day-count {
+  color: #55524b;
 }
 
 .bk-day[aria-disabled="true"] {
@@ -2339,7 +2354,23 @@
 }
 
 .bk-bar-action { width: 100%; min-height: 54px; }
-.bk-bar-action:disabled { opacity: .45; cursor: not-allowed; }
+.bk-bar-action:disabled { cursor: not-allowed; }
+
+/* Disabled bar: a quiet grey plate whose label still reads (it says why, e.g. the security check). */
+.book-page .bk-bar .bk-bar-action:disabled,
+.book-page .bk-bar .bk-bar-action:disabled:hover {
+  opacity: 1;
+  background: #d9d3cb;
+  border-color: #d9d3cb;
+  color: #4a4740;
+}
+
+.book-page .bk-bar .bk-bar-action:disabled::before { display: none; }
+
+/* 3. Keyboard focus and scrollIntoView keep controls above the fixed phone bar. */
+html.bk-has-bar {
+  scroll-padding-bottom: calc(var(--bk-bar-h, 128px) + 16px);
+}
 
 .bk-sheet {
   width: 100%;
