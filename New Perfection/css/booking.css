@@ -183,6 +183,25 @@
   }
 }
 
+/* On the dark confirmation hero, the primary action is gold and sweeps to black on hover. */
+.book-page .bk .bk-cinema-hero .button-gold {
+  background: var(--bk-gold);
+  color: #0b0b0a;
+  border-color: var(--bk-gold);
+}
+
+.book-page .bk .bk-cinema-hero .button-gold::before {
+  background: #0b0b0a;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .book-page .bk .bk-cinema-hero .button-gold:hover {
+    background: var(--bk-gold);
+    border-color: var(--bk-gold);
+    color: #f5f2ef;
+  }
+}
+
 .book-page .bk button:focus-visible,
 .book-page .bk a:focus-visible,
 .book-page .bk-bar button:focus-visible,
@@ -1550,16 +1569,16 @@
   min-height: 300px;
   display: flex;
   align-items: flex-end;
-  padding: 44px 42px 36px;
+  margin-inline: calc(-1 * var(--bk-gutter));
+  padding: 44px var(--bk-gutter) 36px;
   overflow: hidden;
-  border: 1px solid var(--bk-line);
-  border-top: 2px solid var(--bk-gold);
+  border: 0;
   background: var(--bk-bg-deep);
 }
 
 .bk-cinema-hero--confirm {
   min-height: 390px;
-  padding: 56px 46px 44px;
+  padding: 56px var(--bk-gutter) 44px;
 }
 
 .bk-cinema-photo {
@@ -2235,8 +2254,8 @@
   .bk-progress-label { font-size: 12px; }
   .bk-fields { grid-template-columns: minmax(0, 1fr); gap: 25px; }
   .bk-pay { width: 100%; min-width: 0; }
-  .bk-cinema-hero { min-height: 240px; padding: 28px 22px; }
-  .bk-cinema-hero--confirm { min-height: 300px; padding: 32px 22px; }
+  .bk-cinema-hero { min-height: 240px; padding: 28px var(--bk-gutter); }
+  .bk-cinema-hero--confirm { min-height: 300px; padding: 32px var(--bk-gutter); }
   .bk-cinema-caption { display: none; }
   .bk-cinema-grid { grid-template-columns: minmax(0, 1fr); gap: 0; padding: 12px 0; }
   .bk-cinema-col,

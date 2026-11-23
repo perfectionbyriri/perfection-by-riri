@@ -147,6 +147,26 @@ test('primary buttons are black with light text and fill gold on hover with dark
   assert.ok(contrast('#262620', '#b99a6d') >= 4.5, 'ink on the gold hover fill');
 });
 
+test('the Step 5 confirmation hero is full-bleed and its primary button is gold filling black on hover', () => {
+  const hero = css.match(/\n\.bk-cinema-hero\s*\{([^}]*)\}/)?.[1] ?? '';
+  assert.match(hero, /margin-inline:\s*calc\(-1 \* var\(--bk-gutter\)\)/);
+  assert.match(hero, /padding:\s*44px var\(--bk-gutter\) 36px/);
+  assert.match(hero, /border:\s*0/);
+  const confirmHero = css.match(/\n\.bk-cinema-hero--confirm\s*\{([^}]*)\}/)?.[1] ?? '';
+  assert.match(confirmHero, /padding:\s*56px var\(--bk-gutter\) 44px/);
+
+  const base = css.match(/\.book-page \.bk \.bk-cinema-hero \.button-gold\s*\{([^}]*)\}/)?.[1] ?? '';
+  assert.match(base, /background:\s*var\(--bk-gold\)/);
+  assert.match(base, /color:\s*#0b0b0a/);
+  assert.match(base, /border-color:\s*var\(--bk-gold\)/);
+  const sweep = css.match(/\.book-page \.bk \.bk-cinema-hero \.button-gold::before\s*\{([^}]*)\}/)?.[1] ?? '';
+  assert.match(sweep, /background:\s*#0b0b0a/);
+  const hover = css.match(/\.book-page \.bk \.bk-cinema-hero \.button-gold:hover\s*\{([^}]*)\}/)?.[1] ?? '';
+  assert.match(hover, /color:\s*#f5f2ef/);
+  assert.ok(contrast('#0b0b0a', island['--bk-gold']) >= 7, 'dark text on the gold confirmation button');
+  assert.ok(contrast('#f5f2ef', '#0b0b0a') >= 7, 'light text on the black hover fill');
+});
+
 test('sub-tabs wrap only on phones (max-width 540px); wider screens keep their layout', () => {
   const at800 = (css.match(/@media \(max-width: 800px\) \{[\s\S]*?\n\}\n/g) ?? []).join('\n');
   const at540 = (css.match(/@media \(max-width: 540px\) \{[\s\S]*?\n\}\n/g) ?? []).join('\n');
