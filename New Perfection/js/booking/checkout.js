@@ -150,15 +150,29 @@ function row(label, value, className = 'bk-quote-row') {
   return `<div class="${className}"><dt>${label}</dt><dd>${value}</dd></div>`;
 }
 
+function splitTimeLabel(timeLabel) {
+  const raw = String(timeLabel ?? '').trim();
+  const idx = raw.indexOf(' · ');
+  if (idx === -1) return { datePart: raw, timePart: 'Pacific Time' };
+  return {
+    datePart: raw.slice(0, idx).trim(),
+    timePart: `${raw.slice(idx + 3).trim()} Pacific Time`
+  };
+}
+
 export function renderReview({ service, details = {}, timeLabel = '' }) {
   const deposit = service.deposit ?? {};
-  const photo = service.photo && typeof service.photo.src === 'string' && service.photo.src ? service.photo : DEFAULT_HERO_PHOTO;
+  const photo = service.heroPhoto && typeof service.heroPhoto.src === 'string' && service.heroPhoto.src
+    ? service.heroPhoto
+    : DEFAULT_HERO_PHOTO;
   const focal = typeof photo.focal === 'string' && photo.focal ? photo.focal : DEFAULT_HERO_PHOTO.focal;
   const name = `${trimmed(details.first_name)} ${trimmed(details.last_name)}`.trim();
-  const who = [name, trimmed(details.email), formatPhone(trimmed(details.phone))].filter(Boolean).join(' · ');
+  const email = trimmed(details.email);
+  const phone = formatPhone(trimmed(details.phone));
   const notes = trimmed(details.notes);
+  const { datePart, timePart } = splitTimeLabel(timeLabel);
   const priceLine = Number.isFinite(Number(service.price_cents)) && Number(service.price_cents) > 0
-    ? `<p class="bk-cinema-sub">Service price: ${formatMoney(service.price_cents)}</p>`
+    ? `<span class="bk-cinema-sub">Service price: ${formatMoney(service.price_cents)}</span>`
     : '';
 
   let quote = '';
@@ -166,21 +180,28 @@ export function renderReview({ service, details = {}, timeLabel = '' }) {
     const fee = deposit.fee_cents > 0
       ? row(`Card processing fee (${(deposit.fee_basis_points / 100).toString()}%)`, formatMoney(deposit.fee_cents))
       : '';
-    quote = '<dl class="bk-quote">'
-      + row('Deposit', formatMoney(deposit.deposit_cents)) + fee
-      + row('Due today', formatMoney(deposit.total_cents), 'bk-quote-row bk-quote-total')
-      + '</dl><p class="bk-fine">Remaining balance is paid at the studio.</p>';
+    const detailList = fee
+      ? '<dl class="bk-quote">'
+        + row('Deposit', formatMoney(deposit.deposit_cents)) + fee
+        + row('Due today', formatMoney(deposit.total_cents), 'bk-quote-row bk-quote-total')
+        + '</dl>'
+      : '';
+    quote = `<div class="bk-cinema-price">${formatMoney(deposit.total_cents)}</div>`
+      + detailList
+      + '<span class="bk-cinema-sub">Deposit &middot; Remaining balance is paid at the studio.</span>';
   } else {
-    quote = '<p class="bk-cinema-price">$0.00</p>'
-      + '<p class="bk-fine">No deposit is needed for this service. You pay at the studio.</p>';
+    quote = '<div class="bk-cinema-price">$0.00</div>'
+      + '<span class="bk-cinema-sub">No deposit is needed for this service. You pay at the studio.</span>';
   }
 
   const card = deposit.required
     ? '<div class="bk-review-block bk-cinema-card-wrap">'
-      + '<div class="bk-cinema-card-head"><h3 class="bk-review-label">Card</h3><p class="bk-fine bk-secured">Payment secured by Square.</p></div>'
+      + `<div class="bk-cinema-card-head"><h3 class="bk-review-label">Card deposit &middot; ${formatMoney(deposit.total_cents)}</h3><p class="bk-fine bk-secured">Payment secured by Square.</p></div>`
       + '<div class="bk-card-field" id="bk-card"></div>'
       + '<p class="bk-field-error" id="bk-card-error" role="alert" hidden></p></div>'
     : '';
+
+  const contactLines = [email, phone].filter(Boolean).map(escapeHtml).join('<br>');
 
   return '<form class="bk-form bk-cinema" id="bk-checkout" novalidate>'
     + '<div class="bk-cinema-hero">'
@@ -200,12 +221,14 @@ export function renderReview({ service, details = {}, timeLabel = '' }) {
     + '</div>'
     + '<div class="bk-cinema-col">'
     + `<div class="bk-cinema-col-head"><h3 class="bk-cinema-col-label">02 &middot; Date &amp; time</h3><button type="button" class="bk-cinema-edit" data-goto-step="2">Edit ${EDIT_ARROW_SVG}</button></div>`
-    + `<p class="bk-review-line bk-cinema-col-title">${escapeHtml(timeLabel)} Pacific Time</p>`
+    + `<p class="bk-review-line bk-cinema-col-title">${escapeHtml(datePart)}</p>`
+    + `<span class="bk-cinema-sub">${escapeHtml(timePart)}</span>`
     + '</div>'
     + '<div class="bk-cinema-col">'
     + `<div class="bk-cinema-col-head"><h3 class="bk-cinema-col-label">03 &middot; Guest</h3><button type="button" class="bk-cinema-edit" data-goto-step="3">Edit ${EDIT_ARROW_SVG}</button></div>`
-    + `<p class="bk-review-line">${escapeHtml(who)}</p>`
-    + (notes ? `<p class="bk-cinema-sub">${escapeHtml(notes)}</p>` : '')
+    + `<p class="bk-review-line bk-cinema-col-title">${escapeHtml(name)}</p>`
+    + (contactLines ? `<span class="bk-cinema-sub bk-cinema-sub--contact">${contactLines}</span>` : '')
+    + (notes ? `<span class="bk-cinema-sub bk-cinema-sub--contact">${escapeHtml(notes)}</span>` : '')
     + '</div>'
     + '<div class="bk-cinema-col">'
     + '<div class="bk-cinema-col-head"><h3 class="bk-cinema-col-label">04 &middot; Due today</h3></div>'

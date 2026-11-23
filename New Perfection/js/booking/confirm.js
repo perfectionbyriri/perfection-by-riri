@@ -136,10 +136,23 @@ export function buildIcs(booking, { now = new Date() } = {}) {
   return `${lines.map(fold).join('\r\n')}\r\n`;
 }
 
+function splitTimeLabel(timeLabel) {
+  const raw = String(timeLabel ?? '').trim();
+  const idx = raw.indexOf(' · ');
+  if (idx === -1) return { datePart: raw, timePart: 'Pacific Time' };
+  return {
+    datePart: raw.slice(0, idx).trim(),
+    timePart: `${raw.slice(idx + 3).trim()} Pacific Time`
+  };
+}
+
 export function renderConfirmation({ result, service = null, firstName = '', email = '', timeLabel = '', policyText = POLICY_TEXT }) {
   const { booking, deposit } = result;
-  const photo = service?.photo && typeof service.photo.src === 'string' && service.photo.src ? service.photo : DEFAULT_HERO_PHOTO;
+  const photo = service?.heroPhoto && typeof service.heroPhoto.src === 'string' && service.heroPhoto.src
+    ? service.heroPhoto
+    : DEFAULT_HERO_PHOTO;
   const focal = typeof photo.focal === 'string' && photo.focal ? photo.focal : DEFAULT_HERO_PHOTO.focal;
+  const { datePart, timePart } = splitTimeLabel(timeLabel);
   const metaParts = [];
   if (Number.isFinite(Number(service?.duration_minutes)) && Number(service.duration_minutes) > 0) {
     metaParts.push(formatDuration(service.duration_minutes));
@@ -147,14 +160,14 @@ export function renderConfirmation({ result, service = null, firstName = '', ema
   if (Number.isFinite(Number(service?.price_cents)) && Number(service.price_cents) > 0) {
     metaParts.push(formatMoney(service.price_cents));
   }
-  const serviceMeta = metaParts.length ? `<p class="bk-cinema-sub">${escapeHtml(metaParts.join(' · '))}</p>` : '';
+  const serviceMeta = metaParts.length ? `<span class="bk-cinema-sub">${escapeHtml(metaParts.join(' · '))}</span>` : '';
 
   let depositLine = '';
   if (deposit?.status === 'captured') {
     const masked = maskEmail(email);
-    depositLine = `<p class="bk-confirm-line">Deposit paid ${formatMoney(deposit.total_cents)}${masked ? ` · Receipt from Square sent to ${escapeHtml(masked)}` : ''}</p>`;
+    depositLine = `<span class="bk-cinema-sub">Deposit paid ${formatMoney(deposit.total_cents)}${masked ? ` · Receipt from Square sent to ${escapeHtml(masked)}` : ''}</span>`;
   } else if (deposit?.status === 'pending_capture') {
-    depositLine = '<p class="bk-confirm-line">Your booking is confirmed. The studio will finalize your deposit shortly.</p>';
+    depositLine = '<span class="bk-cinema-sub">Your booking is confirmed. The studio will finalize your deposit shortly.</span>';
   }
   const name = String(firstName).trim();
   return '<div class="bk-confirm bk-cinema">'
@@ -163,7 +176,7 @@ export function renderConfirmation({ result, service = null, firstName = '', ema
     + '<div class="bk-cinema-hero-inner">'
     + '<div class="bk-cinema-hero-lead">'
     + '<p class="bk-eyebrow">You&rsquo;re booked &middot; Lynnwood, WA</p>'
-    + `<h2 class="bk-step-title bk-confirm-title" tabindex="-1">See you soon${name ? `, <em>${escapeHtml(name)}.</em>` : '.'}</h2>`
+    + `<h2 class="bk-step-title bk-confirm-title" tabindex="-1">See you soon${name ? `,<br><em>${escapeHtml(name)}.</em>` : '.'}</h2>`
     + '<div class="bk-actions bk-confirm-actions">'
     + '<button type="button" class="button button-gold" data-action="add-to-calendar">Add to calendar</button>'
     + `<a class="button button-outline" href="${DIRECTIONS_URL}" target="_blank" rel="noopener noreferrer">Directions</a>`
@@ -179,17 +192,19 @@ export function renderConfirmation({ result, service = null, firstName = '', ema
     + '</div>'
     + '<div class="bk-cinema-col">'
     + '<div class="bk-cinema-col-head"><h3 class="bk-cinema-col-label">Date &amp; time</h3></div>'
-    + `<p class="bk-confirm-line bk-cinema-col-title bk-cinema-col-title--gold">${escapeHtml(timeLabel)} Pacific Time</p>`
+    + `<p class="bk-confirm-line bk-cinema-col-title bk-cinema-col-title--gold">${escapeHtml(datePart)}</p>`
+    + `<span class="bk-cinema-sub">${escapeHtml(timePart)}</span>`
     + '</div>'
     + '<div class="bk-cinema-col">'
     + '<div class="bk-cinema-col-head"><h3 class="bk-cinema-col-label">Studio location</h3></div>'
-    + `<p class="bk-confirm-line">Perfection by Riri · Lynnwood, WA <a href="${DIRECTIONS_URL}" target="_blank" rel="noopener noreferrer">Directions</a></p>`
-    + `<p class="bk-cinema-sub">${escapeHtml(ADDRESS)}</p>`
+    + '<p class="bk-confirm-line bk-cinema-info-title">Perfection by Riri · Lynnwood, WA</p>'
+    + `<span class="bk-cinema-sub">${escapeHtml(ADDRESS)} · <a href="${DIRECTIONS_URL}" target="_blank" rel="noopener noreferrer">Directions</a></span>`
     + '</div>'
     + '<div class="bk-cinema-col">'
     + '<div class="bk-cinema-col-head"><h3 class="bk-cinema-col-label">Questions or changes</h3></div>'
+    + '<p class="bk-confirm-line bk-cinema-info-title">Need to change or cancel?</p>'
+    + '<span class="bk-cinema-sub">Call <a href="tel:+14258450045">(425) 845 0045</a>.</span>'
     + depositLine
-    + '<p class="bk-confirm-line">Need to change or cancel? Call <a href="tel:+14258450045">(425) 845 0045</a>.</p>'
     + '</div>'
     + '</div>'
     + `<p class="bk-fine bk-cinema-policy">Booking policy: ${escapeHtml(policyText || POLICY_TEXT)}</p>`

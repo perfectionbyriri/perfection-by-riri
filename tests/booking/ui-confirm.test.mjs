@@ -126,14 +126,14 @@ test('maskEmail keeps only the local part', () => {
 test('the confirmation view follows D§4 step 5', () => {
   const html = renderConfirmation({ result: result(), firstName: 'Anna', email: 'anna@example.com', timeLabel: 'Thursday, November 27 · 1:00 PM' });
   assert.match(html, /You&rsquo;re booked/);
-  assert.match(html, /<h2 class="bk-step-title bk-confirm-title" tabindex="-1">See you soon, <em>Anna\.<\/em><\/h2>/);
+  assert.match(html, /<h2 class="bk-step-title bk-confirm-title" tabindex="-1">See you soon,<br><em>Anna\.<\/em><\/h2>/);
   assert.match(html, /Lash lift/);
-  assert.match(html, /Thursday, November 27 · 1:00 PM Pacific Time/);
+  assert.match(html, /Thursday, November 27<\/p><span class="bk-cinema-sub">1:00 PM Pacific Time<\/span>/);
   assert.match(html, /Perfection by Riri · Lynnwood, WA/);
   assert.match(html, /href="https:\/\/maps\.app\.goo\.gl\/2zzJp92GvUAGifaV8\?g_st=ic"[^>]*>Directions<\/a>/);
   assert.match(html, /Deposit paid \$50\.00 · Receipt from Square sent to anna@…/);
   assert.match(html, /data-action="add-to-calendar"[^>]*>Add to calendar</);
-  assert.match(html, /Need to change or cancel\? Call <a href="tel:\+14258450045">\(425\) 845 0045<\/a>\./);
+  assert.match(html, /Need to change or cancel\?[\s\S]*Call <a href="tel:\+14258450045">\(425\) 845 0045<\/a>\./);
   assert.match(html, /Cancellations made on the same day as your appointment will result in the forfeiture of your \$50 deposit\./);
 });
 
@@ -143,10 +143,10 @@ test('the confirmation view drops the deposit line for a no-deposit booking and 
     firstName: '<Anna>', email: 'anna@example.com', timeLabel: 'x'
   });
   assert.doesNotMatch(html, /Deposit paid/);
-  assert.match(html, /See you soon, <em>&lt;Anna&gt;\.<\/em>/);
+  assert.match(html, /See you soon,<br><em>&lt;Anna&gt;\.<\/em>/);
 });
 
-test('renderConfirmation renders the Cinematic Hero Scene with photo fallback, 4-column strip and Suite 918 address', () => {
+test('renderConfirmation renders the Cinematic Hero Scene with editorial hero photo, 4-column strip and Suite 918 address', () => {
   const service = {
     service_id: 'svc_lash_lift',
     name: 'Lash lift',
@@ -162,13 +162,10 @@ test('renderConfirmation renders the Cinematic Hero Scene with photo fallback, 4
     timeLabel: 'Thursday, November 27 · 1:00 PM'
   });
   assert.match(html, /class="bk-cinema-hero bk-cinema-hero--confirm"/);
-  assert.match(html, /src="\/images\/Lash%20Lift\/lash-lift\.webp"/);
-  assert.match(html, /object-position:\s*50% 40%/);
+  assert.match(html, /src="\/images\/hero\/hero-lash\.webp"/);
+  assert.match(html, /object-position:\s*78% 42%/);
   assert.match(html, /Personal by design\.<br>Perfection in the details\./);
   assert.match(html, /class="bk-cinema-grid"/);
   assert.match(html, /18205 Alderwood Mall Pkwy A, Suite 918/);
   assert.match(html, /1 hr · \$95\.00/);
-
-  const fallbackHtml = renderConfirmation({ result: result(), firstName: 'Anna', email: 'anna@example.com', timeLabel: 'x' });
-  assert.match(fallbackHtml, /src="\/images\/hero\/hero-lash\.webp"/);
 });

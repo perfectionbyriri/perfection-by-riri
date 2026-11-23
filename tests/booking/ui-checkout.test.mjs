@@ -134,8 +134,8 @@ test('a no-deposit service hides the card block and labels the button BOOK APPOI
 test('the review shows the server quote, the card field and no fee line at 0%', () => {
   const html = renderReview({ service: lashLift, details, timeLabel: 'Thursday, November 27 · 1:00 PM' });
   assert.match(html, /Lash lift · 1 hr/);
-  assert.match(html, /Thursday, November 27 · 1:00 PM Pacific Time/);
-  assert.match(html, /Anna Smith · Anna@Example\.com · \(425\) 845 0045/);
+  assert.match(html, /Thursday, November 27<\/p><span class="bk-cinema-sub">1:00 PM Pacific Time<\/span>/);
+  assert.match(html, /Anna Smith<\/p><span class="bk-cinema-sub bk-cinema-sub--contact">Anna@Example\.com<br>\(425\) 845 0045<\/span>/);
   assert.match(html, /Due today[\s\S]*\$50\.00/);
   assert.match(html, /<div class="bk-card-field" id="bk-card"><\/div>/);
   assert.match(html, />PAY \$50\.00 &amp; BOOK</);
@@ -145,28 +145,25 @@ test('the review shows the server quote, the card field and no fee line at 0%', 
   assert.match(withFee, /Card processing fee \(3%\)[\s\S]*\$1\.50/);
 });
 
-test('renderReview renders the Cinematic Hero Scene with photo fallback, 4-column strip, Edit links and unified Back/Pay bar', () => {
-  const withPhoto = {
+test('renderReview renders the Cinematic Hero Scene with editorial hero photo, 4-column strip, Edit links and unified Back/Pay bar', () => {
+  const withBeforeAfterPhoto = {
     ...shaping,
-    photo: { src: '/images/Brow%20Lamination%20%26%20Tint/brow-lamination-tint.webp', alt: 'Brow lamination', focal: '50% 35%' }
+    photo: { src: '/images/Brow%20Lamination%20%26%20Tint/brow-lamination-tint.webp', alt: 'Before/After collage', focal: '50% 35%' }
   };
-  const html = renderReview({ service: withPhoto, details, timeLabel: 'Tuesday, December 15 · 4:30 PM' });
+  const html = renderReview({ service: withBeforeAfterPhoto, details, timeLabel: 'Tuesday, December 15 · 4:30 PM' });
   assert.match(html, /class="bk-cinema-hero"/);
-  assert.match(html, /src="\/images\/Brow%20Lamination%20%26%20Tint\/brow-lamination-tint\.webp"/);
-  assert.match(html, /object-position:\s*50% 35%/);
+  // Uses the wide editorial hero photo rather than the service's square before/after collage
+  assert.match(html, /src="\/images\/hero\/hero-lash\.webp"/);
+  assert.match(html, /object-position:\s*78% 42%/);
   assert.match(html, /Your appointment,<br><em>considered\.<\/em>/);
   assert.match(html, /Personal by design\.<br>Perfection in the details\./);
   assert.match(html, /class="bk-cinema-grid"/);
   assert.match(html, /data-goto-step="1"/);
   assert.match(html, /data-goto-step="2"/);
   assert.match(html, /data-goto-step="3"/);
-  assert.match(html, /\$45\.00/);
+  assert.match(html, /Service price: \$45\.00/);
   assert.match(html, /\$0\.00/);
   assert.match(html, /class="bk-actions bk-cinema-bar"[\s\S]*data-action="back"[\s\S]*class="button button-gold bk-pay"/);
-
-  // Fallback photo when service.photo is omitted
-  const fallbackHtml = renderReview({ service: lashLift, details, timeLabel: 'Thursday, November 27 · 1:00 PM' });
-  assert.match(fallbackHtml, /src="\/images\/hero\/hero-lash\.webp"/);
 });
 
 test('the submit guard ignores a second submit while the first is in flight', () => {
