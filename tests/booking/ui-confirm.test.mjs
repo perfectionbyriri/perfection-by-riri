@@ -169,3 +169,20 @@ test('renderConfirmation renders the Cinematic Hero Scene with editorial hero ph
   assert.match(html, /18205 Alderwood Mall Pkwy A, Suite 918/);
   assert.match(html, /1 hr · \$95\.00/);
 });
+
+test('renderConfirmation picks the editorial hero photo that matches the service group', () => {
+  const brows = { service_id: 'svc_eyebrow_shaping', name: 'Eyebrow shaping', duration_minutes: 30, price_cents: 4500, group: 'brows' };
+  assert.match(renderConfirmation({ result: result(), service: brows }), /class="bk-cinema-photo" src="\/images\/hero\/brow-hero\.webp" alt="Close-up of laminated and shaped brows"/);
+  const pmu = { ...brows, group: 'permanent-makeup' };
+  assert.match(renderConfirmation({ result: result(), service: pmu }), /src="\/images\/hero\/pmu-hero\.webp"/);
+});
+
+test('renderConfirmation shows Directions once and labels the deposit column for what it holds', () => {
+  const paid = renderConfirmation({ result: result(), firstName: 'Anna', email: 'anna@example.com', timeLabel: 'Thursday, November 27 · 1:00 PM' });
+  assert.equal(paid.match(/maps\.app\.goo\.gl/g).length, 1, 'one Directions link');
+  assert.match(paid, /<h3 class="bk-cinema-col-label">Deposit &amp; changes<\/h3>[\s\S]*Deposit paid \$50\.00[\s\S]*Need to change or cancel\?/);
+  assert.doesNotMatch(paid, /Questions or changes/);
+  const noDeposit = renderConfirmation({ result: result({ deposit: { status: 'none' } }), timeLabel: 'Thursday, November 27 · 1:00 PM' });
+  assert.match(noDeposit, /<h3 class="bk-cinema-col-label">Questions or changes<\/h3>/);
+  assert.doesNotMatch(noDeposit, /Deposit &amp; changes/);
+});

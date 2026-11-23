@@ -60,7 +60,8 @@ if (app) {
   const findService = (id) => {
     for (const group of state.get().catalog?.groups ?? []) {
       const service = group.services.find((item) => item.service_id === id);
-      if (service) return service;
+      // The group key picks the Step 4/5 hero photo (heroPhotoFor).
+      if (service) return { ...service, group: group.key };
     }
     return null;
   };

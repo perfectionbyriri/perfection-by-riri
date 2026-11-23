@@ -184,3 +184,17 @@ test('the Square SDK URL follows checkout.square.environment', () => {
   assert.equal(squareSdkUrl('anything-else'), SQUARE_SDK_URLS.production);
   assert.equal(TURNSTILE_URL, 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit');
 });
+
+test('renderReview picks the editorial hero photo that matches the service group', () => {
+  const cases = [
+    ['brows', '/images/hero/brow-hero.webp', 'Close-up of laminated and shaped brows'],
+    ['permanent-makeup', '/images/hero/pmu-hero.webp', 'Permanent makeup with ombré brows, eyeliner and lip blush'],
+    ['lash-lift', '/images/hero/hero-lashlift.webp', 'Close-up of naturally lifted lashes'],
+    ['lash-refills', '/images/hero/hero-lash.webp', 'Close-up of a woman with softly closed eyes and long, delicate lash extensions'],
+    [undefined, '/images/hero/hero-lash.webp', 'Close-up of a woman with softly closed eyes and long, delicate lash extensions']
+  ];
+  for (const [group, src, alt] of cases) {
+    const html = renderReview({ service: { ...shaping, group }, details, timeLabel: 'Tuesday, December 15 · 4:30 PM' });
+    assert.match(html, new RegExp(`class="bk-cinema-photo" src="${src.replace(/[.]/g, '\\.')}" alt="${alt}"`), `group ${group}`);
+  }
+});

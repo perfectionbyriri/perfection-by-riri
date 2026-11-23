@@ -144,13 +144,25 @@ const DEFAULT_HERO_PHOTO = {
   focal: '78% 42%'
 };
 
+// Wide editorial photos for the Step 4/5 hero band, one per service family.
+// Lash extension groups (and anything unknown) keep the default lash photo.
+const GROUP_HERO_PHOTOS = {
+  brows: { src: '/images/hero/brow-hero.webp', alt: 'Close-up of laminated and shaped brows', focal: '72% 30%' },
+  'permanent-makeup': { src: '/images/hero/pmu-hero.webp', alt: 'Permanent makeup with ombré brows, eyeliner and lip blush', focal: '72% 45%' },
+  'lash-lift': { src: '/images/hero/hero-lashlift.webp', alt: 'Close-up of naturally lifted lashes', focal: '58% 30%' }
+};
+
+export function heroPhotoFor(service) {
+  return GROUP_HERO_PHOTOS[service?.group] ?? DEFAULT_HERO_PHOTO;
+}
+
 const EDIT_ARROW_SVG = '<svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12 12 4"/><path d="M5.5 4H12v6.5"/></g></svg>';
 
 function row(label, value, className = 'bk-quote-row') {
   return `<div class="${className}"><dt>${label}</dt><dd>${value}</dd></div>`;
 }
 
-function splitTimeLabel(timeLabel) {
+export function splitTimeLabel(timeLabel) {
   const raw = String(timeLabel ?? '').trim();
   const idx = raw.indexOf(' · ');
   if (idx === -1) return { datePart: raw, timePart: 'Pacific Time' };
@@ -162,10 +174,8 @@ function splitTimeLabel(timeLabel) {
 
 export function renderReview({ service, details = {}, timeLabel = '' }) {
   const deposit = service.deposit ?? {};
-  const photo = service.heroPhoto && typeof service.heroPhoto.src === 'string' && service.heroPhoto.src
-    ? service.heroPhoto
-    : DEFAULT_HERO_PHOTO;
-  const focal = typeof photo.focal === 'string' && photo.focal ? photo.focal : DEFAULT_HERO_PHOTO.focal;
+  const photo = heroPhotoFor(service);
+  const { focal } = photo;
   const name = `${trimmed(details.first_name)} ${trimmed(details.last_name)}`.trim();
   const email = trimmed(details.email);
   const phone = formatPhone(trimmed(details.phone));

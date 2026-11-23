@@ -6,18 +6,13 @@
 // service id only: never a name, email or phone.
 
 import { escapeHtml } from './html.js';
-import { formatMoney } from './checkout.js';
+import { formatMoney, heroPhotoFor, splitTimeLabel } from './checkout.js';
 import { POLICY_TEXT } from './render-details.js';
 import { formatDuration } from './render-services.js';
 
 const STUDIO_TZ = 'America/Los_Angeles';
 const ADDRESS = '18205 Alderwood Mall Pkwy A, Suite 918, Lynnwood, WA 98037';
 const DIRECTIONS_URL = 'https://maps.app.goo.gl/2zzJp92GvUAGifaV8?g_st=ic';
-const DEFAULT_HERO_PHOTO = {
-  src: '/images/hero/hero-lash.webp',
-  alt: 'Close-up of a woman with softly closed eyes and long, delicate lash extensions',
-  focal: '78% 42%'
-};
 const FUNNEL_EVENTS = new Set(['booking_view_service', 'booking_select_slot', 'booking_begin_checkout', 'booking_slot_conflict']);
 
 export function trackFunnel(name, params = {}, gtag = globalThis.gtag) {
@@ -136,22 +131,10 @@ export function buildIcs(booking, { now = new Date() } = {}) {
   return `${lines.map(fold).join('\r\n')}\r\n`;
 }
 
-function splitTimeLabel(timeLabel) {
-  const raw = String(timeLabel ?? '').trim();
-  const idx = raw.indexOf(' · ');
-  if (idx === -1) return { datePart: raw, timePart: 'Pacific Time' };
-  return {
-    datePart: raw.slice(0, idx).trim(),
-    timePart: `${raw.slice(idx + 3).trim()} Pacific Time`
-  };
-}
-
 export function renderConfirmation({ result, service = null, firstName = '', email = '', timeLabel = '', policyText = POLICY_TEXT }) {
   const { booking, deposit } = result;
-  const photo = service?.heroPhoto && typeof service.heroPhoto.src === 'string' && service.heroPhoto.src
-    ? service.heroPhoto
-    : DEFAULT_HERO_PHOTO;
-  const focal = typeof photo.focal === 'string' && photo.focal ? photo.focal : DEFAULT_HERO_PHOTO.focal;
+  const photo = heroPhotoFor(service);
+  const { focal } = photo;
   const { datePart, timePart } = splitTimeLabel(timeLabel);
   const metaParts = [];
   if (Number.isFinite(Number(service?.duration_minutes)) && Number(service.duration_minutes) > 0) {
@@ -198,13 +181,13 @@ export function renderConfirmation({ result, service = null, firstName = '', ema
     + '<div class="bk-cinema-col">'
     + '<div class="bk-cinema-col-head"><h3 class="bk-cinema-col-label">Studio location</h3></div>'
     + '<p class="bk-confirm-line bk-cinema-info-title">Perfection by Riri · Lynnwood, WA</p>'
-    + `<span class="bk-cinema-sub">${escapeHtml(ADDRESS)} · <a href="${DIRECTIONS_URL}" target="_blank" rel="noopener noreferrer">Directions</a></span>`
+    + `<span class="bk-cinema-sub">${escapeHtml(ADDRESS)}</span>`
     + '</div>'
     + '<div class="bk-cinema-col">'
-    + '<div class="bk-cinema-col-head"><h3 class="bk-cinema-col-label">Questions or changes</h3></div>'
+    + `<div class="bk-cinema-col-head"><h3 class="bk-cinema-col-label">${depositLine ? 'Deposit &amp; changes' : 'Questions or changes'}</h3></div>`
+    + depositLine
     + '<p class="bk-confirm-line bk-cinema-info-title">Need to change or cancel?</p>'
     + '<span class="bk-cinema-sub">Call <a href="tel:+14258450045">(425) 845 0045</a>.</span>'
-    + depositLine
     + '</div>'
     + '</div>'
     + `<p class="bk-fine bk-cinema-policy">Booking policy: ${escapeHtml(policyText || POLICY_TEXT)}</p>`

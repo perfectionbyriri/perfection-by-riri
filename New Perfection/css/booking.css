@@ -1165,8 +1165,17 @@
   margin-bottom: 28px;
 }
 
+/* Visually hidden, not display:none, so the page h1 stays in the accessibility tree. */
 .bk-shell[data-step="5"] .bk-head {
-  display: none;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .bk-shell[data-step="4"] .bk-head .bk-title,
@@ -1407,6 +1416,10 @@
   line-height: 1.45;
   color: var(--bk-ink);
 }
+
+/* Deposit line sits above the change/cancel title in the Step 5 "Deposit & changes" column. */
+.bk-cinema-col > .bk-cinema-col-head + .bk-cinema-sub { margin-top: 0; }
+.bk-cinema-sub + .bk-cinema-info-title { margin-top: 18px; }
 
 .bk-confirm-line a,
 .bk-cinema-sub a {

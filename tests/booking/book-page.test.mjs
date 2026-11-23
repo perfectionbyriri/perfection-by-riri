@@ -152,6 +152,11 @@ test('booking.css adds the error token, Cinematic Hero Scene rules, and keeps sq
   assert.match(css, /\.bk-cinema-hero\b/);
   assert.match(css, /\.bk-cinema-grid\b/);
   assert.match(css, /\.bk-shell\[data-step="5"\]\s+\.bk-head/);
+  // Step 5 keeps the page h1 in the accessibility tree: the head is visually hidden, never display:none.
+  const step5Head = css.match(/\.bk-shell\[data-step="5"\]\s+\.bk-head\s*\{([^}]*)\}/);
+  assert.ok(step5Head, 'step 5 head rule');
+  assert.doesNotMatch(step5Head[1], /display\s*:\s*none/);
+  assert.match(step5Head[1], /clip\s*:\s*rect\(0,\s*0,\s*0,\s*0\)/);
   assert.ok(!/box-shadow\s*:(?!\s*none)/.test(css), 'no shadows');
   for (const match of css.matchAll(/border-radius\s*:\s*([^;}]+)/g)) assert.equal(match[1].trim(), '0', 'square corners');
 });
@@ -160,4 +165,11 @@ test('the page canonical, title and description point at /book/', () => {
   assert.match(html, /<link rel="canonical" href="https:\/\/perfectionbyriri\.com\/book\/">/);
   assert.match(html, /<title>[^<]*Book[^<]*<\/title>/);
   assert.match(html, /<meta name="description" content="[^"]+">/);
+});
+
+test('main.js findService carries the group key that picks the Step 4/5 hero photo', () => {
+  const main = read('js/booking/main.js');
+  const body = main.match(/const findService = \(id\) => \{([\s\S]*?)\n  \};/);
+  assert.ok(body, 'findService');
+  assert.match(body[1], /return \{ \.\.\.service, group: group\.key \}/);
 });
