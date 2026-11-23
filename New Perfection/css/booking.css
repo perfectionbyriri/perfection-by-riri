@@ -1944,6 +1944,20 @@
   to { opacity: 0; transform: translateX(10px); }
 }
 
+/* Week change (Step 2): the old week slides out toward the swipe, the new one
+   slides in from the other side. */
+@media (prefers-reduced-motion: no-preference) {
+  .bk-week.is-week-out-next { animation: bk-week-out-next 140ms ease both; }
+  .bk-week.is-week-out-prev { animation: bk-week-out-prev 140ms ease both; }
+  .bk-week.is-week-in-next { animation: bk-week-in-next 320ms var(--bk-ease) both; }
+  .bk-week.is-week-in-prev { animation: bk-week-in-prev 320ms var(--bk-ease) both; }
+}
+
+@keyframes bk-week-out-next { to { opacity: 0; transform: translateX(-24px); } }
+@keyframes bk-week-out-prev { to { opacity: 0; transform: translateX(24px); } }
+@keyframes bk-week-in-next { from { opacity: 0; transform: translateX(24px); } to { opacity: 1; transform: none; } }
+@keyframes bk-week-in-prev { from { opacity: 0; transform: translateX(-24px); } to { opacity: 1; transform: none; } }
+
 @media (prefers-reduced-motion: reduce) {
   .bk-cat-panel,
   .bk-cat-icon span,

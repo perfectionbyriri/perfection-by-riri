@@ -30,3 +30,18 @@ test('step 2 wires the swipe to the week arrows and keeps vertical scroll', () =
   assert.match(js, /\[data-action="\$\{direction\}-week"\]/, 'clicks the same prev-week / next-week arrows');
   assert.match(read('css/booking.css'), /\.bk-week\s*\{[^}]*touch-action:\s*pan-y/);
 });
+
+test('the week slides out and in, direction-aware, only without reduced motion', () => {
+  const js = read('js/booking/main.js');
+  const css = read('css/booking.css');
+  assert.match(js, /is-week-out-\$\{direction\}/);
+  assert.match(js, /is-week-in-\$\{slideIn\}/);
+  assert.match(js, /prefersReducedMotion\(\)/);
+  for (const name of ['bk-week-out-next', 'bk-week-out-prev', 'bk-week-in-next', 'bk-week-in-prev']) {
+    assert.match(css, new RegExp(`@keyframes ${name}\\b`), `${name} keyframes`);
+  }
+  const block = css.match(/@media \(prefers-reduced-motion: no-preference\) \{[\s\S]*?\.bk-week\.is-week-in-next[\s\S]*?\n\}/)?.[0] ?? '';
+  assert.ok(block, 'week slide rules sit inside the no-preference media query');
+  assert.match(block, /\.bk-week\.is-week-out-next/);
+  assert.match(block, /\.bk-week\.is-week-in-prev/);
+});

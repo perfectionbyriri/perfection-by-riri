@@ -416,13 +416,18 @@ if (app) {
 
   // Re-render the week and the actions only, so focus on the step title or a
   // control outside them survives.
-  function refreshWeek({ focusSelector = null } = {}) {
+  function refreshWeek({ focusSelector = null, slideIn = null } = {}) {
     const { week, selectedDate, startAt } = state.get();
     const weekBox = elements.step.querySelector('.bk-week');
     const actions = elements.step.querySelector('.bk-actions');
     if (!weekBox || !actions) {
       renderStep2({ focusSelector });
       return;
+    }
+    weekBox.classList.remove('is-week-out-next', 'is-week-out-prev', 'is-week-in-next', 'is-week-in-prev');
+    if (slideIn && !prefersReducedMotion()) {
+      weekBox.classList.add(`is-week-in-${slideIn}`);
+      setTimeout(() => weekBox.classList.remove(`is-week-in-${slideIn}`), 400);
     }
     morphHeight(weekBox, () => {
       weekBox.innerHTML = week ? renderWeek({ week, selectedDate, selectedStartAt: startAt, deviceTimeZone }) : renderSlotsLoading();
@@ -432,12 +437,24 @@ if (app) {
     if (focusSelector) elements.step.querySelector(focusSelector)?.focus({ preventScroll: true });
   }
 
+  // The week slides out toward the swipe, the new one slides in from the
+  // other side. Skipped with reduced motion or on the first load.
+  function slideOutWeek(direction) {
+    const weekBox = elements.step.querySelector('.bk-week');
+    if (!direction || !weekBox || prefersReducedMotion()) return Promise.resolve();
+    weekBox.classList.add(`is-week-out-${direction}`);
+    return new Promise((resolve) => { setTimeout(resolve, 140); });
+  }
+
   async function loadWeek(weekStart, { focusSelector = null } = {}) {
-    const { serviceId } = state.get();
+    const { serviceId, weekStart: from } = state.get();
+    const direction = weekStart && from && weekStart !== from ? (weekStart > from ? 'next' : 'prev') : null;
+    const request = api.fetchWeek(serviceId, weekStart ?? undefined);
+    await slideOutWeek(direction);
     state.set({ week: null, weekStart: weekStart ?? null });
     refreshWeek();
     announce('Loading available times…');
-    const result = await api.fetchWeek(serviceId, weekStart ?? undefined);
+    const result = await request;
     if (state.get().serviceId !== serviceId || state.get().step !== 2) return;
     if (!result.ok) {
       elements.step.setAttribute('aria-busy', 'false');
@@ -449,7 +466,7 @@ if (app) {
     const week = result.data;
     const keepDate = week.days.some((day) => day.date === state.get().selectedDate && day.slots.length);
     state.set({ week, weekStart: week.week_start, selectedDate: keepDate ? state.get().selectedDate : defaultDay(week) });
-    refreshWeek({ focusSelector });
+    refreshWeek({ focusSelector, slideIn: direction });
     const total = week.days.reduce((sum, day) => sum + day.slots.length, 0);
     announce(total ? `${total} times available this week.` : 'No openings this week.');
   }
