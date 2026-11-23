@@ -147,10 +147,13 @@ test('primary buttons are white with a gold border and fill gold on hover, text 
   assert.ok(contrast('#262620', '#ffffff') >= 7, 'ink on the white button');
 });
 
-test('phone sub-tabs wrap so every tab is visible without swiping', () => {
-  const mobile = css.match(/@media \(max-width: 800px\) \{[\s\S]*?\n\}\n/g)?.join('\n') ?? '';
-  const rule = mobile.match(/\n  \.bk-subtabs \{([^}]*)\}/)?.[1] ?? '';
-  assert.ok(rule, 'phone .bk-subtabs rule exists');
-  assert.doesNotMatch(rule, /nowrap|overflow-x/);
-  assert.doesNotMatch(css, /\.bk-subtabs::-webkit-scrollbar/);
+test('sub-tabs wrap only on phones (max-width 540px); wider screens keep their layout', () => {
+  const at800 = (css.match(/@media \(max-width: 800px\) \{[\s\S]*?\n\}\n/g) ?? []).join('\n');
+  const at540 = (css.match(/@media \(max-width: 540px\) \{[\s\S]*?\n\}\n/g) ?? []).join('\n');
+  const r800 = at800.match(/\n  \.bk-subtabs \{([^}]*)\}/)?.[1] ?? '';
+  assert.match(r800, /flex-wrap:\s*nowrap/);
+  assert.match(r800, /overflow-x:\s*auto/);
+  const r540 = at540.match(/\n  \.bk-subtabs \{([^}]*)\}/)?.[1] ?? '';
+  assert.match(r540, /flex-wrap:\s*wrap/);
+  assert.match(r540, /overflow(-x)?:\s*visible/);
 });

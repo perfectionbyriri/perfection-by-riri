@@ -2080,8 +2080,12 @@
     gap: 12px 14px;
   }
   .bk-subtabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
     padding: 14px 16px 14px 28px;
+    scrollbar-width: none;
   }
+  .bk-subtabs::-webkit-scrollbar { display: none; }
   .bk-card { padding: 18px 16px 18px 28px; }
 }
 
@@ -2099,7 +2103,7 @@
   .bk-cat-num { display: none; }
   .bk-cat-meta { display: none; }
   .bk-cat-meta-mobile { display: block; }
-  .bk-subtabs { padding: 12px 14px; }
+  .bk-subtabs { flex-wrap: wrap; overflow: visible; padding: 12px 14px; }
   .bk-card {
     flex-direction: column;
     align-items: flex-start;
