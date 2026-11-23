@@ -129,7 +129,8 @@ test('the confirmation view follows D§4 step 5', () => {
   assert.match(html, /<h2 class="bk-step-title bk-confirm-title" tabindex="-1">See you soon,<br><em>Anna\.<\/em><\/h2>/);
   assert.match(html, /Lash lift/);
   assert.match(html, /Thursday, November&nbsp;27<\/p><span class="bk-cinema-sub">1:00 PM Pacific Time<\/span>/);
-  assert.match(html, /Perfection by Riri · Lynnwood, WA/);
+  assert.match(html, /Studio location<\/h3><\/div><p class="bk-confirm-line bk-cinema-info-title">18205 Alderwood Mall Pkwy A, Suite&nbsp;918<\/p><span class="bk-cinema-sub">Lynnwood, WA 98037<\/span>/);
+  assert.doesNotMatch(html, /Perfection by Riri · Lynnwood, WA/);
   assert.match(html, /href="https:\/\/maps\.app\.goo\.gl\/2zzJp92GvUAGifaV8\?g_st=ic"[^>]*>Directions<\/a>/);
   assert.match(html, /Deposit paid \$50\.00 · Receipt from Square sent to anna@…/);
   assert.match(html, /data-action="add-to-calendar"[^>]*>Add to calendar</);
@@ -166,7 +167,7 @@ test('renderConfirmation renders the Cinematic Hero Scene with editorial hero ph
   assert.match(html, /object-position:\s*78% 42%/);
   assert.match(html, /Personal by design\.<br>Perfection in the details\./);
   assert.match(html, /class="bk-cinema-grid"/);
-  assert.match(html, /18205 Alderwood Mall Pkwy A, Suite 918/);
+  assert.match(html, /18205 Alderwood Mall Pkwy A, Suite&nbsp;918/);
   assert.match(html, /1 hr · \$95\.00/);
 });
 

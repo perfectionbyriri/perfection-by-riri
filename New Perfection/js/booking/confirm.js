@@ -11,7 +11,9 @@ import { POLICY_TEXT } from './render-details.js';
 import { formatDuration } from './render-services.js';
 
 const STUDIO_TZ = 'America/Los_Angeles';
-const ADDRESS = '18205 Alderwood Mall Pkwy A, Suite 918, Lynnwood, WA 98037';
+const ADDRESS_STREET = '18205 Alderwood Mall Pkwy A, Suite 918';
+const ADDRESS_CITY = 'Lynnwood, WA 98037';
+const ADDRESS = `${ADDRESS_STREET}, ${ADDRESS_CITY}`;
 const DIRECTIONS_URL = 'https://maps.app.goo.gl/2zzJp92GvUAGifaV8?g_st=ic';
 const FUNNEL_EVENTS = new Set(['booking_view_service', 'booking_select_slot', 'booking_begin_checkout', 'booking_slot_conflict']);
 
@@ -180,8 +182,8 @@ export function renderConfirmation({ result, service = null, firstName = '', ema
     + '</div>'
     + '<div class="bk-cinema-col">'
     + '<div class="bk-cinema-col-head"><h3 class="bk-cinema-col-label">Studio location</h3></div>'
-    + '<p class="bk-confirm-line bk-cinema-info-title">Perfection by Riri · Lynnwood, WA</p>'
-    + `<span class="bk-cinema-sub">${escapeHtml(ADDRESS)}</span>`
+    + `<p class="bk-confirm-line bk-cinema-info-title">${escapeHtml(ADDRESS_STREET).replace(/Suite (\d+)/, 'Suite&nbsp;$1')}</p>`
+    + `<span class="bk-cinema-sub">${escapeHtml(ADDRESS_CITY)}</span>`
     + '</div>'
     + '<div class="bk-cinema-col">'
     + `<div class="bk-cinema-col-head"><h3 class="bk-cinema-col-label">${depositLine ? 'Deposit &amp; changes' : 'Questions or changes'}</h3></div>`
