@@ -19,14 +19,26 @@ const BOOKING = {
   start_at: '2026-11-24T10:00:00-08:00', end_at: '2026-11-24T11:00:00-08:00', status: 'CONFIRMED'
 };
 
-function setup({ slotsFor = () => ({}), services = SERVICES, bookings = [BOOKING] } = {}) {
+const CUSTOMERS_PAGE_1 = [
+  {
+    id: 'cust-secret-1',
+    first_name: 'Alice',
+    last_name: 'Secret',
+    email_addresses: [{ value: 'alice@secret.example' }],
+    phone_numbers: [{ value: '+14255550199' }]
+  }
+];
+
+function setup({ slotsFor = () => ({}), services = SERVICES, bookings = [BOOKING], customers } = {}) {
+  const clock = createClock('2026-11-22T20:00:00Z');
+  const defaultCustomers = () => ({ body: { data: CUSTOMERS_PAGE_1 } });
   const recorder = createFetchRecorder({
     'GET /api/v2/o/oauth2/token': { body: { data: { token: { access_token: 'access', expires_in: 3600 } } } },
     'GET /api/v2/services': { body: { data: services } },
     [`GET /api/v2/bookings/staffs/${PROVIDER}`]: { body: { data: bookings } },
-    'GET /api/v2/slots': (url) => ({ body: { data: { days: slotsFor(url) } } })
+    'GET /api/v2/slots': (url) => ({ body: { data: { days: slotsFor(url) } } }),
+    'GET /api/v2/customers': (url) => (customers ? customers(url, clock) : defaultCustomers())
   });
-  const clock = createClock('2026-11-22T20:00:00Z');
   const tokenManager = createTokenManager({ refreshToken: 'refresh', apiBase: API, fetch: recorder.fetch, now: clock.now });
   const client = createSetmoreClient({ apiBase: API, tokenManager, fetch: recorder.fetch, now: clock.now, sleep: async () => {} });
   const lines = [];
@@ -108,3 +120,52 @@ test('runRead logs a histogram of raw slot start times per duration (times only)
   assert.ok(line, 'histogram line present');
   assert.match(line, /"13:00":4/);
 });
+
+test('runRead pages through GET /customers?limit=100 and logs only counts and timings without contact fields', async () => {
+  const page2 = [
+    {
+      id: 'cust-secret-2',
+      first_name: 'Bob',
+      last_name: 'Private',
+      email: 'bob@secret.example',
+      phone: '2065550188',
+      email_addresses: [{ value: 'bob@secret.example' }],
+      phone_numbers: [{ value: '+12065550188' }]
+    },
+    {
+      id: 'cust-secret-3',
+      first_name: 'Carol',
+      last_name: 'Hidden',
+      email_addresses: [{ value: 'carol@secret.example' }],
+      phone_numbers: [{ value: '+12065550177' }]
+    }
+  ];
+  const { client, clock, log, lines, recorder } = setup({
+    slotsFor: () => freeSlot,
+    customers: (url, clk) => {
+      const cursor = url.searchParams.get('cursor');
+      if (!cursor) {
+        clk.advance(120);
+        return { body: { data: CUSTOMERS_PAGE_1, cursor: 'cur-2' } };
+      }
+      clk.advance(280);
+      return { body: { data: page2 } };
+    }
+  });
+  await runRead({ client, meta: META, config: CONFIG, now: clock.now, log });
+  const customerCalls = recorder.calls.filter((call) => call.path === '/api/v2/customers');
+  assert.equal(customerCalls.length, 2);
+  assert.equal(customerCalls[0].url.searchParams.get('limit'), '100');
+  assert.equal(customerCalls[1].url.searchParams.get('cursor'), 'cur-2');
+  const text = lines.join('\n');
+  assert.match(text, /^customers_pages=2 customers_total=3 avg_page_ms=200 max_page_ms=280$/m);
+  for (const secret of [
+    'cust-secret-1', 'cust-secret-2', 'cust-secret-3',
+    'Alice', 'Secret', 'alice@secret.example', '4255550199',
+    'Bob', 'Private', 'bob@secret.example', '2065550188',
+    'Carol', 'Hidden', 'carol@secret.example', '2065550177'
+  ]) {
+    assert.ok(!text.includes(secret), `leaked ${secret}`);
+  }
+});
+

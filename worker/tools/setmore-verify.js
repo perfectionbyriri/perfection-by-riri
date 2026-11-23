@@ -119,6 +119,25 @@ export async function runRead({ client, meta, config, now = () => new Date(), lo
   }
   log(`buffer_honoured=${bufferHonoured}`);
 
+  let customersPages = 0;
+  let customersTotal = 0;
+  let totalPageMs = 0;
+  let maxPageMs = 0;
+  let customerCursor;
+  for (let page = 0; page < 100; page += 1) {
+    const t0 = now().getTime();
+    const pageResult = await client.listCustomersPage(customerCursor, 100);
+    const elapsed = Math.max(0, now().getTime() - t0);
+    customersPages += 1;
+    customersTotal += pageResult.items.length;
+    totalPageMs += elapsed;
+    if (elapsed > maxPageMs) maxPageMs = elapsed;
+    if (!pageResult.cursor) break;
+    customerCursor = pageResult.cursor;
+  }
+  const avgPageMs = customersPages > 0 ? Math.round(totalPageMs / customersPages) : 0;
+  log(`customers_pages=${customersPages} customers_total=${customersTotal} avg_page_ms=${avgPageMs} max_page_ms=${maxPageMs}`);
+
   const ok = catalog.unmatched.length === 0 && catalog.ambiguous.length === 0
     && conflictsLive.length === 0 && outsideLive.length === 0;
   log(`RESULT ok=${ok}`);
