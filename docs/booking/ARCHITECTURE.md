@@ -281,6 +281,7 @@ Run [45118376957](https://github.com/perfectionbyriri/perfection-by-riri/actions
 - KV `idem:<sha256(key)>`: `{state, payment_id, booking_id, customer_id, service_id, start_at, result, created_at, updated_at, complete_attempts, alerted}`, TTL 72 h (longer than the 48 h authorization). No email, phone or name.
 - States, in order: `started` (before step 1) → `payment_authorized` (after step 2, `payment_id` set) → `booking_requested` (just before step 5) → `booking_created` (after step 5, `booking_id` set) → `done` (after step 6). Side branches: `failed` (definite failure, authorization cancelled or never made), `capture_pending` (step 6 failed, booking kept), `needs_review` (cron could not prove the booking's state).
 - Square `idempotency_key` = the same UUID, so Square deduplicates CreatePayment on retries.
+- A `failed` record without `payment_id` may be retried with the same key. A `failed` record with `payment_id` answers `ATTEMPT_ENDED`: Square would return the cancelled payment for that key.
 - KV is eventually consistent. Two simultaneous submits with the same key in different colos are additionally protected by Square's idempotency (one payment) and by the step 4/7 checks. Acceptable for a single-salon volume.
 
 ### 8.4 Reconciliation cron
@@ -405,6 +406,7 @@ Match priority: email first, then phone. If the email matches customer X and the
 | `NOT_FOUND` | 404 | Unknown route or non-whitelisted service |
 | `SLOT_TAKEN` | 409 | Slot gone at step 1, 4 or 5 |
 | `IN_PROGRESS` | 409 | Same idempotency key still running |
+| `ATTEMPT_ENDED` | 409 | Same idempotency key after a failed attempt whose authorization was cancelled (Square would return that payment again); the client starts a new key |
 | `PAYMENT_DECLINED` | 402 | Square declined; `decline_reason` is a safe category |
 | `RATE_LIMITED` | 429 | Our own per-IP limit |
 | `UPSTREAM_BUSY` | 503 | Setmore 429 after retries or during cooldown; `retry_after_seconds` set |

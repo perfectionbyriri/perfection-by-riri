@@ -18,6 +18,38 @@ export const SQUARE_SDK_URLS = {
 
 export const TURNSTILE_URL = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
 
+// The page is light (ivory panels), so the Turnstile widget and Square's card
+// iframe use light colours. Jost is not available inside Square's iframe, so
+// the card field falls back to a system sans.
+export const TURNSTILE_THEME = 'light';
+
+export const CARD_STYLE = {
+  input: { backgroundColor: '#ffffff', color: '#262620', fontSize: '16px', fontFamily: 'sans-serif' },
+  'input::placeholder': { color: '#6d6a62' },
+  'input.is-error': { color: '#8c2f23' },
+  '.input-container': { borderColor: '#a8a49d', borderRadius: '0px' },
+  '.input-container.is-focus': { borderColor: '#7d6035' },
+  '.input-container.is-error': { borderColor: '#8c2f23' },
+  '.message-text': { color: '#6d6a62' },
+  '.message-text.is-error': { color: '#8c2f23' },
+  '.message-icon': { color: '#6d6a62' },
+  '.message-icon.is-error': { color: '#8c2f23' }
+};
+
+const PAY_HINTS = {
+  waiting: 'Completing a quick security check…',
+  error: 'The security check did not complete. Please refresh the page, or call (425) 845 0045.'
+};
+
+// Pay stays disabled until Turnstile has issued a token: the server rejects an
+// empty one with TURNSTILE_FAILED. Without Turnstile (local mock) only the
+// submit state matters.
+export function payGate({ busy = false, locked = false, needsTurnstile = false, turnstileToken = '', turnstileError = false } = {}) {
+  const waiting = needsTurnstile && !turnstileToken;
+  const hint = waiting ? (turnstileError ? PAY_HINTS.error : PAY_HINTS.waiting) : '';
+  return { disabled: busy || locked || waiting, hint };
+}
+
 export function squareSdkUrl(environment) {
   return environment === 'sandbox' ? SQUARE_SDK_URLS.sandbox : SQUARE_SDK_URLS.production;
 }
@@ -178,7 +210,7 @@ export function splitTimeLabel(timeLabel) {
   };
 }
 
-export function renderReview({ service, details = {}, timeLabel = '' }) {
+export function renderReview({ service, details = {}, timeLabel = '', turnstile = false }) {
   const deposit = service.deposit ?? {};
   const name = `${trimmed(details.first_name)} ${trimmed(details.last_name)}`.trim();
   const email = trimmed(details.email);
@@ -245,11 +277,14 @@ export function renderReview({ service, details = {}, timeLabel = '' }) {
     + '</div>'
     + `<div class="bk-cinema-payband${deposit.required ? ' has-card' : ''}">`
     + card
-    + '<div class="bk-turnstile" id="bk-turnstile"></div>'
+    // A reserved box keeps the Pay button from jumping when the widget appears.
+    + `<div class="bk-turnstile${turnstile ? ' is-reserved' : ''}" id="bk-turnstile"></div>`
     + '</div>'
     + renderActionBar({
       step: 4,
-      primary: `<button type="submit" class="button button-gold bk-pay" data-label="${escapeHtml(payLabel(deposit))}">${escapeHtml(payLabel(deposit))}</button>`
+      hint: turnstile ? `<p class="bk-hint" id="bk-pay-hint">${PAY_HINTS.waiting}</p>` : '',
+      primary: `<button type="submit" class="button button-gold bk-pay" data-label="${escapeHtml(payLabel(deposit))}"`
+        + `${turnstile ? ' disabled aria-disabled="true" aria-describedby="bk-pay-hint"' : ''}>${escapeHtml(payLabel(deposit))}</button>`
     })
     + '</form>';
 }

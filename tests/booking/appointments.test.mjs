@@ -271,6 +271,18 @@ test('a failed attempt may be retried with the same key', async () => {
   assert.equal((await service.create(RAW)).status, 201);
 });
 
+// Square deduplicates CreatePayment by the same key and would hand back the
+// cancelled authorization, so a retry after one must start a new attempt.
+test('a failed attempt whose authorization was cancelled is not re-run with the same key', async () => {
+  const { service, payments, count } = setup({ scenario: 'slot_taken' });
+  await rejectsWith(service.create(RAW), 'SLOT_TAKEN');
+  assert.deepEqual(methods(payments), ['authorize', 'cancel']);
+  const err = await rejectsWith(service.create(RAW), 'ATTEMPT_ENDED');
+  assert.equal(err.status, 409);
+  assert.deepEqual(methods(payments), ['authorize', 'cancel']);
+  assert.equal(count('POST', '/bookings'), 0);
+});
+
 test('start_at in Z form matches the PST slot', async () => {
   const { service, state } = setup();
   const { body } = await service.create({ ...RAW, start_at: '2026-11-23T21:00:00Z' });

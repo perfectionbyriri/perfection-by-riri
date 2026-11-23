@@ -14,6 +14,7 @@ const CODES = {
   PAYMENT_DECLINED: { status: 402, message: 'Your card was declined. Please try another card.' },
   SLOT_TAKEN: { status: 409, message: 'That time was just booked by someone else. Please choose another time.' },
   IN_PROGRESS: { status: 409, message: 'Your booking is already being processed. Please wait a moment.' },
+  ATTEMPT_ENDED: { status: 409, message: 'This booking attempt has ended and your card was not charged. Please try again.' },
   RATE_LIMITED: { status: 429, message: 'Too many attempts. Please wait a few minutes and try again.' },
   UPSTREAM_UNAVAILABLE: { status: 502, message: 'Online booking is taking a short break. Please call (425) 845 0045 and we will book you in.' },
   UPSTREAM_AUTH: { status: 502, message: 'Online booking is taking a short break. Please call (425) 845 0045 and we will book you in.' },

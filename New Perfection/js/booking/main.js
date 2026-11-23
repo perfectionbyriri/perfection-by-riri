@@ -6,8 +6,8 @@
 
 import { createApi } from './api.js';
 import {
-  TURNSTILE_URL, buildAppointmentBody, createSubmitGuard, ensureIdempotencyKey, formatMoney,
-  heroPhotoFor, mapError, renderReview, squareSdkUrl
+  CARD_STYLE, TURNSTILE_THEME, TURNSTILE_URL, buildAppointmentBody, createSubmitGuard, ensureIdempotencyKey, formatMoney,
+  heroPhotoFor, mapError, payGate, renderReview, squareSdkUrl
 } from './checkout.js';
 import { renderActionBar } from './action-bar.js';
 import { buildIcs, confirmedPath, fireConfirmation, renderConfirmation, trackFunnel } from './confirm.js';
@@ -65,7 +65,7 @@ if (app) {
     details: {}, idempotencyKey: null, booking: null
   });
   const guard = createSubmitGuard();
-  const widgets = { card: null, turnstileId: null };
+  const widgets = { card: null, turnstileId: null, turnstileToken: '', turnstileError: false, unavailable: false };
   const deviceTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
   const findService = (id) => {
@@ -222,7 +222,10 @@ if (app) {
     elements.bar.hidden = !show;
     document.documentElement.classList.toggle('bk-has-bar', show);
     const button = primaryButton();
-    const label = (button?.dataset.label ?? button?.textContent ?? 'Continue').trim().toUpperCase();
+    // While Turnstile is pending the bar says why Pay is disabled; the page hint is off screen on phones.
+    const waitingForCheck = step === 4 && Boolean(elements.step.querySelector('#bk-pay-hint'));
+    const checkLabel = widgets.turnstileError ? 'Security check failed' : 'Security check…';
+    const label = (waitingForCheck ? checkLabel : (button?.dataset.label ?? button?.textContent ?? 'Continue')).trim().toUpperCase();
     const disabled = !button || button.disabled;
     if (!show) return;
     elements.barSummary.textContent = summaryLine({ service: findService(serviceId), week, startAt, startLabel });
@@ -618,21 +621,6 @@ if (app) {
     return loadedScripts.get(src);
   }
 
-  // D§4 step 4: Jost is not available inside Square's iframe, so the card
-  // field falls back to a system sans tuned to the obsidian black theme.
-  const CARD_STYLE = {
-    input: { backgroundColor: '#141312', color: '#f4efe8', fontSize: '16px', fontFamily: 'sans-serif' },
-    'input::placeholder': { color: '#a69e94' },
-    'input.is-error': { color: '#eb8f82' },
-    '.input-container': { borderColor: '#4a4237', borderRadius: '0px' },
-    '.input-container.is-focus': { borderColor: '#dfc094' },
-    '.input-container.is-error': { borderColor: '#eb8f82' },
-    '.message-text': { color: '#a69e94' },
-    '.message-text.is-error': { color: '#eb8f82' },
-    '.message-icon': { color: '#a69e94' },
-    '.message-icon.is-error': { color: '#eb8f82' }
-  };
-
   const UNAVAILABLE_HTML = '<p>Online booking is taking a short break. Please call <a href="tel:+14258450045">(425) 845 0045</a> and we&rsquo;ll book you in.</p>';
 
   function stepTimeLabel() {
@@ -676,9 +664,46 @@ if (app) {
       await card.attach('#bk-card');
       widgets.card = card;
     } catch {
-      showBanner(UNAVAILABLE_HTML);
-      setControlsLocked(true, { keepBack: true });
+      showUnavailable();
     }
+  }
+
+  function showUnavailable() {
+    widgets.unavailable = true;
+    showBanner(UNAVAILABLE_HTML);
+    setControlsLocked(true, { keepBack: true });
+  }
+
+  const needsTurnstile = () => Boolean(state.get().catalog?.checkout?.turnstile_site_key);
+
+  // Pay waits for a Turnstile token; the sticky bar mirrors it through the MutationObserver.
+  function syncPay() {
+    const button = elements.step.querySelector('.bk-pay');
+    if (!button) return;
+    const { disabled, hint } = payGate({
+      busy: guard.busy,
+      locked: guard.locked || widgets.unavailable,
+      needsTurnstile: needsTurnstile(),
+      turnstileToken: widgets.turnstileToken,
+      turnstileError: widgets.turnstileError
+    });
+    button.disabled = disabled;
+    let hintEl = elements.step.querySelector('#bk-pay-hint');
+    if (disabled && hint) {
+      if (!hintEl) {
+        hintEl = document.createElement('p');
+        hintEl.className = 'bk-hint';
+        hintEl.id = 'bk-pay-hint';
+        button.before(hintEl);
+      }
+      hintEl.textContent = hint;
+      button.setAttribute('aria-describedby', 'bk-pay-hint');
+    } else {
+      hintEl?.remove();
+      button.removeAttribute('aria-describedby');
+    }
+    if (disabled) button.setAttribute('aria-disabled', 'true');
+    else button.removeAttribute('aria-disabled');
   }
 
   async function mountTurnstile() {
@@ -688,10 +713,17 @@ if (app) {
       await loadScript(TURNSTILE_URL);
       const box = elements.step.querySelector('#bk-turnstile');
       if (state.get().step !== 4 || !box) return;
-      widgets.turnstileId = window.turnstile.render(box, { sitekey: siteKey, theme: 'dark', size: 'flexible', action: 'booking' });
+      widgets.turnstileId = window.turnstile.render(box, {
+        sitekey: siteKey,
+        theme: TURNSTILE_THEME,
+        size: 'flexible',
+        action: 'booking',
+        callback: (token) => { widgets.turnstileToken = token; widgets.turnstileError = false; syncPay(); },
+        'expired-callback': () => { widgets.turnstileToken = ''; syncPay(); },
+        'error-callback': () => { widgets.turnstileToken = ''; widgets.turnstileError = true; syncPay(); }
+      });
     } catch {
-      showBanner(UNAVAILABLE_HTML);
-      setControlsLocked(true, { keepBack: true });
+      showUnavailable();
     }
   }
 
@@ -700,9 +732,14 @@ if (app) {
     try { if (widgets.turnstileId !== null) window.turnstile?.remove(widgets.turnstileId); } catch { /* already gone */ }
     widgets.card = null;
     widgets.turnstileId = null;
+    widgets.turnstileToken = '';
+    widgets.turnstileError = false;
+    widgets.unavailable = false;
   }
 
+  // A token is single use: Pay waits for the fresh one the reset issues.
   function resetTurnstile() {
+    widgets.turnstileToken = '';
     try { if (widgets.turnstileId !== null) window.turnstile?.reset(widgets.turnstileId); } catch { /* reloads on next mount */ }
   }
 
@@ -732,7 +769,7 @@ if (app) {
     const service = findService(state.get().serviceId);
     state.set({ idempotencyKey: ensureIdempotencyKey(state.get().idempotencyKey) });
     elements.step.innerHTML = '<h2 class="bk-step-title" tabindex="-1">Deposit &amp; confirm</h2>'
-      + renderReview({ service, details: state.get().details, timeLabel: stepTimeLabel() });
+      + renderReview({ service, details: state.get().details, timeLabel: stepTimeLabel(), turnstile: needsTurnstile() });
     elements.step.setAttribute('aria-busy', 'false');
     if (focus) focusTitle();
     trackFunnel('booking_begin_checkout', { service_id: service.service_id }, window.gtag);
@@ -862,7 +899,9 @@ if (app) {
   elements.step.addEventListener('submit', async (event) => {
     if (event.target.id !== 'bk-checkout') return;
     event.preventDefault();
-    if (state.get().step !== 4 || !guard.tryStart()) return; // A second click while booking is ignored.
+    if (state.get().step !== 4) return;
+    if (needsTurnstile() && !widgets.turnstileToken) { syncPay(); return; } // No token yet: the server would answer TURNSTILE_FAILED.
+    if (!guard.tryStart()) return; // A second click while booking is ignored.
     hideBanner();
     showCardError('');
     setControlsLocked(true);
@@ -875,7 +914,7 @@ if (app) {
         mapped = { step: 4, inline: true, message: card.message, newKey: false };
         return;
       }
-      const turnstile = widgets.turnstileId !== null ? window.turnstile?.getResponse(widgets.turnstileId) ?? '' : '';
+      const turnstile = widgets.turnstileId !== null ? window.turnstile?.getResponse(widgets.turnstileId) || widgets.turnstileToken : '';
       state.set({ idempotencyKey: ensureIdempotencyKey(state.get().idempotencyKey) });
       const body = buildAppointmentBody({ ...state.get(), service }, { turnstile, payment: card.payment });
       const result = await api.createAppointment(body);
@@ -894,7 +933,8 @@ if (app) {
       guard.finish();
       if (state.get().step === 4 && !state.get().booking) {
         setPayBusy(false);
-        setControlsLocked(guard.locked);
+        setControlsLocked(guard.locked || widgets.unavailable, { keepBack: widgets.unavailable && !guard.locked });
+        syncPay();
       }
       if (mapped) showSubmitError(mapped);
     }

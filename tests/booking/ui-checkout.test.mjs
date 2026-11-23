@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   SQUARE_SDK_URLS, TURNSTILE_URL, buildAppointmentBody, createSubmitGuard, ensureIdempotencyKey,
-  heroPhotoFor, mapError, payLabel, renderReview, squareSdkUrl
+  CARD_STYLE, TURNSTILE_THEME, heroPhotoFor, mapError, payGate, payLabel, renderReview, squareSdkUrl
 } from '../../New Perfection/js/booking/checkout.js';
 
 const DEPOSIT = { required: true, deposit_cents: 5000, fee_cents: 0, total_cents: 5000, fee_basis_points: 0 };
@@ -211,4 +211,41 @@ test('the review shows the FAQ confirmation line for a flagged service only', ()
   const lash = { ...lashLift, notice: { key: 'lash-extensions-faq', label: 'Lash Extensions' } };
   assert.match(renderReview({ service: lash, details, timeLabel: 'Monday, November 23 · 1:00 PM' }), /Lash Extensions FAQ: confirmed/);
   assert.doesNotMatch(renderReview({ service: lashLift, details, timeLabel: 'Monday, November 23 · 1:00 PM' }), /FAQ/);
+});
+
+test('ATTEMPT_ENDED says the card was not charged and starts a new attempt key', () => {
+  const mapped = mapError({ error: { code: 'ATTEMPT_ENDED' } });
+  assert.equal(mapped.step, 4);
+  assert.equal(mapped.newKey, true);
+  assert.match(mapped.message, /card was not charged/);
+});
+
+test('with Turnstile, the review reserves its space and renders Pay disabled with a waiting hint', () => {
+  const html = renderReview({ service: lashLift, details, timeLabel: 'Thursday, November 27 · 1:00 PM', turnstile: true });
+  assert.match(html, /<div class="bk-turnstile is-reserved" id="bk-turnstile"><\/div>/);
+  assert.match(html, /<p class="bk-hint" id="bk-pay-hint">Completing a quick security check…<\/p>/);
+  assert.match(html, /<button type="submit" class="button button-gold bk-pay"[^>]* disabled aria-disabled="true" aria-describedby="bk-pay-hint">/);
+  const plain = renderReview({ service: lashLift, details, timeLabel: 'x' });
+  assert.match(plain, /<div class="bk-turnstile" id="bk-turnstile"><\/div>/);
+  assert.doesNotMatch(plain, /bk-pay-hint|disabled/);
+});
+
+test('payGate keeps Pay disabled until Turnstile has a token, and while busy or locked', () => {
+  assert.deepEqual(payGate({ needsTurnstile: true, turnstileToken: '' }), { disabled: true, hint: 'Completing a quick security check…' });
+  assert.deepEqual(payGate({ needsTurnstile: true, turnstileToken: '', turnstileError: true }), {
+    disabled: true, hint: 'The security check did not complete. Please refresh the page, or call (425) 845 0045.'
+  });
+  assert.deepEqual(payGate({ needsTurnstile: true, turnstileToken: 'tok' }), { disabled: false, hint: '' });
+  assert.deepEqual(payGate({ needsTurnstile: false }), { disabled: false, hint: '' });
+  assert.equal(payGate({ needsTurnstile: true, turnstileToken: 'tok', busy: true }).disabled, true);
+  assert.equal(payGate({ needsTurnstile: false, locked: true }).disabled, true);
+});
+
+test('the card form and Turnstile follow the light page theme', () => {
+  assert.equal(TURNSTILE_THEME, 'light');
+  assert.equal(CARD_STYLE.input.backgroundColor, '#ffffff');
+  assert.equal(CARD_STYLE.input.color, '#262620');
+  for (const rule of Object.values(CARD_STYLE)) {
+    for (const value of Object.values(rule)) assert.doesNotMatch(String(value), /^#(141312|f4efe8|0b0b0a)$/i);
+  }
 });

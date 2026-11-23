@@ -47,6 +47,7 @@ Other approaches considered: (2) recolor plus rebuilding Step 1 as a list with a
 3. **Hardcoded dark colors** (about 40 `rgba(...)` and hex values outside the tokens, the dialog backdrop, the sticky bar, the mock payment card) are converted to tokens or to light equivalents.
 4. `<meta name="theme-color">` changes from `#0b0b0a` to `#f5f2ef`.
 5. The real Square card form (live payments, not mock) takes its styles from the page; if it needs separate light styling, I will treat that as a finding and report it, not guess.
+   - **Finding (2026-11-23 test pass):** it did not: `main.js` passed a hard-coded dark `CARD_STYLE` and rendered Turnstile with `theme: 'dark'`. Both now live in `checkout.js` as light values (`CARD_STYLE`, `TURNSTILE_THEME = 'light'`). The live Square iframe with these styles is not yet seen.
 
 ## Verification (done means evidence)
 

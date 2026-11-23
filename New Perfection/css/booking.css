@@ -1842,7 +1842,7 @@
   border-bottom: 1px solid var(--bk-line);
 }
 
-.bk-cinema-payband:not(.has-card):has(.bk-turnstile:empty) {
+.bk-cinema-payband:not(.has-card):has(.bk-turnstile:empty:not(.is-reserved)) {
   display: none;
 }
 
@@ -1894,7 +1894,12 @@
   margin: 0;
 }
 
-.bk-turnstile:empty {
+/* Reserved for the widget (65 px tall) so the Pay button does not jump when it renders. */
+.bk-turnstile.is-reserved {
+  min-height: 65px;
+}
+
+.bk-turnstile:empty:not(.is-reserved) {
   display: none;
 }
 
@@ -1948,6 +1953,31 @@
   margin: 0;
   padding-top: 0;
   border-top: 0;
+}
+
+/* On the dark confirmation banner the black primary button would vanish:
+   it turns ivory there and still fills gold on hover. */
+.book-page .bk .bk-cinema-hero .button-gold {
+  background: #f5f2ef;
+  color: #0b0b0a;
+  border-color: #f5f2ef;
+}
+
+.book-page .bk .bk-cinema-hero .button-outline {
+  border-color: var(--bk-line-strong);
+  color: var(--bk-ink);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .book-page .bk .bk-cinema-hero .button-gold:hover {
+    background: var(--bk-gold);
+    border-color: var(--bk-gold);
+    color: #0b0b0a;
+  }
+  .book-page .bk .bk-cinema-hero .button-outline:hover {
+    border-color: var(--bk-gold);
+    color: #f5f2ef;
+  }
 }
 
 .bk-cinema-policy {

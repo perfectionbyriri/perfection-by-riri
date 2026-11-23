@@ -105,6 +105,9 @@ export function createAppointmentService({ client, catalog, slots, customers, pa
     const existing = await kv.get(idemKey, 'json');
     if (existing?.result) return { status: 200, body: existing.result };
     if (existing && existing.state !== 'failed') throw new BookingError('IN_PROGRESS');
+    // Square deduplicates CreatePayment by this key and would return the
+    // cancelled authorization, so a retry after one needs a new attempt key.
+    if (existing?.payment_id) throw new BookingError('ATTEMPT_ENDED');
 
     const service = await catalog.getService(input.serviceId);
     if (!service) throw new BookingError('NOT_FOUND', { message: 'That service is not available for online booking.' });
