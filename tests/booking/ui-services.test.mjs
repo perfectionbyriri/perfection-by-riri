@@ -275,3 +275,9 @@ test('choosing a flagged service scrolls its notice into view so the checkbox is
   const js = fs.readFileSync(path.join(ROOT, 'New Perfection/js/booking/main.js'), 'utf8');
   assert.match(js, /notice\.scrollIntoView\(\{ block: 'center'/);
 });
+
+test('the notice carries a warning icon and is announced as a note', () => {
+  const notice = renderNotice(LIP, { visible: true });
+  assert.match(notice, /role="note"/);
+  assert.match(notice, /<svg class="bk-notice-icon"[^>]*aria-hidden="true"/);
+});

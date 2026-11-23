@@ -177,3 +177,22 @@ test('the FAQ notice is a full-row panel built from theme tokens only', () => {
   assert.doesNotMatch(rules, /#[0-9a-f]{3,8}\b|rgba?\(/i, 'no hardcoded colors');
   assert.match(css, /\.bk-notice\[hidden\]\s*\{\s*display:\s*none/);
 });
+
+test('the FAQ notice stands out: warm panel, 2px gold frame, big text, button-style link, large checkbox', () => {
+  assert.ok(luminance(page['--bk-notice-bg']) > 0.9, 'notice panel is a light warm tint');
+  assert.ok(contrast(page['--bk-ink'], page['--bk-notice-bg']) >= 7, 'ink on the notice panel');
+  assert.ok(contrast(page['--bk-gold-text'], page['--bk-notice-bg']) >= 4.5, 'gold text on the notice panel');
+  const rule = (sel) => css.match(new RegExp(`\\n${sel.replace(/[.\\[\\]]/g, '\\\\$&')}\\s*\\{([^}]*)\\}`))?.[1] ?? '';
+  const box = rule('.bk-notice');
+  assert.match(box, /background:\s*var\(--bk-notice-bg\)/);
+  assert.match(box, /border:\s*2px solid var\(--bk-gold-text\)/);
+  assert.match(box, /border-left-width:\s*6px/);
+  assert.ok(Number(rule('.bk-notice-text').match(/font-size:\s*(\d+)px/)?.[1]) >= 17, 'text is at least 17px');
+  const link = rule('.bk-notice-link');
+  assert.ok(Number(link.match(/min-height:\s*(\d+)px/)?.[1]) >= 44, 'link is a 44px tap target');
+  assert.match(link, /border:\s*1px solid var\(--bk-ink\)/);
+  assert.ok(Number(rule('.bk-notice-check').match(/width:\s*(\d+)px/)?.[1]) >= 24, 'checkbox is at least 24px');
+  const motion = css.match(/@media \(prefers-reduced-motion: no-preference\) \{[^@]*\.bk-notice:not\(\[hidden\]\)[\s\S]*?\n\}/)?.[0] ?? '';
+  assert.ok(motion, 'attention animation only without reduced motion');
+  assert.match(css, /@keyframes bk-notice-attn\b/);
+});

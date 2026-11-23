@@ -50,8 +50,12 @@ const FAQ_URL = '/faq/#lip-blushing-cold-sores';
 export function renderNotice(service, { visible = false, acknowledged = false } = {}) {
   if (!service?.notice) return '';
   const id = escapeHtml(service.service_id);
-  return `<div class="bk-notice" data-notice-for="${id}"${visible ? '' : ' hidden'}>`
-    + '<p class="bk-notice-title">Important before you book</p>'
+  const icon = '<svg class="bk-notice-icon" viewBox="0 0 24 24" width="26" height="26" aria-hidden="true" focusable="false">'
+    + '<circle cx="12" cy="12" r="10.5" fill="none" stroke="currentColor" stroke-width="1.8"/>'
+    + '<path d="M12 6.8v7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>'
+    + '<circle cx="12" cy="17.4" r="1.2" fill="currentColor"/></svg>';
+  return `<div class="bk-notice" role="note" data-notice-for="${id}"${visible ? '' : ' hidden'}>`
+    + `<p class="bk-notice-title">${icon}<span>Important before you book</span></p>`
     + '<p class="bk-notice-text">Please read our &quot;Lip Blushing &amp; Cold Sores&quot; FAQ.</p>'
     + `<a class="bk-notice-link" href="${FAQ_URL}" target="_blank" rel="noopener">Read the FAQ</a>`
     + '<label class="bk-notice-label">'
