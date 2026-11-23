@@ -43,7 +43,7 @@ export function createSquarePayments({ accessToken, environment, locationId, ver
           ...(body !== undefined ? { 'Content-Type': 'application/json' } : {})
         },
         ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
-        redirect: 'error',
+        redirect: 'manual',
         signal: AbortSignal.timeout(timeoutMs)
       });
       return { response, body: await readJson(response) };

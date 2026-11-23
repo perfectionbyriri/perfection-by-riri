@@ -77,7 +77,7 @@ export function createSetmoreClient({
           method,
           headers,
           ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
-          redirect: 'error',
+          redirect: 'manual',
           signal: AbortSignal.timeout(timeoutMs)
         });
       } catch {
@@ -88,6 +88,9 @@ export function createSetmoreClient({
         }
         throw new SetmoreUnavailable();
       }
+
+      // `redirect: 'manual'` (workerd rejects 'error'): an unexpected redirect is an upstream fault.
+      if (response.status >= 300 && response.status < 400) throw new SetmoreUnavailable();
 
       if (response.status === 401) {
         if (authRetried) throw new SetmoreAuthError();

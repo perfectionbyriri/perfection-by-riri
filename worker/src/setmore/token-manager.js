@@ -52,7 +52,7 @@ export function createTokenManager({
     try {
       const url = new URL(`${apiBase}/o/oauth2/token`);
       url.searchParams.set('refreshToken', refreshToken);
-      const response = await fetch(url, { method: 'GET', redirect: 'error', signal: AbortSignal.timeout(timeoutMs) });
+      const response = await fetch(url, { method: 'GET', redirect: 'manual', signal: AbortSignal.timeout(timeoutMs) });
       if (!response.ok) throw new Error('token refresh failed');
       const body = await response.json();
       const token = body?.data?.token;
