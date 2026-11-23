@@ -175,7 +175,7 @@ export function renderConfirmation({ result, service = null, firstName = '', ema
     + '</div>'
     + '<div class="bk-cinema-col">'
     + '<div class="bk-cinema-col-head"><h3 class="bk-cinema-col-label">Date &amp; time</h3></div>'
-    + `<p class="bk-confirm-line bk-cinema-col-title bk-cinema-col-title--gold">${escapeHtml(datePart)}</p>`
+    + `<p class="bk-confirm-line bk-cinema-col-title bk-cinema-col-title--gold">${escapeHtml(datePart).replace(/ (\d+)$/, '&nbsp;$1')}</p>`
     + `<span class="bk-cinema-sub">${escapeHtml(timePart)}</span>`
     + '</div>'
     + '<div class="bk-cinema-col">'

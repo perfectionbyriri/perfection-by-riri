@@ -213,6 +213,8 @@ export function renderReview({ service, details = {}, timeLabel = '' }) {
 
   const contactLines = [email, phone].filter(Boolean).map(escapeHtml).join('<br>');
 
+  const dateHtml = escapeHtml(datePart).replace(/ (\d+)$/, '&nbsp;$1');
+
   return '<form class="bk-form bk-cinema" id="bk-checkout" novalidate>'
     + '<div class="bk-cinema-hero">'
     + `<img class="bk-cinema-photo" src="${escapeHtml(photo.src)}" alt="${escapeHtml(photo.alt ?? '')}" style="object-position: ${escapeHtml(focal)}" loading="eager" decoding="async">`
@@ -231,7 +233,7 @@ export function renderReview({ service, details = {}, timeLabel = '' }) {
     + '</div>'
     + '<div class="bk-cinema-col">'
     + `<div class="bk-cinema-col-head"><h3 class="bk-cinema-col-label">02 &middot; Date &amp; time</h3><button type="button" class="bk-cinema-edit" data-goto-step="2">Edit ${EDIT_ARROW_SVG}</button></div>`
-    + `<p class="bk-review-line bk-cinema-col-title">${escapeHtml(datePart)}</p>`
+    + `<p class="bk-review-line bk-cinema-col-title">${dateHtml}</p>`
     + `<span class="bk-cinema-sub">${escapeHtml(timePart)}</span>`
     + '</div>'
     + '<div class="bk-cinema-col">'

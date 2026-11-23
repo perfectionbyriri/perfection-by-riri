@@ -128,7 +128,7 @@ test('the confirmation view follows D§4 step 5', () => {
   assert.match(html, /You&rsquo;re booked/);
   assert.match(html, /<h2 class="bk-step-title bk-confirm-title" tabindex="-1">See you soon,<br><em>Anna\.<\/em><\/h2>/);
   assert.match(html, /Lash lift/);
-  assert.match(html, /Thursday, November 27<\/p><span class="bk-cinema-sub">1:00 PM Pacific Time<\/span>/);
+  assert.match(html, /Thursday, November&nbsp;27<\/p><span class="bk-cinema-sub">1:00 PM Pacific Time<\/span>/);
   assert.match(html, /Perfection by Riri · Lynnwood, WA/);
   assert.match(html, /href="https:\/\/maps\.app\.goo\.gl\/2zzJp92GvUAGifaV8\?g_st=ic"[^>]*>Directions<\/a>/);
   assert.match(html, /Deposit paid \$50\.00 · Receipt from Square sent to anna@…/);
