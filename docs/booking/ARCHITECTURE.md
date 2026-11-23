@@ -167,6 +167,8 @@ BFF rules:
 
 Run [45116866123](https://github.com/perfectionbyriri/perfection-by-riri/actions/runs/45116866123) (`setmore-verify.yml`, `mode=read`, GET only) compared `/slots` with `GET /bookings/staffs/{provider}` for the next 4 studio weeks: 30 bookings, all `CONFIRMED`; slots for all 6 catalog durations (30, 60, 90, 120, 150, 180 min) with `working_hours=false` and `true`. Result: **0 slots overlapping a booking, 0 slots outside Mon–Sat 10:00–17:00**, identical slot counts for both `working_hours` values. Every service has `buffer {before: 0, after: 0}`, so buffer handling is untested by live data; if a buffer is ever set in Setmore, re-run the check (`buffer_honoured` reports it).
 
+Re-run with `slot_limit=15` ([45124336336](https://github.com/perfectionbyriri/perfection-by-riri/actions/runs/45124336336)): 30 bookings, 215–396 slots per duration over 4 weeks, **0 overlaps, 0 outside hours**, 43/43 services mapped.
+
 ### 6.1 Time zone helpers (pure, unit-tested, no dependencies)
 
 Built on `Intl.DateTimeFormat` with `timeZone: 'America/Los_Angeles'`. This is the same technique as the live voice agent's `pacificSlotTimestamp` (`virtual-phone-agent/src/setmore.ts`), which is proven in production.
