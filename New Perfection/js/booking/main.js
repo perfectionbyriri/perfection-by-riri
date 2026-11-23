@@ -313,18 +313,6 @@ if (app) {
     updateSummary();
     trackFunnel('booking_view_service', { service_id: id }, window.gtag);
     announce(`${service.name} selected.`);
-    scheduleAutoAdvance(id);
-  }
-
-  // On small screens a tap on a service card moves on by itself after 400ms (long enough for the check mark to draw)
-  // (at once with reduced motion). Desktop keeps the explicit Continue.
-  let advanceTimer = null;
-  function scheduleAutoAdvance(id) {
-    clearTimeout(advanceTimer);
-    if (!window.matchMedia('(max-width: 800px)').matches) return;
-    const go = () => { if (state.get().step === 1 && state.get().serviceId === id) goTo(2); };
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) go();
-    else advanceTimer = setTimeout(go, 400);
   }
 
   elements.step.addEventListener('click', (event) => {
@@ -830,7 +818,6 @@ if (app) {
   // walks the steps. `push: false` is used when history already moved.
   function goTo(step, { push = true } = {}) {
     if (step < 1 || step > 4 || guard.busy) return;
-    clearTimeout(advanceTimer);
     const prevStep = state.get().step;
     const direction = step < prevStep ? 'backward' : 'forward';
     if (push && step !== prevStep) {

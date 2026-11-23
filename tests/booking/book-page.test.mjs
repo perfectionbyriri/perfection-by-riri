@@ -255,6 +255,6 @@ test('motion: steps swap through a named view transition, no blur keyframes, ful
   const reduce = css.match(/@media \(prefers-reduced-motion: reduce\)\s*\{[\s\S]*?\n\}/)?.[0] ?? '';
   assert.match(reduce, /\.book-page[\s\S]*transition-duration/);
   assert.match(js, /startViewTransition/);
-  assert.match(js, /setTimeout\(go, 400\)/);
+  assert.doesNotMatch(js, /scheduleAutoAdvance|advanceTimer/, 'choosing a service never moves on by itself; only Continue does');
   assert.match(js, /morphHeight\(weekBox/);
 });
