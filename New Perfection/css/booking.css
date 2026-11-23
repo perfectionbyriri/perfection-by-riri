@@ -8,7 +8,6 @@
 :root {
   --error: #8c2f23;
   --bk-gutter: max(5.9vw, calc((100vw - 1272px) / 2));
-  --bk-summary-width: 340px;
 }
 
 /* Obsidian black & champagne-gold tokens scoped to the booking page */
@@ -260,14 +259,14 @@
   background: var(--bk-gold-bright);
 }
 
-/* Layout: step content + sticky summary from 801px; one column below. */
+/* Layout: one full-width column on every step (Variant C); the ribbon sits above the step. */
 .bk-app { display: none; }
 .bk-enhanced .bk-app { display: block; }
 
 .bk-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) var(--bk-summary-width);
-  gap: 64px;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 44px;
   align-items: start;
 }
 
@@ -294,16 +293,7 @@
 .bk-step-title:focus,
 .bk-step-title:focus-visible { outline: none; }
 
-/* Summary sidebar: atelier reservation card framed with top gold bar */
-.bk-summary {
-  position: sticky;
-  top: 24px;
-  padding: 28px 28px;
-  background: var(--bk-surface);
-  border: 1px solid var(--bk-line);
-  border-top: 2px solid var(--bk-gold);
-}
-
+/* Summary list: shared by the ribbon (Variant C) and the mobile sheet */
 .bk-summary-label {
   margin: 0 0 18px;
   font-family: var(--sans);
@@ -337,14 +327,6 @@
   font-variant-numeric: var(--price-numeric);
 }
 
-.bk-summary-cta {
-  margin-top: 20px;
-  padding-top: 20px;
-  border-top: 1px solid var(--bk-line);
-}
-
-.bk-summary-cta[hidden] { display: none; }
-.bk-summary-action { width: 100%; }
 
 .bk-fine {
   margin: 20px 0 0;
@@ -670,8 +652,9 @@
 
 /* Nested treatment list inside each opened category */
 .bk-card-grid {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 32px;
   border-top: 1px solid var(--bk-line);
 }
 
@@ -960,6 +943,19 @@
 
 .bk-slot-group + .bk-slot-group { margin-top: 26px; }
 
+/* Variant C · Morning | Afternoon side by side behind a vertical hairline */
+.bk-slots-split {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.bk-slots-split .bk-slot-group + .bk-slot-group {
+  margin-top: 0;
+  padding-left: 32px;
+  border-left: 1px solid var(--bk-line);
+}
+.bk-slots-split .bk-slot-group:first-child:not(:only-child) { padding-right: 32px; }
+.bk-slot-group-date { color: var(--bk-muted); }
+
 .bk-slot-group-title {
   margin: 0 0 12px;
   font-family: var(--sans);
@@ -1132,6 +1128,20 @@
 .bk-consent .bk-field-error { grid-column: 2; }
 
 .bk-privacy { margin-top: 25px; }
+
+/* Variant C · details 8 / 4: fields left, policy consent right behind a hairline */
+.bk-details-split {
+  display: grid;
+  grid-template-columns: minmax(0, 8fr) minmax(0, 4fr);
+  align-items: start;
+}
+.bk-details-fields { padding-right: 40px; min-width: 0; }
+.bk-details-policy {
+  margin-top: 24px;
+  padding-left: 40px;
+  border-left: 1px solid var(--bk-line);
+}
+.bk-details-policy .bk-privacy { margin-top: 22px; }
 .bk-privacy .bk-text-button { min-height: 44px; font-size: 13px; color: var(--bk-gold-bright); }
 
 .bk-error-summary {
@@ -1150,20 +1160,190 @@
 .bk-error-summary ul { margin: 0; padding-left: 20px; }
 .bk-error-summary a { color: var(--bk-error); text-underline-offset: 3px; }
 
+/* Variant C · Monolith hero: studio photo, title and the progress along its bottom edge */
+.bk-monolith {
+  position: relative;
+  min-height: 276px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  margin-bottom: 0;
+  padding: 44px 42px 0;
+  overflow: hidden;
+  border: 1px solid var(--bk-line);
+  border-top: 2px solid var(--bk-gold);
+  background: var(--bk-bg-deep);
+}
+
+.bk-monolith-photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 72% 50%;
+  opacity: .56;
+  pointer-events: none;
+}
+
+.bk-monolith::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(12, 12, 11, .94) 0%, rgba(12, 12, 11, .68) 54%, rgba(12, 12, 11, .32) 100%),
+    linear-gradient(180deg, rgba(12, 12, 11, .35) 0%, rgba(12, 12, 11, .92) 100%);
+  pointer-events: none;
+}
+
+.bk-monolith-inner,
+.bk-monolith-progress {
+  position: relative;
+  z-index: 2;
+}
+
+.bk-monolith-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.bk-monolith-lead { max-width: 760px; }
+
+.bk-monolith .bk-title,
+.bk-monolith-display {
+  margin: 0;
+  font-family: var(--serif);
+  font-variation-settings: "opsz" 24;
+  font-size: clamp(40px, 4.6vw, 66px);
+  font-weight: 400;
+  line-height: 1.01;
+  letter-spacing: .01em;
+  color: var(--bk-ink);
+}
+
+.bk-monolith .bk-title em,
+.bk-monolith-display em {
+  font-style: italic;
+  color: var(--bk-gold-bright);
+}
+
+.bk-monolith-kicker {
+  margin: 0 0 12px;
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 2px;
+  color: var(--bk-gold);
+}
+
+.bk-monolith-kicker[hidden],
+.bk-monolith-display[hidden] { display: none; }
+
+.bk-monolith-progress {
+  margin-top: 30px;
+  padding: 0 0 18px;
+}
+
+.bk-monolith-progress .bk-step-count {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+/* Variant C · Live selection ribbon: three hairline columns under the hero (Steps 1-3) */
+.bk-ribbon {
+  border-bottom: 1px solid var(--bk-line);
+}
+
+.bk-ribbon-heads,
+.bk-ribbon .bk-summary-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.bk-ribbon-head,
+.bk-ribbon .bk-summary-row {
+  min-width: 0;
+  padding-inline: 28px;
+}
+
+.bk-ribbon-head:first-child,
+.bk-ribbon .bk-summary-row:first-child { padding-left: 0; }
+
+.bk-ribbon-head + .bk-ribbon-head,
+.bk-ribbon .bk-summary-row + .bk-summary-row { border-left: 1px solid var(--bk-line); }
+
+.bk-ribbon-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding-top: 24px;
+  min-height: 28px;
+}
+
+.bk-ribbon .bk-summary-row {
+  padding-block: 10px 24px;
+  border-top: 0;
+}
+
+.bk-ribbon .bk-summary-row dt {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+.bk-ribbon-title {
+  display: block;
+  font-family: var(--serif);
+  font-variation-settings: "opsz" 24;
+  font-size: 21px;
+  line-height: 1.2;
+  color: var(--bk-ink);
+}
+
+.bk-ribbon-sub {
+  display: block;
+  margin-top: 7px;
+  font-family: var(--sans);
+  font-size: 11px;
+  letter-spacing: 1.2px;
+  line-height: 1.6;
+  color: var(--bk-muted);
+}
+
+.bk-ribbon-sub:empty { display: none; }
+
+/* The sheet reuses the list: title and sub stack in sans */
+.bk-sheet .bk-ribbon-title { font-family: var(--sans); font-size: var(--fs-body); text-transform: none; }
+
 /* Step 4 & Step 5 · Cinematic Hero Scene full-bleed stage */
 .bk-layout[data-step="4"],
 .bk-layout[data-step="5"] {
   grid-template-columns: minmax(0, 1fr);
 }
 
-.bk-layout[data-step="4"] .bk-summary,
-.bk-layout[data-step="5"] .bk-summary {
+.bk-layout[data-step="4"] .bk-ribbon,
+.bk-layout[data-step="5"] .bk-ribbon {
   display: none;
 }
 
 .bk-shell[data-step="4"] .bk-head {
-  margin-bottom: 28px;
+  margin-bottom: 0;
 }
+
+.bk-shell[data-step="4"] .bk-monolith .bk-eyebrow { display: none; }
 
 /* Visually hidden, not display:none, so the page h1 stays in the accessibility tree. */
 .bk-shell[data-step="5"] .bk-head {
@@ -1379,6 +1559,8 @@
   cursor: pointer;
   transition: color 220ms var(--bk-ease);
 }
+
+.bk-cinema-edit[hidden] { display: none; }
 
 .bk-cinema-edit svg {
   width: 12px;
@@ -1617,6 +1799,15 @@
   text-align: center;
 }
 
+.bk-cinema-step {
+  margin: 0;
+  font-family: var(--sans);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 2px;
+  color: var(--bk-gold);
+}
+
 .bk-pay { min-width: 260px; }
 .bk-pay[aria-busy="true"] { cursor: progress; }
 
@@ -1663,7 +1854,7 @@
   .bk-head .bk-title { animation: bk-focus-in 760ms var(--bk-ease) 100ms both; }
   .bk-head .bk-step-count { animation: bk-focus-in 620ms var(--bk-ease) 170ms both; }
   .bk-head .bk-progress { animation: bk-fade-up 680ms var(--bk-ease) 220ms both; }
-  .bk-summary { animation: bk-fade-up 740ms var(--bk-ease) 180ms both; }
+  .bk-ribbon { animation: bk-fade-up 740ms var(--bk-ease) 180ms both; }
 
   .bk-step-lead { animation: bk-fade-up 460ms var(--bk-ease) 40ms both; }
   .bk-group {
@@ -1759,6 +1950,16 @@
 }
 
 @media (max-width: 1050px) {
+  .bk-ribbon-head,
+  .bk-ribbon .bk-summary-row { padding-inline: 20px; }
+  .bk-details-split { grid-template-columns: minmax(0, 1fr); }
+  .bk-details-fields { padding-right: 0; }
+  .bk-details-policy {
+    margin-top: 32px;
+    padding: 28px 0 0;
+    border-left: 0;
+    border-top: 1px solid var(--bk-line);
+  }
   .bk-cinema-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 24px 0;
@@ -1786,9 +1987,18 @@
   .bk-actions { justify-content: stretch; }
   .bk-actions .button { flex: 1 1 100%; }
   .bk-hint { flex: 1 1 100%; }
-  .bk-layout { grid-template-columns: minmax(0, 1fr); gap: 40px; }
-  .bk-summary { position: static; padding: 26px 22px; }
-  .bk-summary-cta { display: none !important; }
+  .bk-layout { gap: 32px; }
+  .bk-monolith { min-height: 168px; padding: 26px 20px 0; }
+  .bk-monolith .bk-title,
+  .bk-monolith-display { font-size: 30px; }
+  .bk-monolith-progress { margin-top: 22px; padding-bottom: 14px; }
+  .bk-ribbon { display: none; }
+  .bk-card-grid { grid-template-columns: minmax(0, 1fr); }
+  .bk-slots-split { grid-template-columns: minmax(0, 1fr); }
+  .bk-slots-split .bk-slot-group + .bk-slot-group { margin-top: 26px; padding-left: 0; border-left: 0; }
+  .bk-slots-split .bk-slot-group:first-child:not(:only-child) { padding-right: 0; }
+  .bk-cinema-bar .bk-cinema-address { display: none; }
+  .bk-shell[data-step="1"] .bk-cinema-bar { display: none; }
   .bk-progress-label { font-size: 12px; }
   .bk-fields { grid-template-columns: minmax(0, 1fr); gap: 25px; }
   .bk-pay { width: 100%; min-width: 0; }

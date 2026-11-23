@@ -10,6 +10,9 @@
    label must opt in here. */
 
 /* Labels */
+.bk-ribbon-sub,
+.bk-cinema-step,
+.bk-monolith-kicker,
 .announcement,
 .brand,
 .main-navigation a,
@@ -79,6 +82,8 @@ th {
 }
 
 /* Serif display headings */
+.bk-monolith-display,
+.bk-ribbon-title,
 h1,
 h2,
 .brow-service-name,

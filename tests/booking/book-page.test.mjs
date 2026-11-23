@@ -210,3 +210,25 @@ test('Variant C: main.js wires the ribbon, the hero and the shared action bar', 
   assert.match(main, /function setHero\(step\)/);
   assert.match(main, /ribbon\?\.addEventListener\('click'[\s\S]{0,200}navigateFromProgress/);
 });
+
+test('Variant C: type-case registers the new labels and serif display lines', () => {
+  const typeCase = read('css/type-case.css');
+  const labels = /\/\* Labels \*\/([\s\S]*?)\{\s*text-transform:\s*uppercase/.exec(typeCase)[1].split(/[\s,]+/);
+  for (const name of ['.bk-ribbon-sub', '.bk-cinema-step', '.bk-monolith-kicker']) assert.ok(labels.includes(name), name);
+  const serifs = /\/\* Serif display headings \*\/([\s\S]*?)\{\s*text-transform:\s*uppercase/.exec(typeCase)[1].split(/[\s,]+/);
+  for (const name of ['.bk-monolith-display', '.bk-ribbon-title']) assert.ok(serifs.includes(name), name);
+});
+
+test('Variant C: booking.css lays out the monolith, full-width steps, 2-column services and a mobile bar that keeps Back', () => {
+  const css = read('css/booking.css');
+  assert.match(css, /\.bk-monolith\s*\{[^}]*min-height:\s*276px/);
+  assert.match(css, /\.bk-layout\s*\{[^}]*grid-template-columns:\s*minmax\(0,\s*1fr\)/);
+  assert.doesNotMatch(css, /--bk-summary-width\)/, 'no sidebar column left');
+  assert.match(css, /\.bk-card-grid\s*\{[^}]*grid-template-columns:\s*repeat\(2,\s*minmax\(0,\s*1fr\)\)/);
+  const mobile = [...css.matchAll(/@media \(max-width: 800px\) \{([\s\S]*?)\n\}/g)].map((match) => match[1]).join('\n');
+  assert.match(mobile, /\.bk-ribbon\s*\{[^}]*display:\s*none/);
+  assert.match(mobile, /\.bk-cinema-bar \.bk-cinema-address\s*\{[^}]*display:\s*none/);
+  assert.match(mobile, /\.bk-shell\[data-step="1"\] \.bk-cinema-bar\s*\{[^}]*display:\s*none/);
+  assert.doesNotMatch(mobile, /(^|[,\s])\.bk-actions\.bk-cinema-bar\s*\{[^}]*display:\s*none/);
+  assert.doesNotMatch(mobile, /\[data-action="back"\][^{]*\{[^}]*display:\s*none/);
+});
