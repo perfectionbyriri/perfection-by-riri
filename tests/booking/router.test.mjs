@@ -258,3 +258,24 @@ test('wrangler.jsonc routes /api/* to the Worker and binds KV, limits, e-mail an
     assert.ok(!(secret in config.vars), `${secret} must be a secret, not a var`);
   }
 });
+
+test('wrangler.jsonc preview env: live Setmore, mock payments, no cron or e-mail, production untouched', () => {
+  const raw = fs.readFileSync(path.join(ROOT, 'wrangler.jsonc'), 'utf8');
+  const config = JSON.parse(raw.replace(/^\s*\/\/.*$/gm, ''));
+  const preview = config.env.preview;
+  assert.equal(preview.name, 'perfection-by-riri-preview');
+  assert.equal(preview.workers_dev, true);
+  assert.equal(preview.vars.ENVIRONMENT, 'preview');
+  assert.equal(preview.vars.SETMORE_MOCK_MODE, 'false');
+  assert.equal(preview.vars.PAYMENTS_MOCK_MODE, 'true');
+  assert.equal(preview.vars.SETMORE_PROVIDER_ID, config.vars.SETMORE_PROVIDER_ID);
+  assert.equal(preview.vars.ALLOWED_ORIGINS, 'https://perfection-by-riri-preview.perfection-byriri.workers.dev');
+  assert.deepEqual(preview.kv_namespaces.map((item) => item.binding), ['BOOKING_KV']);
+  assert.equal(preview.triggers, undefined);
+  assert.equal(preview.send_email, undefined);
+  for (const secret of ['SETMORE_REFRESH_TOKEN', 'CUSTOMER_HASH_SECRET', 'SQUARE_ACCESS_TOKEN']) assert.ok(!(secret in preview.vars), secret);
+  // Production stays as it was.
+  assert.equal(config.name, 'perfection-by-riri');
+  assert.equal(config.vars.ENVIRONMENT, 'production');
+  assert.equal(config.vars.PAYMENTS_MOCK_MODE, 'false');
+});

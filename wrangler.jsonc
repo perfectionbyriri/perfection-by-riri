@@ -49,5 +49,39 @@
   ],
   "triggers": {
     "crons": ["*/15 * * * *"]
+  },
+  // Owner-only preview (docs/superpowers/specs/2026-11-23-setmore-live-verification-design.md
+  // Stage 2): real Setmore schedule, mock payments, behind Cloudflare Access.
+  // Deploy: npx wrangler deploy --env preview. Secrets are set on this Worker
+  // only (SETMORE_REFRESH_TOKEN, CUSTOMER_HASH_SECRET). Turnstile uses
+  // Cloudflare's public always-pass test keys.
+  "env": {
+    "preview": {
+      "name": "perfection-by-riri-preview",
+      "workers_dev": true,
+      "vars": {
+        "ENVIRONMENT": "preview",
+        "ALLOWED_ORIGINS": "https://perfection-by-riri-preview.perfection-byriri.workers.dev",
+        "STUDIO_TIMEZONE": "America/Los_Angeles",
+        "SETMORE_MOCK_MODE": "false",
+        "PAYMENTS_MOCK_MODE": "true",
+        "SETMORE_ACCOUNT_ID": "1a47bbdd-c70e-402d-9bcb-1c739d6752ae",
+        "SETMORE_PROVIDER_ID": "b0bfa3b4-b043-4cec-b841-017a716974fd",
+        "SQUARE_ENVIRONMENT": "sandbox",
+        "SQUARE_VERSION": "2026-11-18",
+        "SQUARE_DELAY_DURATION": "PT48H",
+        "DEPOSIT_AMOUNT_CENTS": "5000",
+        "CARD_FEE_BASIS_POINTS": "0",
+        "TURNSTILE_SITE_KEY": "1x00000000000000000000AA",
+        "TURNSTILE_SECRET_KEY": "1x0000000000000000000000000000000AA"
+      },
+      "kv_namespaces": [
+        { "binding": "BOOKING_KV" }
+      ],
+      "ratelimits": [
+        { "name": "RATE_LIMITER_GET", "namespace_id": "1001", "simple": { "limit": 60, "period": 60 } },
+        { "name": "RATE_LIMITER_POST", "namespace_id": "1002", "simple": { "limit": 5, "period": 60 } }
+      ]
+    }
   }
 }
