@@ -35,11 +35,13 @@
   color: var(--bk-ink);
 }
 
-/* Dark island: the photo banners keep a dark overlay, so inside them the
-   tokens go back to light-on-dark values. */
+/* Dark island: the photo banners and the site header stay black, so inside
+   them the tokens go back to light-on-dark values. */
 .bk-monolith,
 .bk-cinema-hero,
+.book-page .header-shell,
 .bk-dark-island {
+  --bk-bg-deep: #080807;
   --bk-ink: #f4efe8;
   --bk-muted: #a69e94;
   --bk-subtle: #8f877c;
@@ -64,11 +66,11 @@
      beat the hero layers (z-index 2) and the sticky bar (40) or they show through. */
   z-index: 50;
   background: var(--bk-bg-deep);
-  border-bottom: 1px solid rgba(38, 38, 32, .12);
+  border-bottom: 1px solid var(--bk-line);
 }
 
 .book-page .site-header { color: var(--bk-ink); }
-.book-page .menu-toggle { border-color: rgba(38, 38, 32, .32); background: transparent; }
+.book-page .menu-toggle { border-color: var(--bk-line-strong); background: transparent; }
 .book-page .menu-toggle span { background: var(--bk-ink); }
 .book-page .nav-dropdown-panel {
   background: var(--bk-bg-deep);
@@ -87,7 +89,7 @@
 @media (max-width: 800px) {
   .book-page .header-shell:has(.main-navigation.is-open) { background: var(--bk-bg-deep); }
   .book-page .header-shell:has(.main-navigation.is-open) .site-header { color: var(--bk-ink); }
-  .book-page .header-shell:has(.main-navigation.is-open) .menu-toggle { border-color: rgba(38, 38, 32, .32); background: transparent; }
+  .book-page .header-shell:has(.main-navigation.is-open) .menu-toggle { border-color: var(--bk-line-strong); background: transparent; }
   .book-page .header-shell:has(.main-navigation.is-open) .menu-toggle span { background: var(--bk-ink); }
   .enhanced .book-page #main-navigation,
   .book-page .main-navigation.is-open { background: var(--bk-bg-deep); border-top-color: var(--bk-line); }

@@ -95,3 +95,9 @@ test('the Services dropdown is light on /book/: labels, descriptions and the ope
   assert.match(css, /\.book-page \.nav-dropdown-desc\s*\{[^}]*color:\s*var\(--bk-muted\)/);
   assert.match(css, /\.book-page \.header-shell\.services-open\s*\{[^}]*background:\s*var\(--bk-bg-deep\)/);
 });
+
+test('the site header is always black on /book/, desktop and phone, open or closed', () => {
+  assert.ok(islandMatch && /\.book-page \.header-shell/.test(islandMatch[1]), 'header-shell is part of the dark island');
+  assert.ok(luminance(island['--bk-bg-deep']) < 0.05, 'island --bk-bg-deep is black');
+  assert.doesNotMatch(css, /rgba\(38, 38, 32, \.32\)/, 'menu toggle border must not be dark ink');
+});
