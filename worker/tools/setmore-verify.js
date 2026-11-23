@@ -141,7 +141,7 @@ export async function runWrite({ client, catalogService, slots, resolver, config
   const tz = config.studioTimezone;
   const result = {
     ok: false, slot: null, slotGoneAfterCreate: false, freshCheckRefused: false, slotFreeAfterDelete: false,
-    markerReturned: false, customerFields: [], bookingFields: [], deleted: false
+    markerReturned: false, customerCreated: false, customerFields: [], bookingFields: [], deleted: false
   };
   const { groups } = await catalogService.getCatalog();
   const service = groups.flatMap((group) => group.services)
@@ -159,7 +159,9 @@ export async function runWrite({ client, catalogService, slots, resolver, config
   result.slot = { date: startParts.date, start: startParts.time };
   log(`test slot: ${startParts.date} ${startParts.time} duration=${service.duration_minutes} service=${service.service_id}`);
 
-  const customerId = await resolver.resolve({ firstName: 'Riri', lastName: 'Verification', email: contact.email, phone: contact.phone });
+  const { customerId, created } = await resolver.resolve({ firstName: 'Riri', lastName: 'Verification', email: contact.email, phone: contact.phone });
+  result.customerCreated = created === true;
+  log(`customer_created=${result.customerCreated}`);
   try {
     result.customerFields = Object.keys(await client.getCustomer(customerId)).sort();
   } catch (error) {
@@ -273,7 +275,9 @@ async function main() {
     }
   } catch (error) {
     // Print the error class only; messages could echo request details.
-    console.error(`Verification failed unexpectedly: ${error?.name || 'Error'}`);
+    // Upstream error codes are Setmore's own short codes (no request data).
+    const code = error?.upstreamCode ? ` (${error.upstreamCode})` : '';
+    console.error(`Verification failed unexpectedly: ${error?.name || 'Error'}${code}`);
     process.exitCode = 1;
   }
 }

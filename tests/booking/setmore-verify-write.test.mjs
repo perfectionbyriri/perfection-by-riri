@@ -50,7 +50,9 @@ function fakeClient({ rereadThrows = false, deleteFails = false, slotStaysAfterC
     async listBookingsByStaff() {
       return state.created ? [{ id: 'booking-secret-id', ...state.created, label: 'pbr-verify', consumer_ids: ['cust-secret'] }] : [];
     },
-    async getCustomer() {
+    async getCustomer(id) {
+      // Live Setmore answers 404 for anything but a real customer id (run 45118009577).
+      if (id !== 'cust-secret') throw Object.assign(new Error('not found'), { name: 'SetmoreNotFound' });
       return { id: 'cust-secret', first_name: 'Riri', last_name: 'Verification', email_addresses: [], phone_numbers: [] };
     }
   };
@@ -64,7 +66,8 @@ function setup(options) {
     async getService(id) { return SERVICES.find((s) => s.service_id === id) ?? null; }
   };
   const slots = createSlotsService({ client, catalog: catalogService, config: CONFIG, now: clock.now });
-  const resolver = { async resolve() { return 'cust-secret'; } };
+  // Same shape as createCustomerResolver().resolve in worker/src/customers.js.
+  const resolver = { async resolve() { return { customerId: 'cust-secret', created: true }; } };
   const lines = [];
   return { clock, client, catalogService, slots, resolver, lines, log: (line) => lines.push(String(line)) };
 }
@@ -122,6 +125,13 @@ test('runWrite fails loudly with the slot time when DELETE fails', async () => {
   assert.match(text, /2026-12-07/);
   assert.match(text, /10:00/);
   assert.ok(!text.includes('booking-secret-id'));
+});
+
+test('runWrite reads the customer by id and logs only whether it was created', async () => {
+  const { result, client, lines } = await run();
+  assert.deepEqual(client.state.created.consumer_ids, ['cust-secret']);
+  assert.equal(result.customerCreated, true);
+  assert.match(lines.join('\n'), /customer_created=true/);
 });
 
 test('runWrite never logs the contact or customer data', async () => {
