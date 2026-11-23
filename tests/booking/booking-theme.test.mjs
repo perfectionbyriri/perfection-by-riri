@@ -115,3 +115,8 @@ test('the Step 1-4 hero is full-bleed: flush under the header, edge to edge, no 
   assert.match(hero, /border:\s*0/);
   assert.match(css, /\.book-page \.header-shell\s*\{[^}]*border-bottom:\s*0/);
 });
+
+test('booking panels use exactly the service-page panel color (--card #efebe7)', () => {
+  assert.equal(page['--bk-surface'].toLowerCase(), '#efebe7');
+  assert.equal(page['--bk-surface-inset'].toLowerCase(), '#efebe7');
+});
