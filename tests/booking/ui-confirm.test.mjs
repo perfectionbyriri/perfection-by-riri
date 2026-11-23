@@ -145,3 +145,30 @@ test('the confirmation view drops the deposit line for a no-deposit booking and 
   assert.doesNotMatch(html, /Deposit paid/);
   assert.match(html, /See you soon, <em>&lt;Anna&gt;\.<\/em>/);
 });
+
+test('renderConfirmation renders the Cinematic Hero Scene with photo fallback, 4-column strip and Suite 918 address', () => {
+  const service = {
+    service_id: 'svc_lash_lift',
+    name: 'Lash lift',
+    duration_minutes: 60,
+    price_cents: 9500,
+    photo: { src: '/images/Lash%20Lift/lash-lift.webp', alt: 'Lash lift result', focal: '50% 40%' }
+  };
+  const html = renderConfirmation({
+    result: result(),
+    service,
+    firstName: 'Anna',
+    email: 'anna@example.com',
+    timeLabel: 'Thursday, November 27 · 1:00 PM'
+  });
+  assert.match(html, /class="bk-cinema-hero bk-cinema-hero--confirm"/);
+  assert.match(html, /src="\/images\/Lash%20Lift\/lash-lift\.webp"/);
+  assert.match(html, /object-position:\s*50% 40%/);
+  assert.match(html, /Personal by design\.<br>Perfection in the details\./);
+  assert.match(html, /class="bk-cinema-grid"/);
+  assert.match(html, /18205 Alderwood Mall Pkwy A, Suite 918/);
+  assert.match(html, /1 hr · \$95\.00/);
+
+  const fallbackHtml = renderConfirmation({ result: result(), firstName: 'Anna', email: 'anna@example.com', timeLabel: 'x' });
+  assert.match(fallbackHtml, /src="\/images\/hero\/hero-lash\.webp"/);
+});

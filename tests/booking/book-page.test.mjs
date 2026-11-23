@@ -132,15 +132,26 @@ test('the sitemap lists /book/', () => {
 });
 
 test('the booking label classes are uppercase labels in type-case.css', () => {
-  const labels = /\/\* Labels \*\/([\s\S]*?)\{\s*text-transform:\s*uppercase/.exec(read('css/type-case.css'))[1];
-  for (const name of ['.bk-eyebrow', '.bk-step-count', '.bk-field-label', '.bk-day-name', '.bk-summary-label']) {
+  const typeCase = read('css/type-case.css');
+  const labels = /\/\* Labels \*\/([\s\S]*?)\{\s*text-transform:\s*uppercase/.exec(typeCase)[1];
+  for (const name of [
+    '.bk-eyebrow', '.bk-step-count', '.bk-field-label', '.bk-day-name', '.bk-summary-label',
+    '.bk-cinema-kicker', '.bk-cinema-caption', '.bk-cinema-col-label', '.bk-cinema-edit', '.bk-cinema-address'
+  ]) {
     assert.ok(labels.split(/[\s,]+/).includes(name), name);
+  }
+  const serifs = /\/\* Serif display headings \*\/([\s\S]*?)\{\s*text-transform:\s*uppercase/.exec(typeCase)[1];
+  for (const name of ['.bk-cinema-title', '.bk-cinema-col-title', '.bk-confirm-service']) {
+    assert.ok(serifs.split(/[\s,]+/).includes(name), name);
   }
 });
 
-test('booking.css adds the error token and keeps square corners without shadows', () => {
+test('booking.css adds the error token, Cinematic Hero Scene rules, and keeps square corners without shadows', () => {
   const css = read('css/booking.css');
   assert.match(css, /--error:\s*#8c2f23/);
+  assert.match(css, /\.bk-cinema-hero\b/);
+  assert.match(css, /\.bk-cinema-grid\b/);
+  assert.match(css, /\.bk-shell\[data-step="5"\]\s+\.bk-head/);
   assert.ok(!/box-shadow\s*:(?!\s*none)/.test(css), 'no shadows');
   for (const match of css.matchAll(/border-radius\s*:\s*([^;}]+)/g)) assert.equal(match[1].trim(), '0', 'square corners');
 });

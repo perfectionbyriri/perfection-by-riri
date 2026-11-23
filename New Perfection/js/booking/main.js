@@ -25,6 +25,8 @@ if (app) {
 
   const api = createApi();
   const elements = {
+    shell: document.querySelector('.bk-shell'),
+    layout: document.querySelector('.bk-layout'),
     step: document.getElementById('bk-step'),
     banner: document.getElementById('bk-banner'),
     status: document.getElementById('bk-status'),
@@ -96,7 +98,13 @@ if (app) {
     el.classList.add('is-updated');
   }
 
+  function setStageStep(step) {
+    elements.shell?.setAttribute('data-step', String(step));
+    elements.layout?.setAttribute('data-step', String(step));
+  }
+
   function updateProgress(step) {
+    setStageStep(step);
     elements.count.textContent = `Step ${step} of 4 — ${STEP_NAMES[step - 1]}`;
     elements.progress.forEach((item, index) => {
       const target = index + 1;
@@ -303,6 +311,11 @@ if (app) {
     const slot = event.target.closest('.bk-slot');
     if (slot) {
       selectSlot(slot.dataset.startAt, slot.textContent);
+      return;
+    }
+    const gotoStep = event.target.closest('[data-goto-step]');
+    if (gotoStep) {
+      navigateFromProgress(gotoStep);
       return;
     }
     const target = event.target.closest('[data-action]');
@@ -599,8 +612,7 @@ if (app) {
     const service = findService(state.get().serviceId);
     state.set({ idempotencyKey: ensureIdempotencyKey(state.get().idempotencyKey) });
     elements.step.innerHTML = '<h2 class="bk-step-title" tabindex="-1">Deposit &amp; confirm</h2>'
-      + renderReview({ service, details: state.get().details, timeLabel: stepTimeLabel() })
-      + '<div class="bk-actions"><button type="button" class="button button-outline" data-action="back">Back</button></div>';
+      + renderReview({ service, details: state.get().details, timeLabel: stepTimeLabel() });
     elements.step.setAttribute('aria-busy', 'false');
     if (focus) focusTitle();
     trackFunnel('booking_begin_checkout', { service_id: service.service_id }, window.gtag);
@@ -671,6 +683,7 @@ if (app) {
     const result = { ...data, service_id: service.service_id };
     const timeLabel = stepTimeLabel();
     state.set({ booking: result, step: 5 });
+    setStageStep(5);
     unmountWidgets();
     hideBanner();
     elements.count.textContent = 'Booking confirmed';
@@ -684,12 +697,12 @@ if (app) {
       item.classList.add('is-done');
     });
     elements.step.innerHTML = renderConfirmation({
-      result, firstName: state.get().details.first_name, email: state.get().details.email,
+      result, service, firstName: state.get().details.first_name, email: state.get().details.email,
       timeLabel, policyText: state.get().catalog?.checkout?.policy_text
     });
     elements.step.setAttribute('aria-busy', 'false');
     animateStep('confirm');
-    const head = document.querySelector('.bk-head');
+    const head = elements.shell ?? document.querySelector('.bk-head');
     if (head && head.getBoundingClientRect().top < 0) {
       head.scrollIntoView({ behavior: prefersReducedMotion() ? 'auto' : 'smooth', block: 'start' });
     }

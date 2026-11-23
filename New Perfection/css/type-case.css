@@ -66,6 +66,11 @@
 .bk-day-name,
 .bk-summary-label,
 .bk-review-label,
+.bk-cinema-kicker,
+.bk-cinema-caption,
+.bk-cinema-col-label,
+.bk-cinema-edit,
+.bk-cinema-address,
 caption,
 figcaption,
 th {
@@ -84,7 +89,10 @@ h2,
 .le-style-link > span:first-child,
 #ll-profile-natural-title,
 #ll-profile-tint-title,
-.svc-pmu h3 {
+.svc-pmu h3,
+.bk-cinema-title,
+.bk-cinema-col-title,
+.bk-confirm-service {
   text-transform: uppercase;
 }
 

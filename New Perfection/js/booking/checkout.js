@@ -138,14 +138,29 @@ export function createSubmitGuard() {
   };
 }
 
+const DEFAULT_HERO_PHOTO = {
+  src: '/images/hero/hero-lash.webp',
+  alt: 'Close-up of a woman with softly closed eyes and long, delicate lash extensions',
+  focal: '78% 42%'
+};
+
+const EDIT_ARROW_SVG = '<svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12 12 4"/><path d="M5.5 4H12v6.5"/></g></svg>';
+
 function row(label, value, className = 'bk-quote-row') {
   return `<div class="${className}"><dt>${label}</dt><dd>${value}</dd></div>`;
 }
 
 export function renderReview({ service, details = {}, timeLabel = '' }) {
   const deposit = service.deposit ?? {};
+  const photo = service.photo && typeof service.photo.src === 'string' && service.photo.src ? service.photo : DEFAULT_HERO_PHOTO;
+  const focal = typeof photo.focal === 'string' && photo.focal ? photo.focal : DEFAULT_HERO_PHOTO.focal;
   const name = `${trimmed(details.first_name)} ${trimmed(details.last_name)}`.trim();
   const who = [name, trimmed(details.email), formatPhone(trimmed(details.phone))].filter(Boolean).join(' · ');
+  const notes = trimmed(details.notes);
+  const priceLine = Number.isFinite(Number(service.price_cents)) && Number(service.price_cents) > 0
+    ? `<p class="bk-cinema-sub">Service price: ${formatMoney(service.price_cents)}</p>`
+    : '';
+
   let quote = '';
   if (deposit.required) {
     const fee = deposit.fee_cents > 0
@@ -156,21 +171,55 @@ export function renderReview({ service, details = {}, timeLabel = '' }) {
       + row('Due today', formatMoney(deposit.total_cents), 'bk-quote-row bk-quote-total')
       + '</dl><p class="bk-fine">Remaining balance is paid at the studio.</p>';
   } else {
-    quote = '<p class="bk-fine">No deposit is needed for this service. You pay at the studio.</p>';
+    quote = '<p class="bk-cinema-price">$0.00</p>'
+      + '<p class="bk-fine">No deposit is needed for this service. You pay at the studio.</p>';
   }
+
   const card = deposit.required
-    ? '<div class="bk-review-block"><h3 class="bk-review-label">Card</h3>'
+    ? '<div class="bk-review-block bk-cinema-card-wrap">'
+      + '<div class="bk-cinema-card-head"><h3 class="bk-review-label">Card</h3><p class="bk-fine bk-secured">Payment secured by Square.</p></div>'
       + '<div class="bk-card-field" id="bk-card"></div>'
       + '<p class="bk-field-error" id="bk-card-error" role="alert" hidden></p></div>'
     : '';
-  return '<form class="bk-form" id="bk-checkout" novalidate>'
-    + '<div class="bk-review-block"><h3 class="bk-review-label">Review</h3>'
-    + `<p class="bk-review-line bk-review-service">${escapeHtml(service.name)} · ${formatDuration(service.duration_minutes)}</p>`
-    + `<p class="bk-review-line">${escapeHtml(timeLabel)} Pacific Time</p>`
-    + `<p class="bk-review-line">${escapeHtml(who)}</p></div>`
-    + quote + card
+
+  return '<form class="bk-form bk-cinema" id="bk-checkout" novalidate>'
+    + '<div class="bk-cinema-hero">'
+    + `<img class="bk-cinema-photo" src="${escapeHtml(photo.src)}" alt="${escapeHtml(photo.alt ?? '')}" style="object-position: ${escapeHtml(focal)}" loading="eager" decoding="async">`
+    + '<div class="bk-cinema-hero-inner">'
+    + '<div class="bk-cinema-hero-lead">'
+    + '<p class="bk-cinema-kicker">Step 04 of 04 &middot; Final review</p>'
+    + '<p class="bk-cinema-title">Your appointment,<br><em>considered.</em></p>'
+    + '</div>'
+    + '<p class="bk-cinema-caption">Personal by design.<br>Perfection in the details.</p>'
+    + '</div></div>'
+    + '<div class="bk-cinema-grid">'
+    + '<div class="bk-cinema-col">'
+    + `<div class="bk-cinema-col-head"><h3 class="bk-cinema-col-label">01 &middot; Treatment</h3><button type="button" class="bk-cinema-edit" data-goto-step="1">Edit ${EDIT_ARROW_SVG}</button></div>`
+    + `<p class="bk-review-line bk-review-service bk-cinema-col-title">${escapeHtml(service.name)} · ${formatDuration(service.duration_minutes)}</p>`
+    + priceLine
+    + '</div>'
+    + '<div class="bk-cinema-col">'
+    + `<div class="bk-cinema-col-head"><h3 class="bk-cinema-col-label">02 &middot; Date &amp; time</h3><button type="button" class="bk-cinema-edit" data-goto-step="2">Edit ${EDIT_ARROW_SVG}</button></div>`
+    + `<p class="bk-review-line bk-cinema-col-title">${escapeHtml(timeLabel)} Pacific Time</p>`
+    + '</div>'
+    + '<div class="bk-cinema-col">'
+    + `<div class="bk-cinema-col-head"><h3 class="bk-cinema-col-label">03 &middot; Guest</h3><button type="button" class="bk-cinema-edit" data-goto-step="3">Edit ${EDIT_ARROW_SVG}</button></div>`
+    + `<p class="bk-review-line">${escapeHtml(who)}</p>`
+    + (notes ? `<p class="bk-cinema-sub">${escapeHtml(notes)}</p>` : '')
+    + '</div>'
+    + '<div class="bk-cinema-col">'
+    + '<div class="bk-cinema-col-head"><h3 class="bk-cinema-col-label">04 &middot; Due today</h3></div>'
+    + quote
+    + '</div>'
+    + '</div>'
+    + `<div class="bk-cinema-payband${deposit.required ? ' has-card' : ''}">`
+    + card
     + '<div class="bk-turnstile" id="bk-turnstile"></div>'
+    + '</div>'
+    + '<div class="bk-actions bk-cinema-bar">'
+    + '<button type="button" class="button button-outline" data-action="back">Back</button>'
+    + '<p class="bk-cinema-address">18205 Alderwood Mall Pkwy A, Suite 918 &middot; Lynnwood, WA 98037</p>'
     + `<button type="submit" class="button button-gold bk-pay" data-label="${escapeHtml(payLabel(deposit))}">${escapeHtml(payLabel(deposit))}</button>`
-    + (deposit.required ? '<p class="bk-fine bk-secured">Payment secured by Square.</p>' : '')
+    + '</div>'
     + '</form>';
 }

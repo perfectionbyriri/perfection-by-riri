@@ -145,6 +145,30 @@ test('the review shows the server quote, the card field and no fee line at 0%', 
   assert.match(withFee, /Card processing fee \(3%\)[\s\S]*\$1\.50/);
 });
 
+test('renderReview renders the Cinematic Hero Scene with photo fallback, 4-column strip, Edit links and unified Back/Pay bar', () => {
+  const withPhoto = {
+    ...shaping,
+    photo: { src: '/images/Brow%20Lamination%20%26%20Tint/brow-lamination-tint.webp', alt: 'Brow lamination', focal: '50% 35%' }
+  };
+  const html = renderReview({ service: withPhoto, details, timeLabel: 'Tuesday, December 15 · 4:30 PM' });
+  assert.match(html, /class="bk-cinema-hero"/);
+  assert.match(html, /src="\/images\/Brow%20Lamination%20%26%20Tint\/brow-lamination-tint\.webp"/);
+  assert.match(html, /object-position:\s*50% 35%/);
+  assert.match(html, /Your appointment,<br><em>considered\.<\/em>/);
+  assert.match(html, /Personal by design\.<br>Perfection in the details\./);
+  assert.match(html, /class="bk-cinema-grid"/);
+  assert.match(html, /data-goto-step="1"/);
+  assert.match(html, /data-goto-step="2"/);
+  assert.match(html, /data-goto-step="3"/);
+  assert.match(html, /\$45\.00/);
+  assert.match(html, /\$0\.00/);
+  assert.match(html, /class="bk-actions bk-cinema-bar"[\s\S]*data-action="back"[\s\S]*class="button button-gold bk-pay"/);
+
+  // Fallback photo when service.photo is omitted
+  const fallbackHtml = renderReview({ service: lashLift, details, timeLabel: 'Thursday, November 27 · 1:00 PM' });
+  assert.match(fallbackHtml, /src="\/images\/hero\/hero-lash\.webp"/);
+});
+
 test('the submit guard ignores a second submit while the first is in flight', () => {
   const guard = createSubmitGuard();
   assert.equal(guard.tryStart(), true);

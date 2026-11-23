@@ -8,10 +8,16 @@
 import { escapeHtml } from './html.js';
 import { formatMoney } from './checkout.js';
 import { POLICY_TEXT } from './render-details.js';
+import { formatDuration } from './render-services.js';
 
 const STUDIO_TZ = 'America/Los_Angeles';
 const ADDRESS = '18205 Alderwood Mall Pkwy A, Suite 918, Lynnwood, WA 98037';
 const DIRECTIONS_URL = 'https://maps.app.goo.gl/2zzJp92GvUAGifaV8?g_st=ic';
+const DEFAULT_HERO_PHOTO = {
+  src: '/images/hero/hero-lash.webp',
+  alt: 'Close-up of a woman with softly closed eyes and long, delicate lash extensions',
+  focal: '78% 42%'
+};
 const FUNNEL_EVENTS = new Set(['booking_view_service', 'booking_select_slot', 'booking_begin_checkout', 'booking_slot_conflict']);
 
 export function trackFunnel(name, params = {}, gtag = globalThis.gtag) {
@@ -130,8 +136,19 @@ export function buildIcs(booking, { now = new Date() } = {}) {
   return `${lines.map(fold).join('\r\n')}\r\n`;
 }
 
-export function renderConfirmation({ result, firstName = '', email = '', timeLabel = '', policyText = POLICY_TEXT }) {
+export function renderConfirmation({ result, service = null, firstName = '', email = '', timeLabel = '', policyText = POLICY_TEXT }) {
   const { booking, deposit } = result;
+  const photo = service?.photo && typeof service.photo.src === 'string' && service.photo.src ? service.photo : DEFAULT_HERO_PHOTO;
+  const focal = typeof photo.focal === 'string' && photo.focal ? photo.focal : DEFAULT_HERO_PHOTO.focal;
+  const metaParts = [];
+  if (Number.isFinite(Number(service?.duration_minutes)) && Number(service.duration_minutes) > 0) {
+    metaParts.push(formatDuration(service.duration_minutes));
+  }
+  if (Number.isFinite(Number(service?.price_cents)) && Number(service.price_cents) > 0) {
+    metaParts.push(formatMoney(service.price_cents));
+  }
+  const serviceMeta = metaParts.length ? `<p class="bk-cinema-sub">${escapeHtml(metaParts.join(' · '))}</p>` : '';
+
   let depositLine = '';
   if (deposit?.status === 'captured') {
     const masked = maskEmail(email);
@@ -140,15 +157,41 @@ export function renderConfirmation({ result, firstName = '', email = '', timeLab
     depositLine = '<p class="bk-confirm-line">Your booking is confirmed. The studio will finalize your deposit shortly.</p>';
   }
   const name = String(firstName).trim();
-  return '<div class="bk-confirm">'
-    + '<p class="bk-eyebrow">You&rsquo;re booked</p>'
+  return '<div class="bk-confirm bk-cinema">'
+    + '<div class="bk-cinema-hero bk-cinema-hero--confirm">'
+    + `<img class="bk-cinema-photo" src="${escapeHtml(photo.src)}" alt="${escapeHtml(photo.alt ?? '')}" style="object-position: ${escapeHtml(focal)}" loading="eager" decoding="async">`
+    + '<div class="bk-cinema-hero-inner">'
+    + '<div class="bk-cinema-hero-lead">'
+    + '<p class="bk-eyebrow">You&rsquo;re booked &middot; Lynnwood, WA</p>'
     + `<h2 class="bk-step-title bk-confirm-title" tabindex="-1">See you soon${name ? `, <em>${escapeHtml(name)}.</em>` : '.'}</h2>`
-    + `<p class="bk-confirm-service">${escapeHtml(booking.service_name)}</p>`
-    + `<p class="bk-confirm-line">${escapeHtml(timeLabel)} Pacific Time</p>`
+    + '<div class="bk-actions bk-confirm-actions">'
+    + '<button type="button" class="button button-gold" data-action="add-to-calendar">Add to calendar</button>'
+    + `<a class="button button-outline" href="${DIRECTIONS_URL}" target="_blank" rel="noopener noreferrer">Directions</a>`
+    + '</div>'
+    + '</div>'
+    + '<p class="bk-cinema-caption">Personal by design.<br>Perfection in the details.</p>'
+    + '</div></div>'
+    + '<div class="bk-cinema-grid">'
+    + '<div class="bk-cinema-col">'
+    + '<div class="bk-cinema-col-head"><h3 class="bk-cinema-col-label">Treatment</h3></div>'
+    + `<p class="bk-confirm-service bk-cinema-col-title">${escapeHtml(booking.service_name)}</p>`
+    + serviceMeta
+    + '</div>'
+    + '<div class="bk-cinema-col">'
+    + '<div class="bk-cinema-col-head"><h3 class="bk-cinema-col-label">Date &amp; time</h3></div>'
+    + `<p class="bk-confirm-line bk-cinema-col-title bk-cinema-col-title--gold">${escapeHtml(timeLabel)} Pacific Time</p>`
+    + '</div>'
+    + '<div class="bk-cinema-col">'
+    + '<div class="bk-cinema-col-head"><h3 class="bk-cinema-col-label">Studio location</h3></div>'
     + `<p class="bk-confirm-line">Perfection by Riri · Lynnwood, WA <a href="${DIRECTIONS_URL}" target="_blank" rel="noopener noreferrer">Directions</a></p>`
+    + `<p class="bk-cinema-sub">${escapeHtml(ADDRESS)}</p>`
+    + '</div>'
+    + '<div class="bk-cinema-col">'
+    + '<div class="bk-cinema-col-head"><h3 class="bk-cinema-col-label">Questions or changes</h3></div>'
     + depositLine
-    + '<div class="bk-actions bk-confirm-actions"><button type="button" class="button button-outline" data-action="add-to-calendar">Add to calendar</button></div>'
     + '<p class="bk-confirm-line">Need to change or cancel? Call <a href="tel:+14258450045">(425) 845 0045</a>.</p>'
-    + `<p class="bk-fine">Booking policy: ${escapeHtml(policyText || POLICY_TEXT)}</p>`
+    + '</div>'
+    + '</div>'
+    + `<p class="bk-fine bk-cinema-policy">Booking policy: ${escapeHtml(policyText || POLICY_TEXT)}</p>`
     + '</div>';
 }
