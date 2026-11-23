@@ -4,7 +4,8 @@
 // 00:00 local (the two boundaries may carry different offsets across DST).
 // Setmore returns starts on a 5-minute grid plus an empty key for the end
 // date; the BFF keeps the seven requested days, removes starts inside the
-// lead time or past the horizon, and keeps only SLOT_STEP_MINUTES boundaries.
+// lead time or past the horizon. Setmore's own slot interval decides which
+// starts exist (owner, 2026-11-23); the BFF does not thin them further.
 // Slots are matched by instant, never by string.
 
 import { BookingError } from './errors.js';
@@ -99,8 +100,7 @@ export function createSlotsService({ client, catalog, config, cache = null, now 
         const instant = parseInstant(item?.start_at);
         if (!instant || instant.getTime() < earliest || seen.has(instant.getTime())) continue;
         const parts = instantToZonedParts(instant, tz);
-        const [hour, minute] = parts.time.split(':').map(Number);
-        if (parts.date !== date || (hour * 60 + minute) % config.slotStepMinutes !== 0) continue;
+        if (parts.date !== date) continue;
         seen.add(instant.getTime());
         slots.push({ instant: instant.getTime(), start_at: formatRfc3339Local(parts.date, parts.time, tz), label: formatSlotLabel(instant, tz) });
       }

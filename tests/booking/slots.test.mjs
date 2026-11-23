@@ -11,7 +11,7 @@ import { createClock, createMemoryCache } from './helpers/fakes.mjs';
 const API = 'https://developer.setmore.com/api/v2';
 const CONFIG = {
   setmoreAccountId: MOCK_ACCOUNT_ID, setmoreProviderId: MOCK_PROVIDER_ID, studioTimezone: 'America/Los_Angeles',
-  bookingHorizonDays: 56, minLeadMinutes: 120, slotStepMinutes: 15, slotsTtlSeconds: 30
+  bookingHorizonDays: 56, minLeadMinutes: 120, slotsTtlSeconds: 30
 };
 const SERVICES = { svc_lash_lift: { service_id: 'svc_lash_lift', duration_minutes: 60 } };
 
@@ -105,11 +105,12 @@ test('rejects a malformed week_start with VALIDATION_FAILED', async () => {
     (err) => err instanceof BookingError && err.code === 'VALIDATION_FAILED');
 });
 
-test('keeps only starts on the 15-minute SLOT_STEP_MINUTES boundary', async () => {
-  const days = { '2026-11-23': ['14:00', '14:05', '14:10', '14:15', '14:20', '14:25', '14:30', '14:35', '14:40', '14:45', '14:50', '14:55'].map((t) => slot('2026-11-23', t)) };
+test('shows every start Setmore returns, on Setmore\'s own interval (owner, 2026-11-23)', async () => {
+  // Live Setmore returned a 100-minute grid in run 45122471180; a 15-minute filter hid 11:40 and 13:20.
+  const days = { '2026-11-23': ['10:00', '11:40', '13:20', '15:00'].map((t) => slot('2026-11-23', t)) };
   const { service } = setup({ client: stubClient(() => days) });
   const week = await service.getWeek({ serviceId: 'svc_lash_lift', weekStart: '2026-11-23' });
-  assert.deepEqual(week.days[0].slots.map((item) => item.label), ['2:00 PM', '2:15 PM', '2:30 PM', '2:45 PM']);
+  assert.deepEqual(week.days[0].slots.map((item) => item.label), ['10:00 AM', '11:40 AM', '1:20 PM', '3:00 PM']);
 });
 
 test('drops the extra end_at date key', async () => {
@@ -159,11 +160,12 @@ test('isSlotAvailable matches 2026-11-27T21:00:00Z to the 1:00 PM PST slot', asy
   assert.equal(result.refreshedWeek.week_start, '2026-11-27');
 });
 
-test('isSlotAvailable refuses a slot inside the lead time or off the step grid', async () => {
+test('isSlotAvailable refuses a slot inside the lead time and accepts any start Setmore returned', async () => {
   const days = { '2026-11-22': [slot('2026-11-22', '13:00')], '2026-11-23': [slot('2026-11-23', '13:05')] };
   const { service } = setup({ client: stubClient(() => days) });
   assert.equal((await service.isSlotAvailable({ serviceId: 'svc_lash_lift', startAt: '2026-11-22T13:00:00-08:00' })).available, false);
-  assert.equal((await service.isSlotAvailable({ serviceId: 'svc_lash_lift', startAt: '2026-11-23T13:05:00-08:00' })).available, false);
+  assert.equal((await service.isSlotAvailable({ serviceId: 'svc_lash_lift', startAt: '2026-11-23T13:05:00-08:00' })).available, true);
+  assert.equal((await service.isSlotAvailable({ serviceId: 'svc_lash_lift', startAt: '2026-11-23T13:10:00-08:00' })).available, false);
 });
 
 test('isSlotAvailable rejects a malformed start_at with VALIDATION_FAILED', async () => {

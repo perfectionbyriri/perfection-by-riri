@@ -6,7 +6,7 @@ import { createClock } from './helpers/fakes.mjs';
 
 const CONFIG = {
   studioTimezone: 'America/Los_Angeles', setmoreAccountId: 'acct-1', setmoreProviderId: 'prov-1',
-  bookingHorizonDays: 56, minLeadMinutes: 120, slotStepMinutes: 15, slotsTtlSeconds: 30
+  bookingHorizonDays: 56, minLeadMinutes: 120, slotsTtlSeconds: 30
 };
 const CONTACT = { email: 'owner-test@example.com', phone: '+14255550123' };
 const SERVICES = [

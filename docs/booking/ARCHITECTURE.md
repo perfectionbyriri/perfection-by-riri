@@ -159,7 +159,7 @@ BFF rules:
 | Horizon | `BOOKING_HORIZON_DAYS` (default 56). Windows beyond it return 400 `OUT_OF_RANGE`. |
 | Lead time | `MIN_LEAD_MINUTES` (default 120). Slots earlier than now + lead are removed. |
 | `slot_limit` | Sent as 100 with `double_booking=false`, but **not relied on**: in probe run 44990258119, `slot_limit=5` still returned 7 slots in one day and 219 in one week, so its meaning is unclear. `may_have_more` is always `false` unless a future check shows a real cap. |
-| Slot step | Setmore returns starts on a **5-minute grid** (14:00, 14:05, 14:10 …). The BFF keeps only starts on a `SLOT_STEP_MINUTES` boundary (default 15, owner may change) before returning them. |
+| Slot step | **Setmore's own interval** (owner decision 2026-11-23). The BFF shows every start Setmore returns. On 2026-11-22 Setmore returned a 5-minute grid; on 2026-11-23 it returned a 100-minute grid (10:00, 11:40, 13:20, 15:00; run [45122471180](https://github.com/perfectionbyriri/perfection-by-riri/actions/runs/45122471180)), and the former `SLOT_STEP_MINUTES=15` filter hid 11:40 and 13:20. The owner sets the interval in Setmore; `SLOT_STEP_MINUTES` was removed. |
 | Window keys | Setmore also returns the `end_at` date as an (empty) key. The BFF keeps only `week_start` … `week_start + 6`. |
 | Cache | `SLOTS_TTL_SECONDS` (default 30), keyed by `service_id + week_start`. The fresh check before booking **bypasses** the cache (§8). A successful booking purges that week's key in the local colo. |
 
@@ -517,7 +517,6 @@ Secrets are set with `wrangler secret put` in Cloudflare. Plain vars go in `wran
 | `SETMORE_REFRESH_TOKEN` | **secret** | — | Permanent refresh token |
 | `SETMORE_ACCOUNT_ID` | var | `1a47bbdd-c70e-402d-9bcb-1c739d6752ae` | `account_id` for slots and bookings (verified V1) |
 | `SETMORE_PROVIDER_ID` | var | `b0bfa3b4-b043-4cec-b841-017a716974fd` | The only provider of all 44 services (verified V2b) |
-| `SLOT_STEP_MINUTES` | var | `15` | Keep slot starts on this boundary (Setmore returns a 5-minute grid) |
 | `TOKEN_REFRESH_MARGIN_SECONDS` | var | `60` | Token margin |
 | `CATALOG_TTL_SECONDS` | var | `600` | Catalog cache |
 | `SLOTS_TTL_SECONDS` | var | `30` | Slot cache |
@@ -618,7 +617,7 @@ Owner-approved 2026-11-22 (second reply): `MIN_LEAD_MINUTES=120`, `BOOKING_HORIZ
 
 Owner decision 2026-11-22 (after the backend, Tasks 2–13): do **not** merge into `main` yet. Merging deploys through Workers Builds (`npx wrangler deploy` on `main`). The UI tasks continue on branch `claude/dazzling-shannon-7jkxc1`.
 
-Calls I made (the owner can override): `SLOT_STEP_MINUTES=15`, mock slots on the real 5-minute grid, catalog TTL 10 min, slots TTL 30 s, customer scan cap 2,000, 15-minute reconciliation cron.
+Calls I made (the owner can override): ~~`SLOT_STEP_MINUTES=15`~~ (removed 2026-11-23, Setmore's interval decides), mock slots on the real 5-minute grid, catalog TTL 10 min, slots TTL 30 s, customer scan cap 2,000, 15-minute reconciliation cron.
 
 ---
 

@@ -101,7 +101,7 @@ test('happy path: authorize → customer → re-check → booking → complete �
 
 test('slot gone at first check: 409 SLOT_TAKEN with refreshed_week, no authorize call', async () => {
   const { service, payments, record } = setup();
-  const err = await rejectsWith(service.create({ ...RAW, start_at: '2026-11-23T13:10:00-08:00' }), 'SLOT_TAKEN');
+  const err = await rejectsWith(service.create({ ...RAW, start_at: '2026-11-23T17:30:00-08:00' }), 'SLOT_TAKEN');
   assert.equal(err.extra.refreshed_week.week_start, '2026-11-23');
   assert.ok(err.extra.refreshed_week.days[0].slots.length > 0);
   assert.deepEqual(methods(payments), []);
@@ -266,7 +266,7 @@ test('same idempotency key after success → 200 with the stored body, no new ca
 
 test('a failed attempt may be retried with the same key', async () => {
   const { service } = setup();
-  await rejectsWith(service.create({ ...RAW, start_at: '2026-11-23T13:10:00-08:00' }), 'SLOT_TAKEN');
+  await rejectsWith(service.create({ ...RAW, start_at: '2026-11-23T17:30:00-08:00' }), 'SLOT_TAKEN');
   assert.equal((await service.create(RAW)).status, 201);
 });
 

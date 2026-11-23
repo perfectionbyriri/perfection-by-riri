@@ -20,7 +20,7 @@ test('defaults follow the approved architecture', () => {
   assert.equal(config.squareDelayDuration, 'PT48H');
   assert.equal(config.minLeadMinutes, 120);
   assert.equal(config.bookingHorizonDays, 56);
-  assert.equal(config.slotStepMinutes, 15);
+  assert.equal('slotStepMinutes' in config, false);
   assert.equal(config.tokenRefreshMarginSeconds, 60);
   assert.equal(config.catalogTtlSeconds, 600);
   assert.equal(config.slotsTtlSeconds, 30);
@@ -31,8 +31,8 @@ test('defaults follow the approved architecture', () => {
 });
 
 test('numbers and lists are parsed from strings', () => {
-  const config = loadConfig({ SLOT_STEP_MINUTES: '30', ALLOWED_ORIGINS: 'https://a.example, http://localhost:8787' });
-  assert.equal(config.slotStepMinutes, 30);
+  const config = loadConfig({ MIN_LEAD_MINUTES: '90', ALLOWED_ORIGINS: 'https://a.example, http://localhost:8787' });
+  assert.equal(config.minLeadMinutes, 90);
   assert.deepEqual(config.allowedOrigins, ['https://a.example', 'http://localhost:8787']);
 });
 
@@ -62,7 +62,6 @@ test('invalid numbers and booleans are misconfigured', () => {
   misconfigured(() => loadConfig({ MIN_LEAD_MINUTES: '-5' }));
   misconfigured(() => loadConfig({ SLOTS_TTL_SECONDS: 'soon' }));
   misconfigured(() => loadConfig({ SETMORE_MOCK_MODE: 'maybe' }));
-  misconfigured(() => loadConfig({ SLOT_STEP_MINUTES: '7' }));
 });
 
 test('production requires the customer hash and Turnstile secrets', () => {

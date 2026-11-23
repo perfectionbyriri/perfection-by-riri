@@ -6,7 +6,6 @@
 
 import { BookingError, STUDIO_PHONE } from './errors.js';
 
-const ALLOWED_SLOT_STEPS = new Set([5, 10, 15, 20, 30, 60]);
 
 function misconfigured(name) {
   return new BookingError('MISCONFIGURED', { message: `Invalid or missing configuration: ${name}` });
@@ -66,7 +65,6 @@ export function loadConfig(env = {}) {
     setmoreCooldownSeconds: int(env, 'SETMORE_COOLDOWN_SECONDS', 10),
     bookingHorizonDays: int(env, 'BOOKING_HORIZON_DAYS', 56),
     minLeadMinutes: int(env, 'MIN_LEAD_MINUTES', 120),
-    slotStepMinutes: int(env, 'SLOT_STEP_MINUTES', 15),
     customerScanMaxPages: int(env, 'CUSTOMER_SCAN_MAX_PAGES', 20),
     customerHashSecret: text(env, 'CUSTOMER_HASH_SECRET'),
 
@@ -88,7 +86,6 @@ export function loadConfig(env = {}) {
     alertFromEmail: text(env, 'ALERT_FROM_EMAIL', 'booking-alerts@perfectionbyriri.com')
   };
 
-  if (!ALLOWED_SLOT_STEPS.has(config.slotStepMinutes)) throw misconfigured('SLOT_STEP_MINUTES');
   if (!['sandbox', 'production'].includes(config.squareEnvironment)) throw misconfigured('SQUARE_ENVIRONMENT');
 
   const production = config.environment === 'production';
