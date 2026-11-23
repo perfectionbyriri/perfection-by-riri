@@ -312,18 +312,32 @@ Payment forms attract card-testing bots. Protections:
 
 Setmore v2 documents **no search** by email, phone or name, only `GET /customers` (cursor, `limit` 1–100) and `GET /customers/{id}`.
 
+**Measured account size and latency (2026-11-23):** read-only verification run [45129424879](https://github.com/perfectionbyriri/perfection-by-riri/actions/runs/45129424879) (`setmore-verify.yml`, `mode=read`, commit `0217ac5`) paged through `GET /customers?limit=100` and recorded `customers_pages=2 customers_total=178 avg_page_ms=2172 max_page_ms=2404`. Fetching and indexing all 178 contacts sequentially inside `POST /api/booking/appointments` on a cold KV took **59 s wall time** (120 ms CPU) on the preview Worker because a miss paid ~4.3 s of Setmore pagination plus sequential KV `get`/`put` calls for every contact's email and phone keys on the request path.
+
 Index (owner decision: no raw PII in KV):
 
 - Normalise: email is trimmed and lower-cased; phone becomes E.164 `+1XXXXXXXXXX`.
 - Key = `cust:e:` + hex(**HMAC-SHA-256**(`CUSTOMER_HASH_SECRET`, email)), and `cust:p:` + the same for the phone. HMAC with a server secret is the standard form of the "salted SHA-256" the owner asked for: the hash cannot be brute-forced without the secret.
 - Value = Setmore customer id. No TTL. Entries are replaced when stale.
+- Sync state key = `cust:sync`: `{ cursor, pass_started_at, complete_at, pages_this_pass }`.
 
-Resolve algorithm:
+Background sync (`syncCustomerIndex`, cron `*/15 * * * *`, owner-approved option A on 2026-11-23):
 
-1. Look up the email key, then the phone key. If found, `GET /customers/{id}`. A 404 means stale: delete the key and continue.
-2. On a miss, run a **bounded scan**: page `GET /customers?limit=100` for at most `CUSTOMER_SCAN_MAX_PAGES` (default 20, so 2,000 contacts). Hash every contact's emails and phones and write them to the index as you go, so the first scan warms the index for everyone. Stop at the first match.
-3. Still no match: `POST /customers` with `first_name`, `last_name`, `email_addresses[{value, primary:true}]`, `phone_numbers[{value, primary:true}]` (required fields to confirm in V2). Then write both index keys.
-4. A 429 during the scan stops the scan and creates the customer. This is a rare duplicate, which is accepted over failing the booking, and it is logged as `customer_scan_aborted`.
+1. Every 15 minutes, `scheduled()` runs `reconcileStaleAuthorizations` and `syncCustomerIndex` in separate `try/catch` blocks so a failure in one never skips the other.
+2. `syncCustomerIndex` resumes from `cust:sync.cursor` and pages `GET /customers?limit=100` (`cooldown: false`) for at most `CUSTOMER_SYNC_PAGES_PER_RUN` pages (default `10`, enough for 1,000 contacts per run vs. the 2 pages / 178 contacts measured on 2026-11-23).
+3. For every contact it hashes email and phone values and writes changed keys via `indexContact`.
+4. When `cursor` ends (`null`), it records `complete_at = now`, clears `cursor = null`, and starts a fresh pass from page 1 on the next cron run (keeping the previous `complete_at` set while the next pass is in progress). It logs `customer_sync_finished` with `{ pages, contacts, complete }`.
+5. On `SetmoreBusy` (429) or any upstream error, it stops immediately, persists the current `cursor` in `cust:sync`, and logs `customer_sync_paused` with counts only (`{ pages, contacts, pages_this_pass }`, never PII or cursors).
+
+Request-path resolve algorithm (`resolve()`):
+
+1. Look up the email key, then the phone key. If found, verify with `GET /customers/{id}`. A 404 means stale: delete the key and continue.
+2. On a KV miss:
+   - **After at least one completed background sync pass** (`cust:sync.complete_at` is set): skip scanning completely (zero `listCustomersPage` calls) and go **straight to `POST /customers`**.
+   - **Before the first completed sync pass** (`cust:sync.complete_at` is null): run a small fallback scan of `GET /customers?limit=100` for at most `CUSTOMER_SCAN_MAX_PAGES` pages (default `3`, reduced from `20`) so the first minutes after a fresh deploy do not create mass duplicates. A 429 during this fallback scan logs `customer_scan_aborted` and proceeds to create.
+3. Create the customer via `POST /customers` with `first_name`, `last_name`, `email_addresses[{value, primary:true}]`, `phone_numbers[{value, primary:true}]`, then write both index keys.
+
+**Trade-off (confirmed with the owner 2026-11-23):** a customer added in Setmore by hand less than ~15 minutes earlier (after the last cron sync pass) who books online before the next cron run will miss in KV and be created again as a duplicate.
 
 Match priority: email first, then phone. If the email matches customer X and the phone matches customer Y, use X and log `customer_identity_conflict` (no PII in the log).
 
@@ -525,7 +539,8 @@ Secrets are set with `wrangler secret put` in Cloudflare. Plain vars go in `wran
 | `SETMORE_COOLDOWN_SECONDS` | var | `10` | After a final 429 |
 | `BOOKING_HORIZON_DAYS` | var | `56` | Booking horizon |
 | `MIN_LEAD_MINUTES` | var | `120` | Earliest bookable slot |
-| `CUSTOMER_SCAN_MAX_PAGES` | var | `20` | Bounded customer scan |
+| `CUSTOMER_SCAN_MAX_PAGES` | var | `3` | Fallback customer scan before the first completed sync pass (§9) |
+| `CUSTOMER_SYNC_PAGES_PER_RUN` | var | `10` | Max `GET /customers?limit=100` pages indexed per 15-minute cron run (§9) |
 | `CUSTOMER_HASH_SECRET` | **secret** | — | HMAC key for the customer index |
 | `PAYMENTS_MOCK_MODE` | var | `true` (dev) | Mock Square |
 | `PAYMENTS_MOCK_SCENARIO` | var | `approve` | Mock Square scenario |
@@ -544,13 +559,13 @@ Secrets are set with `wrangler secret put` in Cloudflare. Plain vars go in `wran
 | `RATE_LIMITER` | rate-limit binding | — | Per-IP limits |
 | `ALERT_EMAIL` | send_email binding | — | Salon alerts |
 
-`wrangler.jsonc` changes: `"main": "worker/src/index.js"`, `assets.run_worker_first: ["/api/*"]`, `kv_namespaces`, `ratelimits`, `send_email`, `vars`, `triggers.crons: ["*/15 * * * *"]` (§8.4). `assets.directory` stays `./New Perfection`.
+`wrangler.jsonc` changes: `"main": "worker/src/index.js"`, `assets.run_worker_first: ["/api/*"]`, `kv_namespaces`, `ratelimits`, `send_email`, `vars`, `triggers.crons: ["*/15 * * * *"]` (§8.4, §9). `assets.directory` stays `./New Perfection`.
 
 ---
 
 ### 15.1 Preview Worker (2026-11-23)
 
-- `wrangler.jsonc` → `env.preview`: Worker `perfection-by-riri-preview`, `https://perfection-by-riri-preview.perfection-byriri.workers.dev`, live Setmore (`SETMORE_MOCK_MODE=false`), mock payments (`PAYMENTS_MOCK_MODE=true`), Turnstile public test keys, own KV, cron disabled (`triggers.crons: []`, top-level triggers are inherited), no `send_email` (alerts log `alert_not_configured`).
+- `wrangler.jsonc` → `env.preview`: Worker `perfection-by-riri-preview`, `https://perfection-by-riri-preview.perfection-byriri.workers.dev`, live Setmore (`SETMORE_MOCK_MODE=false`), mock payments (`PAYMENTS_MOCK_MODE=true`), Turnstile public test keys, own KV, 15-minute cron enabled (`triggers.crons: ["*/15 * * * *"]` to warm the customer index in `BOOKING_KV` via `syncCustomerIndex`; reconcile also runs against live Setmore reads and mock payments), no `send_email` (alerts log `alert_not_configured`).
 - Deployed by Cloudflare Workers Builds from branch `claude/dazzling-shannon-7jkxc1` with `npx wrangler deploy --env preview` (the session proxy rewrites `Authorization`, so asset uploads cannot run from a session).
 - Secrets on the preview Worker only: `SETMORE_REFRESH_TOKEN` (owner), `CUSTOMER_HASH_SECRET` (generated by the session, never printed).
 - Cloudflare Access, scope **All traffic**, policy "Cloudflare account members": an anonymous request to `/book/` returns 302 to `perfection-byriri.cloudflareaccess.com` (checked 2026-11-23). Bookings made here are real Setmore bookings without a deposit; delete them in Setmore after testing.

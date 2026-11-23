@@ -25,14 +25,22 @@ test('defaults follow the approved architecture', () => {
   assert.equal(config.catalogTtlSeconds, 600);
   assert.equal(config.slotsTtlSeconds, 30);
   assert.equal(config.setmoreCooldownSeconds, 10);
-  assert.equal(config.customerScanMaxPages, 20);
+  assert.equal(config.customerScanMaxPages, 3);
+  assert.equal(config.customerSyncPagesPerRun, 10);
   assert.deepEqual(config.allowedOrigins, ['https://perfectionbyriri.com']);
   assert.equal(config.studioPhone, '+14258450045');
 });
 
 test('numbers and lists are parsed from strings', () => {
-  const config = loadConfig({ MIN_LEAD_MINUTES: '90', ALLOWED_ORIGINS: 'https://a.example, http://localhost:8787' });
+  const config = loadConfig({
+    MIN_LEAD_MINUTES: '90',
+    CUSTOMER_SCAN_MAX_PAGES: '5',
+    CUSTOMER_SYNC_PAGES_PER_RUN: '12',
+    ALLOWED_ORIGINS: 'https://a.example, http://localhost:8787'
+  });
   assert.equal(config.minLeadMinutes, 90);
+  assert.equal(config.customerScanMaxPages, 5);
+  assert.equal(config.customerSyncPagesPerRun, 12);
   assert.deepEqual(config.allowedOrigins, ['https://a.example', 'http://localhost:8787']);
 });
 

@@ -1,10 +1,18 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { createCustomerResolver, hmacKey, normalizeEmail, normalizePhoneUS } from '../../worker/src/customers.js';
+import {
+  CUSTOMER_SYNC_KEY,
+  createCustomerResolver,
+  hmacKey,
+  indexContact,
+  normalizeEmail,
+  normalizePhoneUS,
+  syncCustomerIndex
+} from '../../worker/src/customers.js';
 import { createSetmoreClient } from '../../worker/src/setmore/client.js';
 import { createTokenManager } from '../../worker/src/setmore/token-manager.js';
 import { createMockSetmoreFetch, createMockState } from '../../worker/src/setmore/mock.js';
-import { SetmoreUnavailable } from '../../worker/src/errors.js';
+import { SetmoreBusy, SetmoreUnavailable } from '../../worker/src/errors.js';
 import { createClock, createMemoryKV } from './helpers/fakes.mjs';
 
 const API = 'https://developer.setmore.com/api/v2';
@@ -173,3 +181,200 @@ test('different secret produces different keys', async () => {
   assert.notEqual(await hmacKey(SECRET, 'e', 'anna@example.com'), await hmacKey('another-secret', 'e', 'anna@example.com'));
   assert.notEqual(await hmacKey(SECRET, 'e', 'anna@example.com'), await hmacKey(SECRET, 'p', 'anna@example.com'));
 });
+
+test('indexContact hashes email and phone and writes keys only when changed', async () => {
+  const kv = createMemoryKV();
+  const contact = {
+    id: 'cus_1',
+    email_addresses: [{ value: 'Anna@Example.com' }],
+    phone_numbers: [{ value: '(425) 845-0045' }]
+  };
+  const keys = await indexContact(kv, SECRET, contact);
+  assert.equal(keys.email.length, 1);
+  assert.equal(keys.phone.length, 1);
+  assert.equal(await kv.get(keys.email[0]), 'cus_1');
+  assert.equal(await kv.get(keys.phone[0]), 'cus_1');
+});
+
+test('syncCustomerIndex stops after pagesPerRun, writes keys for every contact, and resumes from the stored cursor', async () => {
+  const kv = createMemoryKV();
+  const clock = createClock('2026-11-23T01:00:00Z');
+  const pages = {
+    start: {
+      items: [{ id: 'c1', email_addresses: [{ value: 'one@example.com' }], phone_numbers: [{ value: '4255550101' }] }],
+      cursor: 'cur-2'
+    },
+    'cur-2': {
+      items: [{ id: 'c2', email_addresses: [{ value: 'two@example.com' }], phone_numbers: [{ value: '4255550102' }] }],
+      cursor: 'cur-3'
+    },
+    'cur-3': {
+      items: [{ id: 'c3', email_addresses: [{ value: 'three@example.com' }], phone_numbers: [] }],
+      cursor: null
+    }
+  };
+  const seenCalls = [];
+  const client = {
+    async listCustomersPage(cursor, limit, options) {
+      seenCalls.push({ cursor: cursor ?? null, limit, options });
+      return pages[cursor ?? 'start'];
+    }
+  };
+  const events = [];
+  const log = (event, fields) => events.push({ event, ...fields });
+
+  const run1 = await syncCustomerIndex({ client, kv, secret: SECRET, pagesPerRun: 2, now: clock.now, log });
+  assert.deepEqual(run1, { pages: 2, contacts: 2, complete: false });
+  assert.equal(seenCalls.length, 2);
+  assert.deepEqual(seenCalls[0], { cursor: null, limit: 100, options: { cooldown: false } });
+  assert.deepEqual(seenCalls[1], { cursor: 'cur-2', limit: 100, options: { cooldown: false } });
+  assert.deepEqual(await kv.get(CUSTOMER_SYNC_KEY, 'json'), {
+    cursor: 'cur-3',
+    pass_started_at: '2026-11-23T01:00:00.000Z',
+    complete_at: null,
+    pages_this_pass: 2
+  });
+  assert.equal(await kv.get(await hmacKey(SECRET, 'e', 'one@example.com')), 'c1');
+  assert.equal(await kv.get(await hmacKey(SECRET, 'p', '+14255550102')), 'c2');
+  assert.equal(await kv.get(await hmacKey(SECRET, 'e', 'three@example.com')), null);
+
+  clock.advance(15 * 60 * 1000);
+  const run2 = await syncCustomerIndex({ client, kv, secret: SECRET, pagesPerRun: 2, now: clock.now, log });
+  assert.deepEqual(run2, { pages: 1, contacts: 1, complete: true });
+  assert.equal(seenCalls.length, 3);
+  assert.equal(seenCalls[2].cursor, 'cur-3');
+  assert.deepEqual(await kv.get(CUSTOMER_SYNC_KEY, 'json'), {
+    cursor: null,
+    pass_started_at: '2026-11-23T01:00:00.000Z',
+    complete_at: '2026-11-23T01:15:00.000Z',
+    pages_this_pass: 3
+  });
+  assert.equal(await kv.get(await hmacKey(SECRET, 'e', 'three@example.com')), 'c3');
+
+  // Next run restarts a new pass from cursor null while preserving complete_at until the new pass completes.
+  clock.advance(15 * 60 * 1000);
+  const run3 = await syncCustomerIndex({ client, kv, secret: SECRET, pagesPerRun: 1, now: clock.now, log });
+  assert.deepEqual(run3, { pages: 1, contacts: 1, complete: false });
+  assert.equal(seenCalls[3].cursor, null);
+  assert.deepEqual(await kv.get(CUSTOMER_SYNC_KEY, 'json'), {
+    cursor: 'cur-2',
+    pass_started_at: '2026-11-23T01:30:00.000Z',
+    complete_at: '2026-11-23T01:15:00.000Z',
+    pages_this_pass: 1
+  });
+});
+
+test('syncCustomerIndex on 429 (SetmoreBusy) stops, keeps the cursor, and logs customer_sync_paused with no PII', async () => {
+  const kv = createMemoryKV();
+  const clock = createClock('2026-11-23T02:00:00Z');
+  let callCount = 0;
+  const client = {
+    async listCustomersPage(cursor) {
+      callCount += 1;
+      if (callCount === 1) {
+        assert.equal(cursor, undefined);
+        return {
+          items: [{ id: 'c-secret-id', first_name: 'Anna', email_addresses: [{ value: 'anna@example.com' }] }],
+          cursor: 'cur-keep'
+        };
+      }
+      throw new SetmoreBusy(10);
+    }
+  };
+  const events = [];
+  const result = await syncCustomerIndex({
+    client,
+    kv,
+    secret: SECRET,
+    pagesPerRun: 5,
+    now: clock.now,
+    log: (event, fields) => events.push({ event, ...fields })
+  });
+  assert.deepEqual(result, { pages: 1, contacts: 1, complete: false });
+  assert.deepEqual(await kv.get(CUSTOMER_SYNC_KEY, 'json'), {
+    cursor: 'cur-keep',
+    pass_started_at: '2026-11-23T02:00:00.000Z',
+    complete_at: null,
+    pages_this_pass: 1
+  });
+  assert.equal(events.length, 1);
+  assert.equal(events[0].event, 'customer_sync_paused');
+  assert.equal(events[0].pages, 1);
+  assert.equal(events[0].contacts, 1);
+  const serialized = JSON.stringify(events);
+  for (const secret of ['anna@example.com', 'Anna', 'c-secret-id', 'cur-keep']) {
+    assert.ok(!serialized.includes(secret), `leaked ${secret}`);
+  }
+});
+
+test('resolve() after a completed sync pass creates on a KV miss without calling listCustomersPage', async () => {
+  const kv = createMemoryKV();
+  await kv.put(CUSTOMER_SYNC_KEY, JSON.stringify({
+    cursor: null,
+    pass_started_at: '2026-11-23T01:00:00.000Z',
+    complete_at: '2026-11-23T01:00:05.000Z',
+    pages_this_pass: 2
+  }));
+  let listCalls = 0;
+  let createdPayload = null;
+  const client = {
+    async getCustomer() { throw new Error('should not call getCustomer on miss'); },
+    async listCustomersPage() { listCalls += 1; return { items: [], cursor: null }; },
+    async createCustomer(payload) { createdPayload = payload; return { id: 'cus_new' }; }
+  };
+  const resolver = createCustomerResolver({ client, kv, secret: SECRET });
+  const result = await resolver.resolve(ANNA);
+  assert.deepEqual(result, { customerId: 'cus_new', created: true });
+  assert.equal(listCalls, 0);
+  assert.equal(createdPayload.first_name, 'Anna');
+  assert.equal(await kv.get(await hmacKey(SECRET, 'e', 'anna@example.com')), 'cus_new');
+  assert.equal(await kv.get(await hmacKey(SECRET, 'p', '+14258450045')), 'cus_new');
+});
+
+test('resolve() before any completed pass caps the fallback scan at default maxPages (3)', async () => {
+  const kv = createMemoryKV();
+  await kv.put(CUSTOMER_SYNC_KEY, JSON.stringify({
+    cursor: 'cur-2',
+    pass_started_at: '2026-11-23T01:00:00.000Z',
+    complete_at: null,
+    pages_this_pass: 1
+  }));
+  let listCalls = 0;
+  const client = {
+    async getCustomer() { throw new Error('unexpected'); },
+    async listCustomersPage() {
+      listCalls += 1;
+      return { items: [], cursor: `cur-${listCalls + 1}` };
+    },
+    async createCustomer() { return { id: 'cus_after_fallback' }; }
+  };
+  const resolver = createCustomerResolver({ client, kv, secret: SECRET });
+  const result = await resolver.resolve(ANNA);
+  assert.deepEqual(result, { customerId: 'cus_after_fallback', created: true });
+  assert.equal(listCalls, 3);
+});
+
+test('resolve() after a completed pass still verifies a hit with GET /customers/{id} and drops stale keys on 404', async () => {
+  const { resolver, client, kv, count } = setup();
+  const [liveId] = await seed(client, 1);
+  await kv.put(CUSTOMER_SYNC_KEY, JSON.stringify({
+    cursor: null,
+    pass_started_at: '2026-11-23T01:00:00.000Z',
+    complete_at: '2026-11-23T01:00:05.000Z',
+    pages_this_pass: 2
+  }));
+  const emailKey = await hmacKey(SECRET, 'e', 'anna@example.com');
+  await kv.put(emailKey, liveId);
+  const hit = await resolver.resolve(ANNA);
+  assert.deepEqual(hit, { customerId: liveId, created: false });
+  assert.equal(count('GET', '/customers'), 0);
+
+  // Now point the key to a deleted customer id: 404 drops the stale key and creates without scanning.
+  await kv.put(emailKey, 'cus_deleted');
+  await kv.delete(await hmacKey(SECRET, 'p', '+14258450045'));
+  const missAfter404 = await resolver.resolve(ANNA);
+  assert.equal(missAfter404.created, true);
+  assert.equal(count('GET', '/customers'), 0);
+  assert.equal(await kv.get(emailKey), missAfter404.customerId);
+});
+

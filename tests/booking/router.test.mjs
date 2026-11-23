@@ -209,11 +209,36 @@ test('the X-Mock-Scenario header is ignored when mock is off', async () => {
   assert.ok(seen.length > 0 && seen.every((value) => value === null), 'the header is never forwarded upstream');
 });
 
-test('scheduled calls reconcile', async () => {
+test('scheduled calls reconcile and syncs the customer index', async () => {
   const { app, kv } = setup();
   await kv.put('idem:stale', JSON.stringify({ state: 'started', payment_id: null, updated_at: '2026-11-22T19:00:00.000Z', alerted: [] }));
   await app.scheduled({ cron: '*/15 * * * *' });
   assert.equal((await kv.get('idem:stale', 'json')).state, 'failed');
+  const syncState = await kv.get('cust:sync', 'json');
+  assert.ok(syncState?.complete_at, 'customer sync completed');
+});
+
+test('scheduled runs customer sync even when reconcile throws', async () => {
+  const clock = createClock('2026-11-22T20:00:00Z');
+  const baseKv = createMemoryKV();
+  const kv = {
+    ...baseKv,
+    async list(opts) {
+      if (opts?.prefix === 'idem:') throw new Error('kv list failed');
+      return baseKv.list(opts);
+    }
+  };
+  const app = buildApp(MOCK_ENV, {
+    kv,
+    cache: createMemoryCache(clock),
+    now: clock.now,
+    fetch: async () => { throw new Error('no network in tests'); },
+    sendEmail: async () => {},
+    sleep: async () => {}
+  });
+  await app.scheduled({ cron: '*/15 * * * *' });
+  const syncState = await baseKv.get('cust:sync', 'json');
+  assert.ok(syncState?.complete_at, 'customer sync still ran after reconcile error');
 });
 
 test('the entry module exports only the default handler (workerd rejects other value exports)', () => {
@@ -259,7 +284,7 @@ test('wrangler.jsonc routes /api/* to the Worker and binds KV, limits, e-mail an
   }
 });
 
-test('wrangler.jsonc preview env: live Setmore, mock payments, no cron or e-mail, production untouched', () => {
+test('wrangler.jsonc preview env: live Setmore, mock payments, 15-min cron, no e-mail, production untouched', () => {
   const raw = fs.readFileSync(path.join(ROOT, 'wrangler.jsonc'), 'utf8');
   const config = JSON.parse(raw.replace(/^\s*\/\/.*$/gm, ''));
   const preview = config.env.preview;
@@ -271,8 +296,7 @@ test('wrangler.jsonc preview env: live Setmore, mock payments, no cron or e-mail
   assert.equal(preview.vars.SETMORE_PROVIDER_ID, config.vars.SETMORE_PROVIDER_ID);
   assert.equal(preview.vars.ALLOWED_ORIGINS, 'https://perfection-by-riri-preview.perfection-byriri.workers.dev');
   assert.deepEqual(preview.kv_namespaces.map((item) => item.binding), ['BOOKING_KV']);
-  // Wrangler inherits top-level `triggers` into environments; an explicit empty list disables the cron.
-  assert.deepEqual(preview.triggers, { crons: [] });
+  assert.deepEqual(preview.triggers, { crons: ['*/15 * * * *'] });
   assert.equal(preview.send_email, undefined);
   for (const secret of ['SETMORE_REFRESH_TOKEN', 'CUSTOMER_HASH_SECRET', 'SQUARE_ACCESS_TOKEN']) assert.ok(!(secret in preview.vars), secret);
   // Production stays as it was.

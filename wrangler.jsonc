@@ -78,8 +78,7 @@
       "kv_namespaces": [
         { "binding": "BOOKING_KV" }
       ],
-      // Top-level triggers are inherited by environments; an empty list disables the cron here.
-      "triggers": { "crons": [] },
+      "triggers": { "crons": ["*/15 * * * *"] },
       "ratelimits": [
         { "name": "RATE_LIMITER_GET", "namespace_id": "1001", "simple": { "limit": 60, "period": 60 } },
         { "name": "RATE_LIMITER_POST", "namespace_id": "1002", "simple": { "limit": 5, "period": 60 } }

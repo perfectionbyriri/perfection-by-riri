@@ -65,7 +65,8 @@ export function loadConfig(env = {}) {
     setmoreCooldownSeconds: int(env, 'SETMORE_COOLDOWN_SECONDS', 10),
     bookingHorizonDays: int(env, 'BOOKING_HORIZON_DAYS', 56),
     minLeadMinutes: int(env, 'MIN_LEAD_MINUTES', 120),
-    customerScanMaxPages: int(env, 'CUSTOMER_SCAN_MAX_PAGES', 20),
+    customerScanMaxPages: int(env, 'CUSTOMER_SCAN_MAX_PAGES', 3),
+    customerSyncPagesPerRun: int(env, 'CUSTOMER_SYNC_PAGES_PER_RUN', 10),
     customerHashSecret: text(env, 'CUSTOMER_HASH_SECRET'),
 
     paymentsMockMode: bool(env, 'PAYMENTS_MOCK_MODE', true),

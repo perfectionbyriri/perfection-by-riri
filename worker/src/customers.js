@@ -12,6 +12,8 @@ import { SetmoreBusy, SetmoreInvalidResponse, SetmoreNotFound } from './errors.j
 const PAGE_SIZE = 100;
 const encoder = new TextEncoder();
 
+export const CUSTOMER_SYNC_KEY = 'cust:sync';
+
 export function normalizeEmail(value) {
   return String(value ?? '').trim().toLowerCase();
 }
@@ -35,7 +37,91 @@ function contactValues(list, scalar) {
   return values.filter((item) => typeof item === 'string' && item.trim() !== '');
 }
 
-export function createCustomerResolver({ client, kv, secret, maxPages = 20, log = () => {} }) {
+async function putIfChanged(kv, key, id) {
+  if ((await kv.get(key)) !== id) await kv.put(key, id);
+}
+
+async function contactKeys(secret, contact) {
+  const emails = contactValues(contact?.email_addresses, contact?.email).map(normalizeEmail).filter(Boolean);
+  const phones = contactValues(contact?.phone_numbers, contact?.phone).map(normalizePhoneUS).filter(Boolean);
+  return {
+    email: await Promise.all([...new Set(emails)].map((value) => hmacKey(secret, 'e', value))),
+    phone: await Promise.all([...new Set(phones)].map((value) => hmacKey(secret, 'p', value)))
+  };
+}
+
+export async function indexContact(kv, secret, contact, warmed = null) {
+  if (typeof contact?.id !== 'string' || !contact.id) return { email: [], phone: [] };
+  const keys = await contactKeys(secret, contact);
+  for (const key of [...keys.email, ...keys.phone]) {
+    if (warmed?.has(key)) continue;
+    warmed?.add(key);
+    await putIfChanged(kv, key, contact.id);
+  }
+  return keys;
+}
+
+export async function syncCustomerIndex({
+  client,
+  kv,
+  secret,
+  pagesPerRun = 10,
+  now = () => new Date(),
+  log = () => {}
+}) {
+  const stored = (await kv.get(CUSTOMER_SYNC_KEY, 'json')) ?? {};
+  let cursor = typeof stored.cursor === 'string' && stored.cursor ? stored.cursor : null;
+  const passStartedAt = cursor && typeof stored.pass_started_at === 'string'
+    ? stored.pass_started_at
+    : now().toISOString();
+  let completeAt = typeof stored.complete_at === 'string' ? stored.complete_at : null;
+  let pagesThisPass = cursor && Number.isInteger(stored.pages_this_pass) ? stored.pages_this_pass : 0;
+
+  const warmed = new Set();
+  let pages = 0;
+  let contacts = 0;
+  let complete = false;
+
+  for (let page = 0; page < pagesPerRun; page += 1) {
+    let result;
+    try {
+      result = await client.listCustomersPage(cursor ?? undefined, PAGE_SIZE, { cooldown: false });
+    } catch {
+      await kv.put(CUSTOMER_SYNC_KEY, JSON.stringify({
+        cursor,
+        pass_started_at: passStartedAt,
+        complete_at: completeAt,
+        pages_this_pass: pagesThisPass
+      }));
+      log('customer_sync_paused', { pages, contacts, pages_this_pass: pagesThisPass });
+      return { pages, contacts, complete: false };
+    }
+    pages += 1;
+    pagesThisPass += 1;
+    for (const contact of result.items ?? []) {
+      if (typeof contact?.id !== 'string' || !contact.id) continue;
+      contacts += 1;
+      await indexContact(kv, secret, contact, warmed);
+    }
+    if (!result.cursor) {
+      cursor = null;
+      completeAt = now().toISOString();
+      complete = true;
+      break;
+    }
+    cursor = result.cursor;
+  }
+
+  await kv.put(CUSTOMER_SYNC_KEY, JSON.stringify({
+    cursor,
+    pass_started_at: passStartedAt,
+    complete_at: completeAt,
+    pages_this_pass: pagesThisPass
+  }));
+  return { pages, contacts, complete };
+}
+
+export function createCustomerResolver({ client, kv, secret, maxPages = 3, log = () => {} }) {
   async function liveCustomer(key) {
     const id = await kv.get(key);
     if (!id) return null;
@@ -49,21 +135,8 @@ export function createCustomerResolver({ client, kv, secret, maxPages = 20, log 
     }
   }
 
-  async function putIfChanged(key, id) {
-    if ((await kv.get(key)) !== id) await kv.put(key, id);
-  }
-
   async function putIfAbsent(key, id) {
     if (!(await kv.get(key))) await kv.put(key, id);
-  }
-
-  async function contactKeys(contact) {
-    const emails = contactValues(contact.email_addresses, contact.email).map(normalizeEmail);
-    const phones = contactValues(contact.phone_numbers, contact.phone).map(normalizePhoneUS).filter(Boolean);
-    return {
-      email: await Promise.all([...new Set(emails)].map((value) => hmacKey(secret, 'e', value))),
-      phone: await Promise.all([...new Set(phones)].map((value) => hmacKey(secret, 'p', value)))
-    };
   }
 
   async function scan(emailKey, phoneKey) {
@@ -82,12 +155,7 @@ export function createCustomerResolver({ client, kv, secret, maxPages = 20, log 
       }
       for (const contact of result.items) {
         if (typeof contact?.id !== 'string' || !contact.id) continue;
-        const keys = await contactKeys(contact);
-        for (const key of [...keys.email, ...keys.phone]) {
-          if (warmed.has(key)) continue;
-          warmed.add(key);
-          await putIfChanged(key, contact.id);
-        }
+        const keys = await indexContact(kv, secret, contact, warmed);
         if (!emailMatch && keys.email.includes(emailKey)) emailMatch = contact.id;
         if (!phoneMatch && phoneKey && keys.phone.includes(phoneKey)) phoneMatch = contact.id;
       }
@@ -120,13 +188,16 @@ export function createCustomerResolver({ client, kv, secret, maxPages = 20, log 
       return { customerId: byPhone, created: false };
     }
 
-    const { emailMatch, phoneMatch } = await scan(emailKey, phoneKey);
-    if (emailMatch && phoneMatch && emailMatch !== phoneMatch) log('customer_identity_conflict', {});
-    const found = emailMatch ?? phoneMatch;
-    if (found) {
-      await putIfAbsent(emailKey, found);
-      if (phoneKey) await putIfAbsent(phoneKey, found);
-      return { customerId: found, created: false };
+    const syncState = await kv.get(CUSTOMER_SYNC_KEY, 'json');
+    if (!syncState?.complete_at) {
+      const { emailMatch, phoneMatch } = await scan(emailKey, phoneKey);
+      if (emailMatch && phoneMatch && emailMatch !== phoneMatch) log('customer_identity_conflict', {});
+      const found = emailMatch ?? phoneMatch;
+      if (found) {
+        await putIfAbsent(emailKey, found);
+        if (phoneKey) await putIfAbsent(phoneKey, found);
+        return { customerId: found, created: false };
+      }
     }
 
     const created = await client.createCustomer({

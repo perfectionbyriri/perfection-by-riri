@@ -13,7 +13,7 @@ import { createAlerts } from './alerts.js';
 import { createAppointmentService } from './appointments.js';
 import { createCatalogService, metaForMock } from './catalog.js';
 import { loadConfig } from './config.js';
-import { createCustomerResolver } from './customers.js';
+import { createCustomerResolver, syncCustomerIndex } from './customers.js';
 import { BookingError, errorResponse, json } from './errors.js';
 import { createMockSquare } from './payments/mock.js';
 import { createSquarePayments } from './payments/square.js';
@@ -217,8 +217,25 @@ export function buildApp(env = {}, deps = {}) {
         return;
       }
       const { client, alerts } = stack(config.setmoreMockMode ? config.setmoreMockScenario : null);
-      const summary = await reconcileStaleAuthorizations({ kv, payments: paymentsAdapter(), client, alerts, config, now, log });
-      log('reconcile_finished', summary);
+      try {
+        const summary = await reconcileStaleAuthorizations({ kv, payments: paymentsAdapter(), client, alerts, config, now, log });
+        log('reconcile_finished', summary);
+      } catch (err) {
+        log('reconcile_failed', { error: err?.name ?? 'Error' });
+      }
+      try {
+        const syncSummary = await syncCustomerIndex({
+          client,
+          kv,
+          secret: config.customerHashSecret,
+          pagesPerRun: config.customerSyncPagesPerRun,
+          now,
+          log
+        });
+        log('customer_sync_finished', syncSummary);
+      } catch (err) {
+        log('customer_sync_failed', { error: err?.name ?? 'Error' });
+      }
     }
   };
 }
