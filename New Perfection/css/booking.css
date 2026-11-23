@@ -1,6 +1,6 @@
 /* Booking flow · /book/ (docs/booking/DESIGN_SPEC.md §2–§5).
 
-   Obsidian black editorial palette with champagne-gold hairlines, square
+   Warm-white editorial palette (the site's ivory, grey panels, ink) with gold hairlines, square
    architectural corners and no shadows. Step 1 presents collapsed service
    categories that expand smoothly on click. All animations respect
    prefers-reduced-motion. */
@@ -10,15 +10,35 @@
   --bk-gutter: max(5.9vw, calc((100vw - 1272px) / 2));
 }
 
-/* Obsidian black & champagne-gold tokens scoped to the booking page */
+/* Light tokens scoped to the booking page (same values as the service pages) */
 .book-page {
-  --bk-bg: #0c0c0b;
-  --bk-bg-deep: #080807;
+  --bk-bg: #f5f2ef;
+  --bk-bg-deep: #f5f2ef;
   --bk-bg-announcement: #050504;
-  --bk-surface: #141312;
-  --bk-surface-inset: #10100f;
-  --bk-surface-hover: #1b1917;
-  --bk-surface-active: #221e19;
+  --bk-surface: #efebe7;
+  --bk-surface-inset: #e9e4de;
+  --bk-surface-hover: #e6e0d9;
+  --bk-surface-active: #e0d9d0;
+  --bk-ink: #262620;
+  --bk-muted: #6d6a62;
+  --bk-subtle: #6b675f;
+  --bk-line: rgba(38, 38, 32, .16);
+  --bk-line-strong: rgba(38, 38, 32, .34);
+  --bk-gold: #b99a6d;
+  --bk-gold-bright: #7d6035;
+  --bk-gold-text: #7d6035;
+  --bk-error: #8c2f23;
+  --bk-ease: cubic-bezier(.22, 1, .36, 1);
+  --bk-ease-out: cubic-bezier(.16, 1, .3, 1);
+  background: var(--bk-bg);
+  color: var(--bk-ink);
+}
+
+/* Dark island: the photo banners keep a dark overlay, so inside them the
+   tokens go back to light-on-dark values. */
+.bk-monolith,
+.bk-cinema-hero,
+.bk-dark-island {
   --bk-ink: #f4efe8;
   --bk-muted: #a69e94;
   --bk-subtle: #8f877c;
@@ -26,14 +46,11 @@
   --bk-line-strong: rgba(212, 187, 150, .34);
   --bk-gold: #c6a471;
   --bk-gold-bright: #dfc094;
-  --bk-error: #eb8f82;
-  --bk-ease: cubic-bezier(.22, 1, .36, 1);
-  --bk-ease-out: cubic-bezier(.16, 1, .3, 1);
-  background: var(--bk-bg);
+  --bk-gold-text: #dfc094;
   color: var(--bk-ink);
 }
 
-/* Announcement, header, footer and legal modal harmonized in obsidian black */
+/* Announcement, header, footer and legal modal harmonized with the light page */
 .book-page .announcement {
   background: var(--bk-bg-announcement);
   color: #dcd3c6;
@@ -49,7 +66,7 @@
 }
 
 .book-page .site-header { color: var(--bk-ink); }
-.book-page .menu-toggle { border-color: rgba(244, 239, 232, .32); background: transparent; }
+.book-page .menu-toggle { border-color: rgba(38, 38, 32, .32); background: transparent; }
 .book-page .menu-toggle span { background: var(--bk-ink); }
 .book-page .nav-dropdown-panel {
   background: var(--bk-bg-deep);
@@ -86,7 +103,7 @@
   border: 1px solid var(--bk-line);
 }
 
-.book-page .detail-dialog::backdrop { background: rgba(0, 0, 0, .78); }
+.book-page .detail-dialog::backdrop { background: rgba(20, 19, 18, .5); }
 .book-page .detail-dialog .dialog-close,
 .book-page .bk-sheet .dialog-close {
   background: transparent;
@@ -2151,7 +2168,7 @@
   overflow-y: auto;
 }
 
-.bk-sheet::backdrop { background: rgba(0, 0, 0, .78); }
+.bk-sheet::backdrop { background: rgba(20, 19, 18, .5); }
 .bk-sheet-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
 .bk-sheet-head .bk-summary-label { margin: 0; }
 .bk-sheet-head .dialog-close { position: static; flex: none; color: var(--bk-ink); }
