@@ -16,6 +16,7 @@ import { defaultDay, renderSlotsError, renderSlotsLoading, renderWeek } from './
 import { renderDetails, renderErrorSummary } from './render-details.js';
 import { createState, parseDeepLink, resolveDeepLink, ribbonValues, stepFromHistory, summaryLine } from './state.js';
 import { FIELD_ORDER, formatPhone, validateDetails } from './validate.js';
+import { swipeDirection } from './swipe.js';
 
 const STEP_NAMES = ['Service', 'Date & time', 'Your details', 'Deposit & confirm'];
 
@@ -366,6 +367,26 @@ if (app) {
     else if (action === 'retry-week') loadWeek(state.get().weekStart);
     else if (action === 'add-to-calendar') downloadCalendar();
   });
+
+  // Step 2: swipe the week left or right, the same as the arrows. A touch that
+  // starts inside a horizontally scrolling day strip is left to that strip.
+  let swipeStart = null;
+  elements.step.addEventListener('touchstart', (event) => {
+    swipeStart = null;
+    if (state.get().step !== 2 || event.touches.length !== 1 || !event.target.closest('.bk-week')) return;
+    const strip = event.target.closest('.bk-days');
+    if (strip && strip.scrollWidth > strip.clientWidth) return;
+    const touch = event.touches[0];
+    swipeStart = { x: touch.clientX, y: touch.clientY, t: Date.now() };
+  }, { passive: true });
+  elements.step.addEventListener('touchend', (event) => {
+    const start = swipeStart;
+    swipeStart = null;
+    const touch = event.changedTouches[0];
+    const direction = swipeDirection(start, touch && { x: touch.clientX, y: touch.clientY, t: Date.now() });
+    if (!direction) return;
+    elements.step.querySelector(`[data-action="${direction}-week"]:not(:disabled)`)?.click();
+  }, { passive: true });
 
   elements.banner.addEventListener('click', (event) => {
     if (event.target.closest('[data-action="retry-submit"]')) {

@@ -898,6 +898,8 @@
 
 .bk-zone-note { margin: 0 0 16px; font-size: 13px; color: var(--bk-muted); }
 
+.bk-week { touch-action: pan-y; }
+
 .bk-days {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
