@@ -67,7 +67,7 @@
      beat the hero layers (z-index 2) and the sticky bar (40) or they show through. */
   z-index: 50;
   background: var(--bk-bg-deep);
-  border-bottom: 1px solid var(--bk-line);
+  border-bottom: 0;
 }
 
 .book-page .site-header { color: var(--bk-ink); }
@@ -191,7 +191,7 @@
 
 /* Main booking stage: pure obsidian black with whisper-subtle crown glow */
 .book-page .bk {
-  padding-block: 36px 84px;
+  padding-block: 0 84px;
   min-height: 74vh;
   background:
     radial-gradient(ellipse 68% 36% at 50% 0%, rgba(185, 154, 109, .10) 0%, rgba(245, 242, 239, 0) 70%),
@@ -1196,10 +1196,10 @@
   flex-direction: column;
   justify-content: flex-end;
   margin-bottom: 0;
-  padding: 44px 42px 0;
+  margin-inline: calc(-1 * var(--bk-gutter));
+  padding: 44px var(--bk-gutter) 0;
   overflow: hidden;
-  border: 1px solid var(--bk-line);
-  border-top: 2px solid var(--bk-gold);
+  border: 0;
   background: var(--bk-bg-deep);
 }
 
@@ -2033,13 +2033,13 @@
 }
 
 @media (max-width: 800px) {
-  .book-page .bk { padding-block: 26px 48px; }
+  .book-page .bk { padding-block: 0 48px; }
   .bk-head { margin-bottom: 26px; }
   .bk-actions { justify-content: stretch; }
   .bk-actions .button { flex: 1 1 100%; }
   .bk-hint { flex: 1 1 100%; }
   .bk-layout { gap: 32px; }
-  .bk-monolith { min-height: 168px; padding: 26px 20px 0; }
+  .bk-monolith { min-height: 168px; padding: 26px var(--bk-gutter) 0; }
   .bk-monolith .bk-title,
   .bk-monolith-display { font-size: 30px; }
   .bk-monolith-progress { margin-top: 22px; padding-bottom: 14px; }
@@ -2090,7 +2090,7 @@
 }
 
 @media (max-width: 540px) {
-  .book-page .bk { padding-block: 20px 44px; }
+  .book-page .bk { padding-block: 0 44px; }
   .bk-head { margin-bottom: 20px; }
   .bk-title { font-size: clamp(28px, 8.2vw, 38px); margin-bottom: 12px; }
   .bk-step-count { margin-bottom: 12px; }
