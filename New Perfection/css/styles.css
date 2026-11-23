@@ -1023,7 +1023,7 @@ button:disabled {
 /* Footer */
 .site-footer {
   padding:41px 0 0;
-  color:#756f66
+  color:#68645c
 }
 
 .footer-grid {
@@ -1132,7 +1132,7 @@ button:disabled {
   gap:20px;
   align-items:center;
   font-size:10px;
-  color:#8c857b
+  color:#6d6a62
 }
 
 .footer-bottom>div {
@@ -3090,7 +3090,9 @@ html[data-input=pointer] .detail-dialog button:focus-visible { outline:none; }
 }
 .result-socials {
   display:grid;
-  grid-template-columns:repeat(2,minmax(0,1fr));
+  /* Side by side when both labels fit on one line, otherwise stacked, so a
+     label never wraps to two lines next to a one-line neighbour. */
+  grid-template-columns:repeat(auto-fit,minmax(196px,1fr));
   gap:10px;
   margin-top:14px
 }
@@ -3110,6 +3112,7 @@ html[data-input=pointer] .detail-dialog button:focus-visible { outline:none; }
   letter-spacing:1.6px;
   text-align:center;
   text-transform:uppercase;
+  white-space:nowrap;
   color:var(--ink);
   touch-action:manipulation;
   transition:transform var(--press-out) var(--ease-premium), border-color var(--press-out) var(--ease-premium), color var(--press-out) var(--ease-premium)
@@ -3132,6 +3135,7 @@ html[data-input=pointer] .detail-dialog button:focus-visible { outline:none; }
   margin-top:14px
 }
 .result-thumb {
+  flex:0 0 auto;
   width:64px;
   height:44px;
   padding:0;
@@ -3411,7 +3415,7 @@ html:not(.enhanced) .review-nav {
   display:block;
   width:20px;
   height:1px;
-  background:#4a4438;
+  background:#6b6355;
   transition:background var(--duration-fast) var(--ease-premium), transform var(--duration-fast) var(--ease-premium)
 }
 .review-dot.is-active span {
@@ -3420,7 +3424,7 @@ html:not(.enhanced) .review-nav {
 }
 @media (hover:hover) and (pointer:fine) {
 .review-dot:hover span {
-  background:#8d8474
+  background:#a0967f
 }
 }
 .review-arrows {
@@ -3434,7 +3438,7 @@ html:not(.enhanced) .review-nav {
   width:44px;
   height:44px;
   padding:0;
-  border:1px solid #3a352c;
+  border:1px solid #6b6355;
   border-radius:50%;
   background:transparent;
   color:#c4b699;
@@ -3458,7 +3462,7 @@ html:not(.enhanced) .review-nav {
 @media (hover:hover) and (pointer:fine) {
 .review-arrow:hover {
   background:#ffffff0f;
-  border-color:#6b6355;
+  border-color:#8d8474;
   color:#f0e7d8
 }
 }
@@ -3651,6 +3655,12 @@ html:not(.enhanced) .review-nav {
   letter-spacing:1.1px;
   font-weight:500;
   line-height:1
+}
+
+/* Desktop: a 45px hit area like the neighbouring links, without moving the
+   label (the negative margin cancels the padding in layout). */
+@media (min-width:801px) {
+  .nav-trigger { padding-block:16px; margin-block:-16px }
 }
 
 .nav-trigger:focus-visible {
@@ -4063,4 +4073,16 @@ html:not(.enhanced) .review-nav {
   .nav-services.is-open .nav-dropdown-panel {
     transform:none !important
   }
+}
+
+/* Touch: footer links and legal buttons get a taller hit area (>= 32px tall,
+   above the WCAG 2.2 24px minimum) without changing the type. */
+@media (max-width:800px) {
+  .footer-grid ul a,
+  .footer-grid li button {
+    display:inline-block;
+    padding-block:7px
+  }
+  .footer-grid li { line-height:1.5 }
+  .footer-bottom button { padding-block:12px }
 }

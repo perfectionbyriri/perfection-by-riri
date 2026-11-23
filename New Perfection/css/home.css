@@ -61,7 +61,8 @@ html.motion-armed .home .home-services { opacity: 0; }
   line-height: 1.05;
   letter-spacing: -.3px;
   text-transform: uppercase;
-  color: rgba(38, 38, 32, .38);
+  /* Quiet but legible: 3.3:1 on ivory (WCAG AA for large text). */
+  color: #8a857c;
   transition: color 500ms cubic-bezier(.22, 1, .36, 1);
 }
 .home-svc-desc {
@@ -69,7 +70,7 @@ html.motion-armed .home .home-services { opacity: 0; }
   font-weight: 500;
   letter-spacing: 2px;
   text-transform: uppercase;
-  color: #8a8478;
+  color: #6b665d;
 }
 .home-svc-arrow {
   flex: none;
@@ -82,7 +83,7 @@ html.motion-armed .home .home-services { opacity: 0; }
   fill: none;
   stroke: currentColor;
   stroke-width: 1.4;
-  color: #8a8478;
+  color: #6b665d;
   transform: rotate(-45deg);
   transition: transform 600ms cubic-bezier(.22, 1, .36, 1), color 400ms ease, background-color 400ms ease, border-color 400ms ease;
 }
@@ -358,5 +359,14 @@ html.motion-armed .home .home-services { opacity: 0; }
 .home-svc-panel video { aspect-ratio: 9 / 16; width: auto; height: min(640px, 72vh); }
 @media (max-width: 900px) {
   .home-svc-list { align-items: flex-start; }
-  .home-svc-thumb video { aspect-ratio: 9 / 16; }
+  /* 9:16 stays (the lash lift clip is a three-frame vertical collage that a
+     squarer crop would cut), but the height is capped so a card never
+     outgrows a short screen. */
+  .home-svc-thumb video { aspect-ratio: 9 / 16; max-height: 62svh; object-fit: cover; }
+}
+/* Tablet: two cards side by side instead of one ~570px-wide card whose 9:16
+   clip was taller than the screen. */
+@media (min-width: 601px) and (max-width: 900px) {
+  .home-svc-item,
+  .home-svc-item.is-active { flex-basis: calc(50% - 7px); }
 }

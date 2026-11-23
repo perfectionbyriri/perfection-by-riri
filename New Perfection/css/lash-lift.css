@@ -293,9 +293,12 @@ html.motion-armed .svc-lashlift .brow-cta-copy { opacity: 0 }
   .ll-prices dd { font-size: 21px }
   .ll-edit-action { align-items: stretch; gap: 15px; margin-top: 28px }
   .ll-edit-action > p { max-width: none }
+  /* "Lash lift + tinting" cannot fit a half-width column in display caps, so
+     the two choices stack as full-width rows instead of misaligned 1- and
+     2-line tabs. */
+  .ll-options { grid-template-columns: minmax(0,1fr); column-gap: 0 }
+  .ll-option { font-size: 25px }
 }
 @media (max-width:360px) {
   .ll-edit-title { font-size: 38px }
-  .ll-options { grid-template-columns: minmax(0,1fr); column-gap: 0 }
-  .ll-option { font-size: 25px }
 }

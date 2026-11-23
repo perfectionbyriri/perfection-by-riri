@@ -90,6 +90,18 @@
   <link rel="stylesheet" href="css/motion.css">
   <link rel="stylesheet" href="css/type-case.css">
   <script>
+    /* Enter the enhanced (JS) navigation state before first paint. Adding the
+       class later, from a deferred script, rendered the mobile menu open in the
+       document flow and then collapsed it, shifting the whole page (CLS). If the
+       page script never runs, the class is dropped on load so the no-JS
+       navigation stays usable. */
+    (function () {
+      var root = document.documentElement;
+      root.classList.add('enhanced');
+      window.addEventListener('load', function () {
+        if (!window.__perfectionEnhancedReady) root.classList.remove('enhanced');
+      });
+    })();
     /* Arm the Home reveal motion before first paint so enhanced content never
        flashes into place: it starts hidden, then main.js reveals it. No-JS and
        reduced-motion visitors skip the class and render fully. The timeout
@@ -112,7 +124,7 @@
   <script src="js/ui.js" defer></script>
 </head>
 <body class="svc-page svc-pmu home">
-  <a class="skip-link" href="#main">Skip to content</a>
+  <a class="skip-link" href="#content">Skip to content</a>
   <svg class="icon-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>
     <symbol id="icon-star" viewBox="0 0 32 32"><path d="m16 3 4 8.4 9.2 1.3-6.6 6.5 1.6 9.1-8.2-4.4-8.2 4.4 1.6-9.1-6.6-6.5 9.2-1.3Z"/></symbol>
     <symbol id="icon-heart" viewBox="0 0 32 32"><path d="M16 28S3 19.8 3 10.9C3 3.7 12 1.5 16 8c4-6.5 13-4.3 13 2.9C29 19.8 16 28 16 28Z"/></symbol>
@@ -172,7 +184,7 @@
     </section>
 
   <section class="trust-marquee" aria-label="Why clients choose Perfection by Riri">
-    <div class="trust-mq-track"><ul class="trust-mq-group"><li class="trust-mq-item"><svg class="icon icon-google" aria-hidden="true" focusable="false"><use href="#icon-google"/></svg><span class="trust-mq-value">Google 5.0</span><span class="trust-mq-label"><span class="trust-stars" aria-label="5 out of 5 stars">★★★★★</span> client reviews</span></li><li class="trust-mq-item"><span class="trust-mq-value">10+ years</span><span class="trust-mq-label">European experience</span></li><li class="trust-mq-item"><svg class="icon icon-premium" aria-hidden="true" focusable="false"><use href="#icon-premium"/></svg><span class="trust-mq-value">Lasting style</span><span class="trust-mq-label">Signature quality</span></li><li class="trust-mq-item"><svg class="icon icon-lash-art" aria-hidden="true" focusable="false"><use href="#icon-lash-art"/></svg><span class="trust-mq-value">Made for you</span><span class="trust-mq-label">Personalized design</span></li></ul><ul class="trust-mq-group" aria-hidden="true"><li class="trust-mq-item"><svg class="icon icon-google" aria-hidden="true" focusable="false"><use href="#icon-google"/></svg><span class="trust-mq-value">Google 5.0</span><span class="trust-mq-label"><span class="trust-stars" aria-label="5 out of 5 stars">★★★★★</span> client reviews</span></li><li class="trust-mq-item"><span class="trust-mq-value">10+ years</span><span class="trust-mq-label">European experience</span></li><li class="trust-mq-item"><svg class="icon icon-premium" aria-hidden="true" focusable="false"><use href="#icon-premium"/></svg><span class="trust-mq-value">Lasting style</span><span class="trust-mq-label">Signature quality</span></li><li class="trust-mq-item"><svg class="icon icon-lash-art" aria-hidden="true" focusable="false"><use href="#icon-lash-art"/></svg><span class="trust-mq-value">Made for you</span><span class="trust-mq-label">Personalized design</span></li></ul></div>
+    <div class="trust-mq-track"><ul class="trust-mq-group"><li class="trust-mq-item"><svg class="icon icon-google" aria-hidden="true" focusable="false"><use href="#icon-google"/></svg><span class="trust-mq-value">Google 5.0</span><span class="trust-mq-label"><span class="trust-stars" role="img" aria-label="5 out of 5 stars">★★★★★</span> client reviews</span></li><li class="trust-mq-item"><span class="trust-mq-value">10+ years</span><span class="trust-mq-label">European experience</span></li><li class="trust-mq-item"><svg class="icon icon-premium" aria-hidden="true" focusable="false"><use href="#icon-premium"/></svg><span class="trust-mq-value">Lasting style</span><span class="trust-mq-label">Signature quality</span></li><li class="trust-mq-item"><svg class="icon icon-lash-art" aria-hidden="true" focusable="false"><use href="#icon-lash-art"/></svg><span class="trust-mq-value">Made for you</span><span class="trust-mq-label">Personalized design</span></li></ul><ul class="trust-mq-group" aria-hidden="true"><li class="trust-mq-item"><svg class="icon icon-google" aria-hidden="true" focusable="false"><use href="#icon-google"/></svg><span class="trust-mq-value">Google 5.0</span><span class="trust-mq-label"><span class="trust-stars" role="img" aria-label="5 out of 5 stars">★★★★★</span> client reviews</span></li><li class="trust-mq-item"><span class="trust-mq-value">10+ years</span><span class="trust-mq-label">European experience</span></li><li class="trust-mq-item"><svg class="icon icon-premium" aria-hidden="true" focusable="false"><use href="#icon-premium"/></svg><span class="trust-mq-value">Lasting style</span><span class="trust-mq-label">Signature quality</span></li><li class="trust-mq-item"><svg class="icon icon-lash-art" aria-hidden="true" focusable="false"><use href="#icon-lash-art"/></svg><span class="trust-mq-value">Made for you</span><span class="trust-mq-label">Personalized design</span></li></ul></div>
   </section>
 
     <section class="pmu-intro section-light" aria-labelledby="intro-title">
@@ -191,17 +203,17 @@
         <div class="home-services-head"><p class="pmu-kicker">My signature services</p><h2 id="services-title">Choose<br><em>the detail.</em></h2></div>
         <div class="home-services" data-home-services>
           <ul class="home-svc-list">
-            <li class="home-svc-item is-active" data-svc="lashExtensions"><a class="home-svc-link" href="services/lash-extensions/index.html"><span class="home-svc-text"><span class="home-svc-name">Lash extensions</span><span class="home-svc-desc">Custom lash design</span></span><svg class="home-svc-arrow" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#icon-arrow"/></svg></a><figure class="home-svc-thumb"><video src="videos/web/lash-extensions-loop.mp4" poster="videos/web/lash-extensions-loop-poster.webp" width="720" height="1280" muted loop playsinline preload="metadata" data-loop-video aria-label="Lash extensions being applied, close-up"></video></figure><p class="home-svc-note">Individual extensions for soft, natural definition.</p></li>
-            <li class="home-svc-item" data-svc="permanentMakeup"><a class="home-svc-link" href="services/permanent-makeup/index.html"><span class="home-svc-text"><span class="home-svc-name">Permanent makeup</span><span class="home-svc-desc">Brows · Lips · Eyeliner</span></span><svg class="home-svc-arrow" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#icon-arrow"/></svg></a><figure class="home-svc-thumb"><video src="videos/web/lip-blush-process.mp4" poster="videos/web/lip-blush-poster.webp" width="720" height="1280" muted loop playsinline preload="metadata" data-loop-video aria-label="Lip blush permanent makeup being applied, close-up"></video></figure><p class="home-svc-note">Lip blush, ombré powder brows, and permanent eyeliner — subtle definition designed to last.</p></li>
-            <li class="home-svc-item" data-svc="lashLift"><a class="home-svc-link" href="services/lash-lift/index.html"><span class="home-svc-text"><span class="home-svc-name">Lash lift</span><span class="home-svc-desc">Natural lift &amp; definition</span></span><svg class="home-svc-arrow" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#icon-arrow"/></svg></a><figure class="home-svc-thumb"><video src="videos/web/lash-lift-loop.mp4" poster="videos/web/lash-lift-loop-poster.webp" width="720" height="1280" muted loop playsinline preload="metadata" data-loop-video aria-label="Lash lift result, close-up"></video></figure><p class="home-svc-note">An upward curl and deeper tint for effortless definition.</p></li>
-            <li class="home-svc-item" data-svc="browLamination"><a class="home-svc-link" href="services/brow-lamination-tint/index.html"><span class="home-svc-text"><span class="home-svc-name">Brow lamination &amp; tint</span><span class="home-svc-desc">Shape · Laminate · Define</span></span><svg class="home-svc-arrow" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#icon-arrow"/></svg></a><figure class="home-svc-thumb"><video src="videos/web/brow-lamination-loop.mp4" poster="videos/web/brow-lamination-loop-poster.webp" width="720" height="1280" muted loop playsinline preload="metadata" data-loop-video aria-label="Brow lamination and tint result, close-up"></video></figure><p class="home-svc-note">Fuller, defined brows with a soft, natural finish.</p></li>
+            <li class="home-svc-item is-active" data-svc="lashExtensions"><a class="home-svc-link" href="services/lash-extensions/index.html"><span class="home-svc-text"><span class="home-svc-name">Lash extensions</span><span class="home-svc-desc">Custom lash design</span></span><svg class="home-svc-arrow" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#icon-arrow"/></svg></a><figure class="home-svc-thumb"><video src="videos/web/lash-extensions-loop.mp4" poster="videos/web/lash-extensions-loop-poster.webp" width="720" height="1280" muted loop playsinline preload="none" data-loop-video aria-label="Lash extensions being applied, close-up"></video></figure><p class="home-svc-note">Individual extensions for soft, natural definition.</p></li>
+            <li class="home-svc-item" data-svc="permanentMakeup"><a class="home-svc-link" href="services/permanent-makeup/index.html"><span class="home-svc-text"><span class="home-svc-name">Permanent makeup</span><span class="home-svc-desc">Brows · Lips · Eyeliner</span></span><svg class="home-svc-arrow" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#icon-arrow"/></svg></a><figure class="home-svc-thumb"><video src="videos/web/lip-blush-process.mp4" poster="videos/web/lip-blush-poster.webp" width="720" height="1280" muted loop playsinline preload="none" data-loop-video aria-label="Lip blush permanent makeup being applied, close-up"></video></figure><p class="home-svc-note">Lip blush, ombré powder brows, and permanent eyeliner — subtle definition designed to last.</p></li>
+            <li class="home-svc-item" data-svc="lashLift"><a class="home-svc-link" href="services/lash-lift/index.html"><span class="home-svc-text"><span class="home-svc-name">Lash lift</span><span class="home-svc-desc">Natural lift &amp; definition</span></span><svg class="home-svc-arrow" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#icon-arrow"/></svg></a><figure class="home-svc-thumb"><video src="videos/web/lash-lift-loop.mp4" poster="videos/web/lash-lift-loop-poster.webp" width="720" height="1280" muted loop playsinline preload="none" data-loop-video aria-label="Lash lift result, close-up"></video></figure><p class="home-svc-note">An upward curl and deeper tint for effortless definition.</p></li>
+            <li class="home-svc-item" data-svc="browLamination"><a class="home-svc-link" href="services/brow-lamination-tint/index.html"><span class="home-svc-text"><span class="home-svc-name">Brow lamination &amp; tint</span><span class="home-svc-desc">Shape · Laminate · Define</span></span><svg class="home-svc-arrow" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#icon-arrow"/></svg></a><figure class="home-svc-thumb"><video src="videos/web/brow-lamination-loop.mp4" poster="videos/web/brow-lamination-loop-poster.webp" width="720" height="1280" muted loop playsinline preload="none" data-loop-video aria-label="Brow lamination and tint result, close-up"></video></figure><p class="home-svc-note">Fuller, defined brows with a soft, natural finish.</p></li>
           </ul>
           <div class="home-svc-swipe" aria-hidden="true"><span class="home-svc-count"><span data-svc-current>01</span> / 04</span><span class="home-svc-bar"><span data-svc-bar></span></span><span class="home-svc-hint">Swipe to explore</span></div>
           <div class="home-svc-stage" aria-hidden="true">
-            <figure class="home-svc-panel is-active" data-panel="lashExtensions"><video src="videos/web/lash-extensions-loop.mp4" poster="videos/web/lash-extensions-loop-poster.webp" width="720" height="1280" muted loop playsinline preload="metadata" data-loop-video></video><figcaption><span class="home-svc-panel-name">Lash extensions</span></figcaption></figure>
-            <figure class="home-svc-panel" data-panel="permanentMakeup"><video src="videos/web/lip-blush-process.mp4" poster="videos/web/lip-blush-poster.webp" width="720" height="1280" muted loop playsinline preload="metadata" data-loop-video></video><figcaption><span class="home-svc-panel-name">Permanent makeup</span></figcaption></figure>
-            <figure class="home-svc-panel" data-panel="lashLift"><video src="videos/web/lash-lift-loop.mp4" poster="videos/web/lash-lift-loop-poster.webp" width="720" height="1280" muted loop playsinline preload="metadata" data-loop-video></video><figcaption><span class="home-svc-panel-name">Lash lift</span></figcaption></figure>
-            <figure class="home-svc-panel" data-panel="browLamination"><video src="videos/web/brow-lamination-loop.mp4" poster="videos/web/brow-lamination-loop-poster.webp" width="720" height="1280" muted loop playsinline preload="metadata" data-loop-video></video><figcaption><span class="home-svc-panel-name">Brow lamination &amp; tint</span></figcaption></figure>
+            <figure class="home-svc-panel is-active" data-panel="lashExtensions"><video src="videos/web/lash-extensions-loop.mp4" poster="videos/web/lash-extensions-loop-poster.webp" width="720" height="1280" muted loop playsinline preload="none" data-loop-video></video><figcaption><span class="home-svc-panel-name">Lash extensions</span></figcaption></figure>
+            <figure class="home-svc-panel" data-panel="permanentMakeup"><video src="videos/web/lip-blush-process.mp4" poster="videos/web/lip-blush-poster.webp" width="720" height="1280" muted loop playsinline preload="none" data-loop-video></video><figcaption><span class="home-svc-panel-name">Permanent makeup</span></figcaption></figure>
+            <figure class="home-svc-panel" data-panel="lashLift"><video src="videos/web/lash-lift-loop.mp4" poster="videos/web/lash-lift-loop-poster.webp" width="720" height="1280" muted loop playsinline preload="none" data-loop-video></video><figcaption><span class="home-svc-panel-name">Lash lift</span></figcaption></figure>
+            <figure class="home-svc-panel" data-panel="browLamination"><video src="videos/web/brow-lamination-loop.mp4" poster="videos/web/brow-lamination-loop-poster.webp" width="720" height="1280" muted loop playsinline preload="none" data-loop-video></video><figcaption><span class="home-svc-panel-name">Brow lamination &amp; tint</span></figcaption></figure>
           </div>
         </div>
       </div>
@@ -228,7 +240,7 @@
         <h2 id="gallery-title">Real results</h2>
         <span class="home-results-rule" aria-hidden="true"></span>
         <p class="result-lead">Refined results, tailored to you.</p>
-        <a class="result-explore" href="https://www.instagram.com/perfection.byriri?stkn=eHcyYW1jODF5bXNi" target="_blank" rel="noopener noreferrer" aria-label="Explore more results on Instagram">Explore more results <svg class="icon result-arrow" aria-hidden="true" focusable="false"><use href="#icon-chevron"/></svg></a>
+        <a class="result-explore" href="https://www.instagram.com/perfection.byriri" target="_blank" rel="noopener noreferrer" aria-label="Explore more results on Instagram">Explore more results <svg class="icon result-arrow" aria-hidden="true" focusable="false"><use href="#icon-chevron"/></svg></a>
       </div>
       <div class="result-grid">
         <article class="result-item">
@@ -240,7 +252,7 @@
           </div>
         </article>
         <article class="result-item">
-          <div class="result-media"><img src="images/PMU/lipblush-results-155.webp" alt="Permanent makeup result: soft, natural lip blush with an even tint" loading="lazy" decoding="async"></div>
+          <div class="result-media"><img src="images/PMU/lipblush-results-155.webp" alt="Permanent makeup result: soft, natural lip blush with an even tint" width="1302" height="840" loading="lazy" decoding="async"></div>
           <div class="result-caption">
             <h3 class="result-title">Permanent makeup</h3>
             <p class="result-note">Softly diffused color that wakes up the features every morning.</p>
@@ -248,7 +260,7 @@
           </div>
         </article>
         <article class="result-item">
-          <div class="result-media"><img src="images/Lash%20Lift/lash-lift.webp" alt="Before-and-after of a lash lift with relaxed lashes on the left and lifted lashes on the right" loading="lazy" decoding="async"></div>
+          <div class="result-media"><img src="images/Lash%20Lift/lash-lift.webp" alt="Before-and-after of a lash lift with relaxed lashes on the left and lifted lashes on the right" width="736" height="736" loading="lazy" decoding="async"></div>
           <div class="result-caption">
             <h3 class="result-title">Lash lift</h3>
             <p class="result-note">A lifted, curled shape that opens the eye without extensions.</p>
@@ -256,7 +268,7 @@
           </div>
         </article>
         <article class="result-item">
-          <div class="result-media"><img src="images/Brow%20Lamination%20%26%20Tint/browlamination.webp" alt="Before-and-after of brow lamination and tint with natural brows on the left and fuller defined brows on the right" loading="lazy" decoding="async"></div>
+          <div class="result-media"><img src="images/Brow%20Lamination%20%26%20Tint/browlamination.webp" alt="Before-and-after of brow lamination and tint with natural brows on the left and fuller defined brows on the right" width="1536" height="1024" loading="lazy" decoding="async"></div>
           <div class="result-caption">
             <h3 class="result-title">Brow lamination &amp; tint</h3>
             <p class="result-note">Smooth, redirected hairs and a soft tint for a fuller brow shape.</p>
@@ -269,7 +281,7 @@
 
   <section class="reviews section-dark" id="reviews" aria-labelledby="reviews-title">
     <div class="container reviews-layout">
-      <div class="section-intro"><p class="eyebrow">CLIENT LOVE</p><h2 id="reviews-title">Hear From My<br>Beautiful Clients</h2><p class="review-disclaimer">Real reviews shared by my clients on Google.</p><a class="review-google" href="https://maps.app.goo.gl/2zzJp92GvUAGifaV8" target="_blank" rel="noopener noreferrer"><svg class="icon icon-google" aria-hidden="true" focusable="false"><use href="#icon-google"/></svg><span class="review-google-score">5.0</span><span class="review-google-label">Google rating<span class="review-google-cta">Read all reviews</span></span></a></div>
+      <div class="section-intro"><p class="eyebrow">CLIENT LOVE</p><h2 id="reviews-title">Hear from my<br>beautiful clients</h2><p class="review-disclaimer">Real reviews shared by my clients on Google.</p><a class="review-google" href="https://maps.app.goo.gl/2zzJp92GvUAGifaV8" target="_blank" rel="noopener noreferrer"><svg class="icon icon-google" aria-hidden="true" focusable="false"><use href="#icon-google"/></svg><span class="review-google-score">5.0</span><span class="review-google-label">Google rating<span class="review-google-cta">Read all reviews</span></span></a></div>
       <div class="review-feature" data-reviews role="group" aria-roledescription="carousel" aria-label="Client reviews">
         <div class="review-nav">
           <div class="review-arrows">
@@ -319,10 +331,10 @@
   <footer class="site-footer section-light" id="contact">
     <div class="container">
       <div class="footer-grid">
-        <div class="footer-brand"><a class="brand" href="#home" aria-label="Perfection by Riri, back to top"><span class="brand-name">PERFECTION</span><span class="brand-by">BY RIRI</span><span class="brand-tagline">LASH · BROW · PMU</span></a><p>Elevating beauty with artistry,<br>precision, and luxury.</p><a class="social-coming" href="https://www.instagram.com/perfection.byriri?stkn=eHcyYW1jODF5bXNi" target="_blank" rel="noopener noreferrer" aria-label="Perfection by Riri on Instagram"><svg class="icon" aria-hidden="true" focusable="false"><use href="#icon-instagram"/></svg> INSTAGRAM</a></div>
+        <div class="footer-brand"><a class="brand" href="#home" aria-label="Perfection by Riri, back to top"><span class="brand-name">PERFECTION</span><span class="brand-by">BY RIRI</span><span class="brand-tagline">LASH · BROW · PMU</span></a><p>Elevating beauty with artistry,<br>precision, and luxury.</p><a class="social-coming" href="https://www.instagram.com/perfection.byriri" target="_blank" rel="noopener noreferrer" aria-label="Perfection by Riri on Instagram"><svg class="icon" aria-hidden="true" focusable="false"><use href="#icon-instagram"/></svg> INSTAGRAM</a></div>
         <div><h2 class="footer-heading">Quick links</h2><ul><li><a href="#about">About</a></li><li><a href="#services">Services</a></li><li><a href="#gallery">Gallery</a></li><li><a href="#reviews">Reviews</a></li><li><a href="faq/index.html">FAQ</a></li><li><a href="contact/index.html">Contact</a></li><li><a href="https://perfectionbyriri1.setmore.com" data-booking-url="https://perfectionbyriri1.setmore.com" target="_blank" rel="noopener">Book appointment</a></li></ul></div>
         <div><h2 class="footer-heading">Services</h2><ul><li><a href="services/lash-extensions/index.html">Lash extensions</a></li><li><a href="services/lash-lift/index.html">Lash lift</a></li><li><a href="services/brow-lamination-tint/index.html">Brow lamination &amp; tint</a></li><li><a href="services/permanent-makeup/index.html">Permanent makeup</a></li></ul></div>
-        <div><h2 class="footer-heading">Contact</h2><address><a href="https://maps.app.goo.gl/2zzJp92GvUAGifaV8?g_st=ic" target="_blank" rel="noopener noreferrer" aria-label="Open Perfection by Riri location in Google Maps">18205 Alderwood Mall Pkwy A<br>Suite 918<br>Lynnwood, WA 98037</a><br><a href="tel:+14258450045">(425) 845 0045</a></address></div>
+        <div><h2 class="footer-heading">Contact</h2><address><a href="https://maps.app.goo.gl/2zzJp92GvUAGifaV8" target="_blank" rel="noopener noreferrer" aria-label="Open Perfection by Riri location in Google Maps">18205 Alderwood Mall Pkwy&nbsp;A<br>Suite 918<br>Lynnwood, WA 98037</a><br><a href="tel:+14258450045">(425) 845 0045</a></address></div>
         <div><h2 class="footer-heading">Hours</h2><p class="footer-hours">Mon–Sat&nbsp;&nbsp;10 AM–5 PM<br>Sun&nbsp;&nbsp;Closed</p></div>
       </div>
       <div class="footer-bottom"><p>© <span id="year">2026</span> Perfection by Riri. All rights reserved.</p><div><button type="button" data-dialog="privacy">Privacy policy</button><button type="button" data-dialog="terms">Terms &amp; conditions</button></div></div>
