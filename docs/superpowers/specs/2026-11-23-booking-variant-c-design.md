@@ -1,6 +1,6 @@
 # Booking UI — Variant C "Monolith Cinema Ribbon" for Steps 1–4
 
-Date: 2026-11-23 · Status: **draft for owner approval** · Source brief: the owner's plan "Дизайн-план редизайна `/book/` — Вариант C «Monolith Cinema Ribbon»" (2026-11-23, shared in chat; its screenshots live on another machine and were not available). Amends [DESIGN_SPEC.md](../../booking/DESIGN_SPEC.md) §3–§5 and [2026-11-23-booking-cinematic-finish-design.md](2026-11-23-booking-cinematic-finish-design.md) §3.1–§3.2.
+Date: 2026-11-23 · Status: **approved by the owner 2026-11-23; implemented on `claude/dazzling-shannon-7jkxc1` (commits `a1e19de`–`220aac3`, plan `docs/superpowers/plans/2026-11-23-booking-variant-c.md`)** · Source brief: the owner's plan "Дизайн-план редизайна `/book/` — Вариант C «Monolith Cinema Ribbon»" (2026-11-23, shared in chat; its screenshots live on another machine and were not available). Amends [DESIGN_SPEC.md](../../booking/DESIGN_SPEC.md) §3–§5 and [2026-11-23-booking-cinematic-finish-design.md](2026-11-23-booking-cinematic-finish-design.md) §3.1–§3.2.
 
 ## 1. Intent and why
 

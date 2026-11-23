@@ -99,6 +99,8 @@ Reuse `.button`, `.button-gold`, `.button-outline`, `.button-small` unchanged.
 
 ## 3. Page structure
 
+> **2026-11-23:** Steps 1–4 now follow Variant C (monolith hero with embedded progress, live selection ribbon instead of the sidebar, one bottom action bar). Where this section, §4 or §5 differ, [the Variant C design](../superpowers/specs/2026-11-23-booking-variant-c-design.md) wins.
+
 New page: `New Perfection/book/index.html`. It uses the same announcement bar, header, footer and `css/styles.css` + `css/type-case.css` as other pages, plus a new `css/booking.css` and `js/booking.js`. There is no hero photo; the flow starts above the fold.
 
 ```
