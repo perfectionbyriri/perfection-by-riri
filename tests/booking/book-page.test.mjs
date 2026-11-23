@@ -200,3 +200,13 @@ test('Variant C: the live selection ribbon replaces the sidebar and keeps Edit o
   assert.match(ribbon[1], /data-goto-step="2"/);
   assert.doesNotMatch(html, /bk-summary-cta|bk-summary-action|class="bk-summary"/);
 });
+
+test('Variant C: main.js wires the ribbon, the hero and the shared action bar', () => {
+  const main = read('js/booking/main.js');
+  assert.match(main, /ribbonValues\(/);
+  for (const step of [1, 2, 3]) assert.match(main, new RegExp(`renderActionBar\\(\\{\\s*step: ${step}\\b`), `step ${step}`);
+  for (const label of ['Continue to date &amp; time', 'Continue to details', 'Review &amp; confirm']) assert.ok(main.includes(label), label);
+  assert.doesNotMatch(main, /summaryCta|summaryAction/);
+  assert.match(main, /function setHero\(step\)/);
+  assert.match(main, /ribbon\?\.addEventListener\('click'[\s\S]{0,200}navigateFromProgress/);
+});

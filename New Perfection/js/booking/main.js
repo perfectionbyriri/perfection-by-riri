@@ -7,13 +7,14 @@
 import { createApi } from './api.js';
 import {
   TURNSTILE_URL, buildAppointmentBody, createSubmitGuard, ensureIdempotencyKey, formatMoney,
-  mapError, renderReview, squareSdkUrl
+  heroPhotoFor, mapError, renderReview, squareSdkUrl
 } from './checkout.js';
+import { renderActionBar } from './action-bar.js';
 import { buildIcs, confirmedPath, fireConfirmation, renderConfirmation, trackFunnel } from './confirm.js';
-import { formatDuration, formatPrice, renderCatalogUnavailable, renderServices } from './render-services.js';
+import { renderCatalogUnavailable, renderServices } from './render-services.js';
 import { defaultDay, renderSlotsError, renderSlotsLoading, renderWeek } from './render-slots.js';
 import { renderDetails, renderErrorSummary } from './render-details.js';
-import { createState, parseDeepLink, resolveDeepLink, stepFromHistory, summaryLine } from './state.js';
+import { createState, parseDeepLink, resolveDeepLink, ribbonValues, stepFromHistory, summaryLine } from './state.js';
 import { FIELD_ORDER, formatPhone, validateDetails } from './validate.js';
 
 const STEP_NAMES = ['Service', 'Date & time', 'Your details', 'Deposit & confirm'];
@@ -37,8 +38,13 @@ if (app) {
     bar: document.getElementById('bk-bar'),
     barSummary: document.getElementById('bk-bar-summary'),
     barAction: document.getElementById('bk-bar-action'),
-    summaryCta: document.getElementById('bk-summary-cta'),
-    summaryAction: document.getElementById('bk-summary-action'),
+    hero: {
+      photo: document.querySelector('.bk-monolith-photo'),
+      kicker: document.querySelector('.bk-monolith-kicker'),
+      display: document.querySelector('.bk-monolith-display')
+    },
+    ribbon: document.querySelector('.bk-ribbon'),
+    ribbonEdits: [...document.querySelectorAll('.bk-ribbon .bk-cinema-edit')],
     sheet: document.getElementById('bk-sheet'),
     sheetList: document.getElementById('bk-sheet-list'),
     summaryList: document.getElementById('bk-summary-list'),
@@ -48,6 +54,10 @@ if (app) {
       deposit: document.querySelector('[data-summary="deposit"]')
     }
   };
+  // Steps 1-3 show the studio photo from the markup; Step 4 swaps in the service group's photo (Variant C §5.1).
+  const studioPhoto = elements.hero.photo
+    ? { src: elements.hero.photo.getAttribute('src'), alt: elements.hero.photo.getAttribute('alt') }
+    : null;
   const state = createState({
     step: 1, catalog: null, serviceId: null, focusGroup: null,
     week: null, weekStart: null, selectedDate: null, startAt: null, startLabel: null,
@@ -90,9 +100,12 @@ if (app) {
     else elements.step.classList.add('is-entering-forward');
   }
 
-  function setSummaryValue(el, text) {
-    if (!el || el.textContent === text) return;
-    el.textContent = text;
+  function setSummaryValue(el, { title, sub }) {
+    const titleEl = el?.querySelector('.bk-ribbon-title');
+    const subEl = el?.querySelector('.bk-ribbon-sub');
+    if (!titleEl || !subEl || (titleEl.textContent === title && subEl.textContent === sub)) return;
+    titleEl.textContent = title;
+    subEl.textContent = sub;
     if (prefersReducedMotion()) return;
     el.classList.remove('is-updated');
     void el.offsetWidth;
@@ -104,8 +117,31 @@ if (app) {
     elements.layout?.setAttribute('data-step', String(step));
   }
 
+  function setHero(step) {
+    const { photo, kicker, display } = elements.hero;
+    if (!photo || !kicker || !display || !studioPhoto) return;
+    const service = step === 4 ? findService(state.get().serviceId) : null;
+    if (service) {
+      const groupPhoto = heroPhotoFor(service);
+      photo.src = groupPhoto.src;
+      photo.alt = groupPhoto.alt;
+      photo.style.objectPosition = groupPhoto.focal;
+      kicker.textContent = 'Step 04 of 04 \u00b7 Final review';
+      display.innerHTML = 'Your appointment,<br><em>considered.</em>';
+    } else {
+      photo.src = studioPhoto.src;
+      photo.alt = studioPhoto.alt;
+      photo.style.objectPosition = '';
+      kicker.textContent = '';
+      display.textContent = '';
+    }
+    kicker.hidden = !service;
+    display.hidden = !service;
+  }
+
   function updateProgress(step) {
     setStageStep(step);
+    setHero(step);
     elements.count.textContent = `Step ${step} of 4 — ${STEP_NAMES[step - 1]}`;
     elements.progress.forEach((item, index) => {
       const target = index + 1;
@@ -125,6 +161,7 @@ if (app) {
         delete item.dataset.gotoStep;
       }
     });
+    updateSummary();
   }
 
   function navigateFromProgress(target) {
@@ -144,18 +181,13 @@ if (app) {
   });
 
   function updateSummary() {
-    const service = findService(state.get().serviceId);
-    setSummaryValue(elements.summary.service, service
-      ? `${service.name} · ${formatDuration(service.duration_minutes)} · ${formatPrice(service.price_cents)}`
-      : 'Not chosen yet');
-    const { startAt, startLabel, week } = state.get();
-    const day = week?.days.find((item) => startAt && startAt.startsWith(item.date));
-    setSummaryValue(elements.summary.time, startAt && day
-      ? `${day.weekday}, ${new Date(`${day.date}T12:00:00Z`).toLocaleDateString('en-US', { month: 'long', day: 'numeric', timeZone: 'UTC' })} · ${startLabel}`
-      : 'Not chosen yet');
-    setSummaryValue(elements.summary.deposit, service
-      ? (service.deposit.required ? `${formatPrice(service.deposit.total_cents)} due today` : 'No deposit needed')
-      : '—');
+    const { serviceId, startAt, startLabel, week, step } = state.get();
+    const values = ribbonValues({ service: findService(serviceId), week, startAt, startLabel });
+    setSummaryValue(elements.summary.service, values.service);
+    setSummaryValue(elements.summary.time, values.time);
+    setSummaryValue(elements.summary.deposit, values.deposit);
+    // Edit appears once the client is past the step it returns to (Variant C §5.2).
+    elements.ribbonEdits.forEach((button) => { button.hidden = !(Number(button.dataset.gotoStep) < step && step <= 3); });
     updateBar();
   }
 
@@ -172,14 +204,6 @@ if (app) {
     const button = primaryButton();
     const label = (button?.dataset.label ?? button?.textContent ?? 'Continue').trim().toUpperCase();
     const disabled = !button || button.disabled;
-    if (elements.summaryCta && elements.summaryAction) {
-      const showDesktopCta = show && step < 4;
-      elements.summaryCta.hidden = !showDesktopCta;
-      if (showDesktopCta) {
-        elements.summaryAction.textContent = label;
-        elements.summaryAction.disabled = disabled;
-      }
-    }
     if (!show) return;
     elements.barSummary.textContent = summaryLine({ service: findService(serviceId), week, startAt, startLabel });
     elements.barAction.textContent = label;
@@ -187,7 +211,9 @@ if (app) {
   }
 
   elements.barAction.addEventListener('click', () => primaryButton()?.click());
-  elements.summaryAction?.addEventListener('click', () => primaryButton()?.click());
+  elements.ribbon?.addEventListener('click', (event) => {
+    navigateFromProgress(event.target.closest('.bk-cinema-edit[data-goto-step]'));
+  });
 
   // Step content is re-rendered in many places; one observer keeps the bar's
   // label and disabled state in step with whichever button is on screen.
@@ -213,8 +239,12 @@ if (app) {
     const hint = serviceId ? '' : '<p class="bk-hint" id="bk-continue-hint">Choose a service to continue.</p>';
     elements.step.innerHTML = '<h2 class="bk-step-title" tabindex="-1">Choose a service</h2>'
       + renderServices({ groups: catalog.groups, selectedId: serviceId, focusGroup })
-      + `<div class="bk-actions">${hint}<button type="button" class="button button-gold" data-action="continue"`
-      + `${serviceId ? '' : ' disabled aria-disabled="true" aria-describedby="bk-continue-hint"'}>Continue</button></div>`;
+      + renderActionBar({
+        step: 1,
+        hint,
+        primary: '<button type="button" class="button button-gold" data-action="continue"'
+          + `${serviceId ? '' : ' disabled aria-disabled="true" aria-describedby="bk-continue-hint"'}>Continue to date &amp; time</button>`
+      });
     elements.step.setAttribute('aria-busy', 'false');
     if (focus) focusTitle();
   }
@@ -340,8 +370,11 @@ if (app) {
   function step2Actions() {
     const { startAt } = state.get();
     const hint = startAt ? '' : '<p class="bk-hint" id="bk-continue-hint">Choose a time to continue.</p>';
-    return `<div class="bk-actions"><button type="button" class="button button-outline" data-action="back">Back</button>${hint}`
-      + `<button type="button" class="button button-gold" data-action="continue"${startAt ? '' : ' disabled aria-disabled="true" aria-describedby="bk-continue-hint"'}>Continue</button></div>`;
+    return renderActionBar({
+      step: 2,
+      hint,
+      primary: `<button type="button" class="button button-gold" data-action="continue"${startAt ? '' : ' disabled aria-disabled="true" aria-describedby="bk-continue-hint"'}>Continue to details</button>`
+    });
   }
 
   function renderStep2({ focus = false, focusSelector = null } = {}) {
@@ -436,8 +469,7 @@ if (app) {
     const policyText = state.get().catalog?.checkout?.policy_text;
     elements.step.innerHTML = '<h2 class="bk-step-title" tabindex="-1">Your details</h2>'
       + renderDetails({ values: state.get().details, errors: {}, policyText })
-      + '<div class="bk-actions"><button type="button" class="button button-outline" data-action="back">Back</button>'
-      + '<button type="submit" class="button button-gold" form="bk-details">Continue</button></div>';
+      + renderActionBar({ step: 3, primary: '<button type="submit" class="button button-gold" form="bk-details">Review &amp; confirm</button>' });
     elements.step.setAttribute('aria-busy', 'false');
     if (focus) focusTitle();
   }
@@ -688,8 +720,9 @@ if (app) {
     unmountWidgets();
     hideBanner();
     elements.count.textContent = 'Booking confirmed';
-    if (result.deposit?.status === 'captured') elements.summary.deposit.textContent = `${formatMoney(result.deposit.total_cents)} paid`;
-    if (elements.summaryCta) elements.summaryCta.hidden = true;
+    if (result.deposit?.status === 'captured') {
+      setSummaryValue(elements.summary.deposit, { title: formatMoney(result.deposit.total_cents), sub: 'Paid' });
+    }
     elements.progress.forEach((item) => {
       item.removeAttribute('aria-current');
       item.querySelector('.bk-progress-label')?.removeAttribute('role');

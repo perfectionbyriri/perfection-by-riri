@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   SQUARE_SDK_URLS, TURNSTILE_URL, buildAppointmentBody, createSubmitGuard, ensureIdempotencyKey,
-  mapError, payLabel, renderReview, squareSdkUrl
+  heroPhotoFor, mapError, payLabel, renderReview, squareSdkUrl
 } from '../../New Perfection/js/booking/checkout.js';
 
 const DEPOSIT = { required: true, deposit_cents: 5000, fee_cents: 0, total_cents: 5000, fee_basis_points: 0 };
@@ -145,25 +145,16 @@ test('the review shows the server quote, the card field and no fee line at 0%', 
   assert.match(withFee, /Card processing fee \(3%\)[\s\S]*\$1\.50/);
 });
 
-test('renderReview renders the Cinematic Hero Scene with editorial hero photo, 4-column strip, Edit links and unified Back/Pay bar', () => {
-  const withBeforeAfterPhoto = {
-    ...shaping,
-    photo: { src: '/images/Brow%20Lamination%20%26%20Tint/brow-lamination-tint.webp', alt: 'Before/After collage', focal: '50% 35%' }
-  };
-  const html = renderReview({ service: withBeforeAfterPhoto, details, timeLabel: 'Tuesday, December 15 · 4:30 PM' });
-  assert.match(html, /class="bk-cinema-hero"/);
-  // Uses the wide editorial hero photo rather than the service's square before/after collage
-  assert.match(html, /src="\/images\/hero\/hero-lash\.webp"/);
-  assert.match(html, /object-position:\s*78% 42%/);
-  assert.match(html, /Your appointment,<br><em>considered\.<\/em>/);
-  assert.match(html, /Personal by design\.<br>Perfection in the details\./);
-  assert.match(html, /class="bk-cinema-grid"/);
+test('Variant C: renderReview starts with the 4-column strip (the page hero carries the photo) and ends with the shared action bar', () => {
+  const html = renderReview({ service: shaping, details, timeLabel: 'Tuesday, December 15 · 4:30 PM' });
+  assert.doesNotMatch(html, /bk-cinema-hero|bk-cinema-photo|Your appointment,/);
+  assert.match(html, /^<form class="bk-form bk-cinema" id="bk-checkout" novalidate><div class="bk-cinema-grid">/);
   assert.match(html, /data-goto-step="1"/);
   assert.match(html, /data-goto-step="2"/);
   assert.match(html, /data-goto-step="3"/);
   assert.match(html, /Service price: \$45\.00/);
   assert.match(html, /\$0\.00/);
-  assert.match(html, /class="bk-actions bk-cinema-bar"[\s\S]*data-action="back"[\s\S]*class="button button-gold bk-pay"/);
+  assert.match(html, /<div class="bk-actions bk-cinema-bar"><button type="button" class="button button-outline" data-action="back">Back<\/button><p class="bk-cinema-address">18205 Alderwood Mall Pkwy A, Suite 918 &middot; Lynnwood, WA 98037<\/p><button type="submit" class="button button-gold bk-pay"/);
 });
 
 test('the submit guard ignores a second submit while the first is in flight', () => {
@@ -185,7 +176,7 @@ test('the Square SDK URL follows checkout.square.environment', () => {
   assert.equal(TURNSTILE_URL, 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit');
 });
 
-test('renderReview picks the editorial hero photo that matches the service group', () => {
+test('heroPhotoFor picks the editorial hero photo that matches the service group', () => {
   const cases = [
     ['brows', '/images/hero/brow-hero.webp', 'Close-up of laminated and shaped brows'],
     ['permanent-makeup', '/images/hero/pmu-hero.webp', 'Permanent makeup with ombré brows, eyeliner and lip blush'],
@@ -194,7 +185,9 @@ test('renderReview picks the editorial hero photo that matches the service group
     [undefined, '/images/hero/hero-lash.webp', 'Close-up of a woman with softly closed eyes and long, delicate lash extensions']
   ];
   for (const [group, src, alt] of cases) {
-    const html = renderReview({ service: { ...shaping, group }, details, timeLabel: 'Tuesday, December 15 · 4:30 PM' });
-    assert.match(html, new RegExp(`class="bk-cinema-photo" src="${src.replace(/[.]/g, '\\.')}" alt="${alt}"`), `group ${group}`);
+    const photo = heroPhotoFor({ ...shaping, group });
+    assert.equal(photo.src, src, `group ${group}`);
+    assert.equal(photo.alt, alt, `group ${group}`);
+    assert.match(photo.focal, /^\d+% \d+%$/);
   }
 });

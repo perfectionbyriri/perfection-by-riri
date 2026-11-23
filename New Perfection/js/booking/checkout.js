@@ -6,6 +6,7 @@
 // widgets. Every amount shown here comes from the server quote; the UI only
 // formats cents and never sends an amount back.
 
+import { renderActionBar } from './action-bar.js';
 import { escapeHtml } from './html.js';
 import { formatDuration } from './render-services.js';
 import { formatPhone, phoneDigits } from './validate.js';
@@ -174,8 +175,6 @@ export function splitTimeLabel(timeLabel) {
 
 export function renderReview({ service, details = {}, timeLabel = '' }) {
   const deposit = service.deposit ?? {};
-  const photo = heroPhotoFor(service);
-  const { focal } = photo;
   const name = `${trimmed(details.first_name)} ${trimmed(details.last_name)}`.trim();
   const email = trimmed(details.email);
   const phone = formatPhone(trimmed(details.phone));
@@ -216,15 +215,6 @@ export function renderReview({ service, details = {}, timeLabel = '' }) {
   const dateHtml = escapeHtml(datePart).replace(/ (\d+)$/, '&nbsp;$1');
 
   return '<form class="bk-form bk-cinema" id="bk-checkout" novalidate>'
-    + '<div class="bk-cinema-hero">'
-    + `<img class="bk-cinema-photo" src="${escapeHtml(photo.src)}" alt="${escapeHtml(photo.alt ?? '')}" style="object-position: ${escapeHtml(focal)}" loading="eager" decoding="async">`
-    + '<div class="bk-cinema-hero-inner">'
-    + '<div class="bk-cinema-hero-lead">'
-    + '<p class="bk-cinema-kicker">Step 04 of 04 &middot; Final review</p>'
-    + '<p class="bk-cinema-title">Your appointment,<br><em>considered.</em></p>'
-    + '</div>'
-    + '<p class="bk-cinema-caption">Personal by design.<br>Perfection in the details.</p>'
-    + '</div></div>'
     + '<div class="bk-cinema-grid">'
     + '<div class="bk-cinema-col">'
     + `<div class="bk-cinema-col-head"><h3 class="bk-cinema-col-label">01 &middot; Treatment</h3><button type="button" class="bk-cinema-edit" data-goto-step="1">Edit ${EDIT_ARROW_SVG}</button></div>`
@@ -251,10 +241,9 @@ export function renderReview({ service, details = {}, timeLabel = '' }) {
     + card
     + '<div class="bk-turnstile" id="bk-turnstile"></div>'
     + '</div>'
-    + '<div class="bk-actions bk-cinema-bar">'
-    + '<button type="button" class="button button-outline" data-action="back">Back</button>'
-    + '<p class="bk-cinema-address">18205 Alderwood Mall Pkwy A, Suite 918 &middot; Lynnwood, WA 98037</p>'
-    + `<button type="submit" class="button button-gold bk-pay" data-label="${escapeHtml(payLabel(deposit))}">${escapeHtml(payLabel(deposit))}</button>`
-    + '</div>'
+    + renderActionBar({
+      step: 4,
+      primary: `<button type="submit" class="button button-gold bk-pay" data-label="${escapeHtml(payLabel(deposit))}">${escapeHtml(payLabel(deposit))}</button>`
+    })
     + '</form>';
 }
