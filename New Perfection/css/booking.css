@@ -155,7 +155,7 @@
 
 .book-page .bk .button-gold::before,
 .book-page .bk-bar .button-gold::before {
-  background: var(--bk-ink);
+  background: var(--bk-gold-fill);
 }
 
 .book-page .bk .button-outline {

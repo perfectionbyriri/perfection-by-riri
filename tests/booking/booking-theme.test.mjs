@@ -132,3 +132,9 @@ test('Bodoni at small and medium sizes is sturdier: weight 600, opsz 9; open/sel
   assert.match(css, /\.bk-group\.is-open \.bk-cat-title\s*\{\s*color:\s*var\(--bk-ink\)/);
   assert.match(css, /\.bk-card\[aria-pressed="true"\] \.bk-card-name\s*\{\s*color:\s*var\(--bk-ink\)/);
 });
+
+test('gold button hover sweep is a light gold fill, so the dark button text stays readable', () => {
+  const rule = css.match(/\.book-page \.bk \.button-gold::before,[\s\S]*?\{([^}]*)\}/)?.[1] ?? '';
+  assert.match(rule, /background:\s*var\(--bk-gold-fill\)/);
+  assert.doesNotMatch(rule, /var\(--bk-ink\)/);
+});
