@@ -9,6 +9,12 @@ name: Setmore live verification
 # only public service data, counts, dates and times.
 
 "on":
+  # The push trigger only registers this workflow while it lives on a feature
+  # branch (GitHub dispatches only known workflows). On push, inputs.mode is
+  # empty, so both jobs are skipped and nothing calls Setmore.
+  push:
+    paths:
+      - .github/workflows/setmore-verify.yml
   workflow_dispatch:
     inputs:
       mode:
