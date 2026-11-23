@@ -157,7 +157,12 @@ test('booking.css adds the error token, Cinematic Hero Scene rules, and keeps sq
   assert.ok(step5Head, 'step 5 head rule');
   assert.doesNotMatch(step5Head[1], /display\s*:\s*none/);
   assert.match(step5Head[1], /clip\s*:\s*rect\(0,\s*0,\s*0,\s*0\)/);
-  assert.ok(!/box-shadow\s*:(?!\s*none)/.test(css), 'no shadows');
+  // The only box-shadow allowed is the inset page-colour fill that hides the browser's autofill tint.
+  const autofillBlocks = /[^{}]*:-?(?:webkit-)?autofill[^{}]*\{[^}]*\}/g;
+  for (const block of css.match(autofillBlocks) ?? []) {
+    for (const shadow of block.matchAll(/box-shadow\s*:\s*([^;}]+)/g)) assert.match(shadow[1], /^0 0 0 1000px var\(--bk-bg\) inset$/, 'autofill fill');
+  }
+  assert.ok(!/box-shadow\s*:(?!\s*none)/.test(css.replace(autofillBlocks, '')), 'no shadows');
   for (const match of css.matchAll(/border-radius\s*:\s*([^;}]+)/g)) assert.equal(match[1].trim(), '0', 'square corners');
 });
 

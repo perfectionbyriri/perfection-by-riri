@@ -1192,6 +1192,9 @@
   margin-top: 24px;
 }
 
+/* No double-tap zoom on the booking page (taps stay taps). */
+.book-page { touch-action: manipulation; }
+
 .bk-field { display: flex; flex-direction: column; min-width: 0; }
 .bk-field-wide { grid-column: 1 / -1; }
 
@@ -1226,6 +1229,23 @@
 
 .bk-input::placeholder { color: var(--bk-subtle); }
 
+/* Browser autofill paints the field blue; keep the design's transparent line field. */
+.bk-input:-webkit-autofill,
+.bk-input:-webkit-autofill:hover,
+.bk-input:-webkit-autofill:focus,
+.bk-input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px var(--bk-bg) inset;
+  box-shadow: 0 0 0 1000px var(--bk-bg) inset;
+  -webkit-text-fill-color: var(--bk-ink);
+  caret-color: var(--bk-ink);
+  transition: border-color 260ms var(--bk-ease), background-color 600000s 0s;
+}
+
+.bk-input:autofill {
+  box-shadow: 0 0 0 1000px var(--bk-bg) inset;
+  color: var(--bk-ink);
+}
+
 .bk-textarea { min-height: 96px; resize: vertical; }
 
 .bk-input:focus { outline: none; border-bottom: 2px solid var(--bk-gold-bright); padding-bottom: 8px; }
@@ -1255,7 +1275,7 @@
 }
 
 .bk-checkbox:focus-visible { outline: 2px solid var(--bk-gold-bright); outline-offset: 3px; }
-.bk-consent-label { font-size: 13px; line-height: 1.6; color: var(--bk-ink); cursor: pointer; }
+.bk-consent-label { font-size: 12px; line-height: 1.7; letter-spacing: .9px; text-transform: uppercase; color: var(--bk-ink); cursor: pointer; }
 .bk-consent .bk-field-error { grid-column: 2; }
 
 .bk-privacy { margin-top: 25px; }

@@ -17,6 +17,7 @@ import { renderDetails, renderErrorSummary } from './render-details.js';
 import { continueBlocked, createState, parseDeepLink, resolveDeepLink, ribbonValues, stepFromHistory, summaryLine } from './state.js';
 import { FIELD_ORDER, formatPhone, validateDetails } from './validate.js';
 import { swipeDirection } from './swipe.js';
+import { preventMultiClickSelection } from './selection.js';
 
 const STEP_NAMES = ['Service', 'Date & time', 'Your details', 'Deposit & confirm'];
 
@@ -24,6 +25,7 @@ const app = document.querySelector('[data-booking-app]');
 
 if (app) {
   document.documentElement.classList.add('bk-enhanced');
+  preventMultiClickSelection(document);
 
   const api = createApi();
   const elements = {
