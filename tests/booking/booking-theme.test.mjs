@@ -179,7 +179,10 @@ test('the FAQ notice is a full-row panel built from theme tokens only', () => {
 });
 
 test('the FAQ notice stands out: warm panel, 2px gold frame, big text, button-style link, large checkbox', () => {
-  assert.ok(luminance(page['--bk-notice-bg']) > 0.9, 'notice panel is a light warm tint');
+  const faqBlock = read('css/faq.css').match(/\.faq-subsection\s*\{[^}]*background:\s*(#[0-9a-f]{6})/i)?.[1];
+  assert.ok(faqBlock, 'FAQ block color found');
+  assert.equal(page['--bk-notice-bg'].toLowerCase(), faqBlock.toLowerCase(), 'the notice uses the FAQ block color');
+  assert.ok(luminance(page['--bk-notice-bg']) > 0.7, 'notice panel is a light warm tint');
   assert.ok(contrast(page['--bk-ink'], page['--bk-notice-bg']) >= 7, 'ink on the notice panel');
   assert.ok(contrast(page['--bk-gold-text'], page['--bk-notice-bg']) >= 4.5, 'gold text on the notice panel');
   const rule = (sel) => css.match(new RegExp(`\\n${sel.replace(/[.\\[\\]]/g, '\\\\$&')}\\s*\\{([^}]*)\\}`))?.[1] ?? '';
