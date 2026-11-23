@@ -34,7 +34,7 @@
 /* The bordered "Let's find your look" button shares .le-text-link but fills
    on hover instead of drawing an underline: keep its own fill transition. */
 .le-text-link.le-result-cta {
-  background: transparent;
+  background-image: none;
   transition: background-color 250ms var(--ease-premium), color 250ms var(--ease-premium), border-color 250ms var(--ease-premium);
 }
 
