@@ -173,3 +173,30 @@ test('main.js findService carries the group key that picks the Step 4/5 hero pho
   assert.ok(body, 'findService');
   assert.match(body[1], /return \{ \.\.\.service, group: group\.key \}/);
 });
+
+test('Variant C: the head is a monolith hero with the studio photo, one h1 and the progress inside', () => {
+  const head = /<header class="bk-head bk-monolith"[^>]*>([\s\S]*?)<\/header>/.exec(html);
+  assert.ok(head, 'monolith head');
+  assert.match(head[1], /<img class="bk-monolith-photo" src="\.\.\/images\/booking\/lash-tools\.jpg" width="1536" height="1024" alt="Precision lash tweezers resting in an organizer tray of extensions"/);
+  assert.match(head[1], /<h1 class="bk-title" id="bk-title">Book your<br><em>appointment\.<\/em><\/h1>/);
+  assert.match(head[1], /<p class="bk-monolith-display" aria-hidden="true" hidden><\/p>/);
+  assert.match(head[1], /<p class="bk-monolith-kicker" hidden><\/p>/);
+  assert.match(head[1], /Personal by design\.<br>Perfection in the details\./);
+  assert.match(head[1], /<ol class="bk-progress"/);
+});
+
+test('Variant C: the live selection ribbon replaces the sidebar and keeps Edit outside the copied list', () => {
+  const ribbon = /<aside class="bk-ribbon"[^>]*>([\s\S]*?)<\/aside>/.exec(html);
+  assert.ok(ribbon, 'ribbon');
+  for (const label of ['01 &middot; Treatment', '02 &middot; Date &amp; time', '03 &middot; Due today']) assert.ok(ribbon[1].includes(label), label);
+  const list = /<dl class="bk-summary-list" id="bk-summary-list">([\s\S]*?)<\/dl>/.exec(ribbon[1]);
+  assert.ok(list, 'summary list inside the ribbon');
+  for (const key of ['service', 'time', 'deposit']) {
+    assert.match(list[1], new RegExp(`<dd data-summary="${key}"><span class="bk-ribbon-title">[^<]+</span><span class="bk-ribbon-sub"></span></dd>`), key);
+  }
+  assert.doesNotMatch(list[1], /bk-cinema-edit/);
+  assert.equal((ribbon[1].match(/class="bk-cinema-edit"/g) ?? []).length, 2);
+  assert.match(ribbon[1], /data-goto-step="1"/);
+  assert.match(ribbon[1], /data-goto-step="2"/);
+  assert.doesNotMatch(html, /bk-summary-cta|bk-summary-action|class="bk-summary"/);
+});
