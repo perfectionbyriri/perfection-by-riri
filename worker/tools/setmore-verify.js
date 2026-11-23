@@ -18,7 +18,7 @@ import path from 'node:path';
 import { createCatalogService } from '../src/catalog.js';
 import { loadConfig } from '../src/config.js';
 import { createCustomerResolver } from '../src/customers.js';
-import { createSetmoreClient } from '../src/setmore/client.js';
+import { SETMORE_SLOT_SPACING_MINUTES, createSetmoreClient } from '../src/setmore/client.js';
 import { createSlotsService } from '../src/slots.js';
 import { createTokenManager } from '../src/setmore/token-manager.js';
 import { addDays, formatRfc3339Local, instantToZonedParts, studioToday, weekWindow } from '../src/time.js';
@@ -49,7 +49,7 @@ async function fetchSlots(client, config, { duration, startAt, endAt, workingHou
       start_at: startAt,
       end_at: endAt,
       timezone: config.studioTimezone,
-      slot_limit: 15,
+      slot_limit: SETMORE_SLOT_SPACING_MINUTES,
       double_booking: false,
       working_hours: workingHours
     }
@@ -125,6 +125,13 @@ export async function runRead({ client, meta, config, now = () => new Date(), lo
   return { ok, catalog, conflicts, outsideHours, bufferHonoured };
 }
 
+// Setmore error codes are short snake_case identifiers; anything else could echo
+// request data, so it is hidden from the public log.
+export function safeUpstreamCode(code) {
+  if (code === undefined || code === null) return null;
+  return /^[a-z0-9_]{1,40}$/.test(String(code)) ? String(code) : 'other';
+}
+
 export const VERIFY_LABEL = 'pbr-verify';
 export const VERIFY_NOTE = 'Setmore API verification by perfectionbyriri.com — safe to delete.';
 const MIN_DAYS_AHEAD = 14;
@@ -178,7 +185,7 @@ export async function runWrite({ client, catalogService, slots, resolver, config
   }
   log(`customer fields: ${JSON.stringify(result.customerFields)}`);
 
-  const booking = await client.createBooking({
+  const body = {
     type: 'APPOINTMENT',
     account_id: config.setmoreAccountId,
     provider_id: config.setmoreProviderId,
@@ -189,7 +196,34 @@ export async function runWrite({ client, catalogService, slots, resolver, config
     cost: service.price_cents / 100,
     label: VERIFY_LABEL,
     notes: VERIFY_NOTE
-  });
+  };
+  let booking;
+  try {
+    booking = await client.createBooking(body);
+  } catch (error) {
+    // A timeout or 5xx leaves the outcome unknown: the booking may exist. Find our
+    // marked booking at that start and remove it, or ask the owner to check by hand.
+    if (!(error?.name === 'SetmoreUnavailable' || error?.name === 'SetmoreInvalidResponse')) throw error;
+    log(`booking create outcome unknown (${error.name}); looking for the test booking`);
+    const manual = `CHECK SETMORE: a test booking may exist at ${startParts.date} ${startParts.time} (${tz}); delete it by hand.`;
+    try {
+      const day = weekWindow(startParts.date, tz);
+      const listed = await client.listBookingsByStaff({ staffId: config.setmoreProviderId, startAt: day.startAt, endAt: day.endAt });
+      const stray = listed.find((item) => item?.label === VERIFY_LABEL && item?.service_id === service.service_id
+        && Date.parse(item?.start_at) === Date.parse(startAt));
+      if (stray) {
+        await client.request('DELETE', `/bookings/${encodeURIComponent(stray.id)}`);
+        result.deleted = true;
+        log('stray test booking found and deleted');
+      } else {
+        log('no test booking found at that start');
+      }
+    } catch (lookupError) {
+      log(`lookup or delete failed (${lookupError?.name || 'Error'}). ${manual}`);
+    }
+    log(`RESULT ok=false reason=create_outcome_unknown deleted=${result.deleted}`);
+    return result;
+  }
   log('booking created');
 
   try {
@@ -285,7 +319,8 @@ async function main() {
   } catch (error) {
     // Print the error class only; messages could echo request details.
     // Upstream error codes are Setmore's own short codes (no request data).
-    const code = error?.upstreamCode ? ` (${error.upstreamCode})` : '';
+    const safe = safeUpstreamCode(error?.upstreamCode);
+    const code = safe ? ` (${safe})` : '';
     console.error(`Verification failed unexpectedly: ${error?.name || 'Error'}${code}`);
     process.exitCode = 1;
   }

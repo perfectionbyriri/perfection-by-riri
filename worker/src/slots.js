@@ -2,12 +2,13 @@
 //
 // One request covers one studio week: week_start 00:00 local to +7 days
 // 00:00 local (the two boundaries may carry different offsets across DST).
-// Setmore returns starts on a 5-minute grid plus an empty key for the end
-// date; the BFF keeps the seven requested days, removes starts inside the
-// lead time or past the horizon. Setmore's own slot interval decides which
-// starts exist (owner, 2026-11-23); the BFF does not thin them further.
+// Setmore returns starts spaced by the `slot_limit` it is sent (minutes; the
+// BFF sends SETMORE_SLOT_SPACING_MINUTES) plus an empty key for the end date.
+// The BFF keeps the seven requested days and removes starts inside the lead
+// time or past the horizon; it does not thin them further.
 // Slots are matched by instant, never by string.
 
+import { SETMORE_SLOT_SPACING_MINUTES } from './setmore/client.js';
 import { BookingError } from './errors.js';
 import { addDays, formatRfc3339Local, formatSlotLabel, instantToZonedParts, studioToday, weekWindow } from './time.js';
 
@@ -81,7 +82,7 @@ export function createSlotsService({ client, catalog, config, cache = null, now 
       startAt,
       endAt,
       timezone: tz,
-      slotLimit: 15
+      slotLimit: SETMORE_SLOT_SPACING_MINUTES
     });
     await writeCached(key, days);
     return days;

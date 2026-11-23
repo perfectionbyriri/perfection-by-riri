@@ -271,7 +271,8 @@ test('wrangler.jsonc preview env: live Setmore, mock payments, no cron or e-mail
   assert.equal(preview.vars.SETMORE_PROVIDER_ID, config.vars.SETMORE_PROVIDER_ID);
   assert.equal(preview.vars.ALLOWED_ORIGINS, 'https://perfection-by-riri-preview.perfection-byriri.workers.dev');
   assert.deepEqual(preview.kv_namespaces.map((item) => item.binding), ['BOOKING_KV']);
-  assert.equal(preview.triggers, undefined);
+  // Wrangler inherits top-level `triggers` into environments; an explicit empty list disables the cron.
+  assert.deepEqual(preview.triggers, { crons: [] });
   assert.equal(preview.send_email, undefined);
   for (const secret of ['SETMORE_REFRESH_TOKEN', 'CUSTOMER_HASH_SECRET', 'SQUARE_ACCESS_TOKEN']) assert.ok(!(secret in preview.vars), secret);
   // Production stays as it was.

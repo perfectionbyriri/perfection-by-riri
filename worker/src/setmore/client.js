@@ -36,6 +36,10 @@ async function errorCode(response) {
   }
 }
 
+// Setmore reads `slot_limit` as the spacing between slot starts in minutes
+// (ARCHITECTURE §6). 15 matches the studio's Setmore booking page (2026-11-23).
+export const SETMORE_SLOT_SPACING_MINUTES = 15;
+
 export function createSetmoreClient({
   apiBase,
   tokenManager,
@@ -163,7 +167,7 @@ export function createSetmoreClient({
 
     // Setmore treats slot_limit as the spacing between starts in minutes: 5 gave a 5-minute grid
     // (run 44990258119), 100 a 100-minute grid (run 45122471180). 15 matches the booking page.
-    async getSlots({ accountId, providerId, duration, startAt, endAt, timezone, slotLimit = 15 }) {
+    async getSlots({ accountId, providerId, duration, startAt, endAt, timezone, slotLimit = SETMORE_SLOT_SPACING_MINUTES }) {
       const body = await request('GET', '/slots', {
         query: {
           account_id: accountId, provider_id: providerId, duration, start_at: startAt, end_at: endAt,

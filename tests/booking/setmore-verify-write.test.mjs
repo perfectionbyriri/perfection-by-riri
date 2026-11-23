@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createSlotsService } from '../../worker/src/slots.js';
-import { runWrite } from '../../worker/tools/setmore-verify.js';
+import { runWrite, safeUpstreamCode } from '../../worker/tools/setmore-verify.js';
 import { createClock } from './helpers/fakes.mjs';
 
 const CONFIG = {
@@ -15,7 +15,7 @@ const SERVICES = [
 ];
 
 // Studio "today" is 2026-11-22; the first allowed week starts 2026-12-06 (closed Sunday).
-function fakeClient({ rereadThrows = false, deleteFails = false, slotStaysAfterCreate = false } = {}) {
+function fakeClient({ rereadThrows = false, deleteFails = false, slotStaysAfterCreate = false, createOutcomeUnknown = false, lookupThrows = false } = {}) {
   const state = { booked: false, created: null, deleted: [], calls: [] };
   const free = (start, end) => ({ start_at: start, end_at: end });
   return {
@@ -35,6 +35,8 @@ function fakeClient({ rereadThrows = false, deleteFails = false, slotStaysAfterC
     async createBooking(body) {
       state.created = body;
       state.booked = true;
+      // A timeout or 5xx: Setmore may have stored the booking although the call failed.
+      if (createOutcomeUnknown) throw Object.assign(new Error('timeout'), { name: 'SetmoreUnavailable' });
       return { id: 'booking-secret-id', ...body };
     },
     async request(method, path) {
@@ -48,6 +50,7 @@ function fakeClient({ rereadThrows = false, deleteFails = false, slotStaysAfterC
       throw new Error(`unexpected ${method} ${path}`);
     },
     async listBookingsByStaff() {
+      if (lookupThrows) throw Object.assign(new Error('down'), { name: 'SetmoreUnavailable' });
       return state.created ? [{ id: 'booking-secret-id', ...state.created, label: 'pbr-verify', consumer_ids: ['cust-secret'] }] : [];
     },
     async getCustomer(id) {
@@ -138,4 +141,27 @@ test('runWrite never logs the contact or customer data', async () => {
   const { lines } = await run();
   const text = lines.join('\n');
   for (const secret of [CONTACT.email, CONTACT.phone, 'cust-secret', 'booking-secret-id']) assert.ok(!text.includes(secret), secret);
+});
+
+test('runWrite finds and deletes the booking when the create outcome is unknown', async () => {
+  const { result, client } = await run({ createOutcomeUnknown: true });
+  assert.equal(result.ok, false);
+  assert.equal(result.deleted, true);
+  assert.deepEqual(client.state.deleted, ['/bookings/booking-secret-id']);
+});
+
+test('runWrite asks for manual cleanup when an unknown-outcome booking cannot be looked up', async () => {
+  const { result, lines } = await run({ createOutcomeUnknown: true, lookupThrows: true });
+  assert.equal(result.ok, false);
+  assert.equal(result.deleted, false);
+  const text = lines.join('\n');
+  assert.match(text, /CHECK SETMORE/);
+  assert.match(text, /2026-12-07 10:00/);
+});
+
+test('safeUpstreamCode passes short Setmore codes and hides anything else', () => {
+  assert.equal(safeUpstreamCode('resource_conflict'), 'resource_conflict');
+  assert.equal(safeUpstreamCode('http_400'), 'http_400');
+  assert.equal(safeUpstreamCode('Customer jane@example.com exists'), 'other');
+  assert.equal(safeUpstreamCode(undefined), null);
 });
