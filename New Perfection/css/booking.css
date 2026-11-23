@@ -145,17 +145,17 @@
 .book-page .detail-dialog p,
 .book-page .detail-dialog li { color: var(--bk-muted); }
 
-/* Gold and hairline outline buttons on the light page */
+/* Primary buttons: white with a gold border, filling gold on hover. Outline buttons: hairline. */
 .book-page .bk .button-gold,
 .book-page .bk-bar .button-gold {
-  background: var(--bk-gold);
-  color: #0b0b0a;
+  background: #fff;
+  color: var(--bk-ink);
   border-color: var(--bk-gold);
 }
 
 .book-page .bk .button-gold::before,
 .book-page .bk-bar .button-gold::before {
-  background: var(--bk-gold-fill);
+  background: var(--bk-gold);
 }
 
 .book-page .bk .button-outline {
@@ -172,8 +172,8 @@
   .book-page .bk .button-gold:hover,
   .book-page .bk-bar .button-gold:hover {
     background: var(--bk-gold);
-    border-color: var(--bk-ink);
-    color: #0b0b0a;
+    border-color: var(--bk-gold);
+    color: var(--bk-ink);
   }
   .book-page .bk .button-outline:hover {
     border-color: var(--bk-gold);
