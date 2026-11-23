@@ -51,6 +51,7 @@ test('maps Setmore fields to the public service shape', () => {
     blurb: 'Lifted, curled lashes',
     duration_minutes: 60,
     price_cents: 11500,
+    notice: null,
     photo: { ...PHOTO, focal: '50% 50%' },
     deposit: { required: true, deposit_cents: 5000, fee_cents: 0, total_cents: 5000, fee_basis_points: 0 }
   });
@@ -266,4 +267,25 @@ test('every non-removal/shaping service has a short site-based blurb; full sets 
     const fullSet = ['lash-extensions', 'wispy-lashes'].includes(s.group) && s.mock_id !== 'svc_lash_removal';
     assert.equal(/from 150 lashes per eye/i.test(s.blurb ?? ''), fullSet, s.mock_id);
   }
+});
+
+test('a service meta notice flows to the catalog service, others get null', () => {
+  const { groups } = merge(smallMeta([
+    { service_id: 'svc_lash_lift', group: 'lash-lift', order: 10, deposit: 'standard', notice: 'lip-blushing-faq' }
+  ]));
+  assert.equal(groups[0].services[0].notice, 'lip-blushing-faq');
+  const plain = merge(smallMeta([{ service_id: 'svc_lash_lift', group: 'lash-lift', order: 10, deposit: 'standard' }]));
+  assert.equal(plain.groups[0].services[0].notice, null);
+});
+
+test('a non-string or empty notice is invalid meta', () => {
+  for (const notice of [5, '', '   ', {}]) {
+    assert.throws(() => validateMeta(smallMeta([{ service_id: 'svc_lash_lift', group: 'lash-lift', order: 10, deposit: 'standard', notice }])), /notice/);
+  }
+});
+
+test('services-meta.json flags exactly the two lip services with the FAQ notice', () => {
+  const real = JSON.parse(fs.readFileSync(new URL('../../worker/config/services-meta.json', import.meta.url), 'utf8'));
+  const flagged = real.services.filter((s) => s.notice).map((s) => [s.mock_id, s.notice]);
+  assert.deepEqual(flagged, [['svc_lip_blushing', 'lip-blushing-faq'], ['svc_lip_blushing_touch_up', 'lip-blushing-faq']]);
 });

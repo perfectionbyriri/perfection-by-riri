@@ -87,7 +87,8 @@
         "alt": "Before and after: natural lips, then the same lips with a brighter rosy lip blush"
       },
       "deposit": "standard",
-      "blurb": "Soft, even color with a naturally refreshed finish."
+      "blurb": "Soft, even color with a naturally refreshed finish.",
+      "notice": "lip-blushing-faq"
     },
     {
       "service_id": "80ccb3c0-4a08-431b-b402-8468102223df",
@@ -152,7 +153,8 @@
       "order": 60,
       "photo": null,
       "deposit": "standard",
-      "blurb": "A lighter visit to return color, shape and definition."
+      "blurb": "A lighter visit to return color, shape and definition.",
+      "notice": "lip-blushing-faq"
     },
     {
       "service_id": "c9abc91f-d087-46d6-95bc-bb2c11c5d40f",

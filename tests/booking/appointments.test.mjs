@@ -315,6 +315,7 @@ test('validateAppointmentInput normalizes input and drops unknown fields', () =>
     startAt: '2026-11-23T13:00:00-08:00',
     customer: { firstName: 'Anna', lastName: 'Smith', email: 'anna@example.com', phone: '+14258450045' },
     notes: 'First visit',
+    faqAcknowledged: false,
     payment: { sourceId: 'cnon:card-nonce-ok', verificationToken: 'verf-1' }
   });
 });
@@ -332,4 +333,41 @@ test('validateAppointmentInput reports every invalid field', () => {
   ]);
   assert.throws(() => validateAppointmentInput(null), BookingError);
   assert.throws(() => validateAppointmentInput({ ...RAW, customer: { ...RAW.customer, email: `${'a'.repeat(250)}@b.co` } }), BookingError);
+});
+
+// Lip Blushing carries the FAQ notice: the server must see the client's confirmation.
+const LIP = { ...RAW, service_id: 'svc_lip_blushing', start_at: '2026-11-23T10:00:00-08:00' };
+
+test('Lip Blushing without faq_acknowledged is rejected with the field error, nothing is charged or booked', async () => {
+  const { service, payments, state } = setup();
+  const err = await rejectsWith(service.create(LIP), 'VALIDATION_FAILED');
+  assert.equal(err.fields.faq_acknowledged, 'Please confirm you have read the FAQ.');
+  assert.deepEqual(methods(payments), []);
+  assert.equal(state.bookings.size, 0);
+});
+
+test('Lip Blushing with faq_acknowledged books and the Setmore note records the confirmation', async () => {
+  const { service, state } = setup();
+  const { status } = await service.create({ ...LIP, faq_acknowledged: true });
+  assert.equal(status, 201);
+  const [booking] = state.bookings.values();
+  assert.match(booking.notes, /First visit/);
+  assert.match(booking.notes, /Lip Blushing FAQ read and confirmed online: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2} (AM|PM) Pacific\./);
+});
+
+test('an unflagged service ignores faq_acknowledged and adds no confirmation line', async () => {
+  const { service, state } = setup();
+  const { status } = await service.create({ ...RAW, faq_acknowledged: true });
+  assert.equal(status, 201);
+  const [booking] = state.bookings.values();
+  assert.doesNotMatch(booking.notes, /FAQ/);
+});
+
+test('a 500-character client note still books for a flagged service', async () => {
+  const { service, state } = setup();
+  const { status } = await service.create({ ...LIP, faq_acknowledged: true, notes: 'n'.repeat(500) });
+  assert.equal(status, 201);
+  const [booking] = state.bookings.values();
+  assert.ok(booking.notes.startsWith('n'.repeat(500)));
+  assert.match(booking.notes, /Lip Blushing FAQ read and confirmed online:/);
 });

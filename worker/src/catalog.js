@@ -63,6 +63,7 @@ export function validateMeta(meta) {
       throw invalidMeta(`display_name of ${id}`);
     }
     if (service.blurb !== undefined && (typeof service.blurb !== 'string' || service.blurb.length > 120)) throw invalidMeta(`blurb of ${id}`);
+    if (service.notice !== undefined && (typeof service.notice !== 'string' || !service.notice.trim())) throw invalidMeta(`notice of ${id}`);
     if (service.photo !== undefined && service.photo !== null) checkPhoto(service.photo, id);
   }
 }
@@ -117,6 +118,7 @@ export function mergeCatalog({ services, meta, providerId, depositCents, feeBasi
       service_id: entry.service_id,
       name: entry.display_name ?? service.title,
       blurb: entry.blurb ?? null,
+      notice: entry.notice ?? null,
       duration_minutes: durationMinutes,
       price_cents: priceCents,
       photo: publicPhoto(entry.photo ?? group.photo),

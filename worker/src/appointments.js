@@ -69,7 +69,7 @@ export function validateAppointmentInput(raw) {
   }
 
   if (Object.keys(fields).length) throw new BookingError('VALIDATION_FAILED', { fields });
-  return { idempotencyKey, serviceId, startAt, customer: { firstName, lastName, email, phone }, notes, payment };
+  return { idempotencyKey, serviceId, startAt, customer: { firstName, lastName, email, phone }, notes, faqAcknowledged: raw.faq_acknowledged === true, payment };
 }
 
 async function sha256Hex(value) {
@@ -79,13 +79,14 @@ async function sha256Hex(value) {
 
 const dollars = (cents) => `$${(cents / 100).toFixed(2)}`;
 
-function bookingNotes(clientNotes, deposit, paymentId) {
+function bookingNotes(clientNotes, deposit, paymentId, extraLine = '') {
   const system = deposit.required
     ? `Deposit paid online via Square: ${dollars(deposit.deposit_cents)}.`
       + (deposit.fee_cents > 0 ? ` Card processing fee: ${dollars(deposit.fee_cents)}.` : '')
       + ` Square payment ${paymentId}. Booked on perfectionbyriri.com.`
     : 'Booked on perfectionbyriri.com.';
-  return clientNotes ? `${clientNotes}\n\n${system}` : system;
+  const full = extraLine ? `${system} ${extraLine}` : system;
+  return clientNotes ? `${clientNotes}\n\n${full}` : full;
 }
 
 // Setmore answered and did not process the request: safe to cancel the hold.
@@ -107,6 +108,9 @@ export function createAppointmentService({ client, catalog, slots, customers, pa
 
     const service = await catalog.getService(input.serviceId);
     if (!service) throw new BookingError('NOT_FOUND', { message: 'That service is not available for online booking.' });
+    if (service.notice && !input.faqAcknowledged) {
+      throw new BookingError('VALIDATION_FAILED', { fields: { faq_acknowledged: 'Please confirm you have read the FAQ.' } });
+    }
     const deposit = service.deposit;
     if (deposit.required && !input.payment) {
       throw new BookingError('VALIDATION_FAILED', { fields: { payment: 'Please enter your card details.' } });
@@ -151,6 +155,11 @@ export function createAppointmentService({ client, catalog, slots, customers, pa
       return fail(err);
     }
     if (!check.available) return fail(slotTaken(check.refreshedWeek));
+
+    // Recorded in the Setmore note so the owner can show the client confirmed the FAQ.
+    const faqConfirmation = service.notice
+      ? `Lip Blushing FAQ read and confirmed online: ${instantToZonedParts(now(), tz).date} ${formatSlotLabel(now(), tz)} Pacific.`
+      : '';
 
     const instant = parseInstant(input.startAt);
     const startParts = instantToZonedParts(instant, tz);
@@ -209,7 +218,7 @@ export function createAppointmentService({ client, catalog, slots, customers, pa
         start_at: startAt,
         end_at: endAt,
         cost: service.price_cents / 100,
-        notes: bookingNotes(input.notes, deposit, record.payment_id)
+        notes: bookingNotes(input.notes, deposit, record.payment_id, faqConfirmation)
       });
       if (typeof booking?.id !== 'string' || !booking.id) throw new Error('booking id missing');
     } catch (err) {
