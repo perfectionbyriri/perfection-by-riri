@@ -86,7 +86,8 @@
         "height": 695,
         "alt": "Before and after: natural lips, then the same lips with a brighter rosy lip blush"
       },
-      "deposit": "standard"
+      "deposit": "standard",
+      "blurb": "Soft, even color with a naturally refreshed finish."
     },
     {
       "service_id": "80ccb3c0-4a08-431b-b402-8468102223df",
@@ -99,7 +100,8 @@
         "height": 1500,
         "alt": "Before and after: naturally thin brows, then the same brows with a soft, shaded ombré powder finish"
       },
-      "deposit": "standard"
+      "deposit": "standard",
+      "blurb": "Airy fronts and softly shaded definition."
     },
     {
       "service_id": "6f9a994f-1408-4d06-957b-d182a07e79c9",
@@ -112,7 +114,8 @@
         "height": 1200,
         "alt": "Before and after: a bare upper lash line, then the same eye with a fine permanent eyeliner"
       },
-      "deposit": "standard"
+      "deposit": "standard",
+      "blurb": "A polished line that brings quiet focus to the eyes."
     },
     {
       "service_id": "e30b230a-c796-4ac8-9d89-32826b835bf6",
@@ -125,7 +128,8 @@
         "height": 1200,
         "alt": "Before and after: a bare upper lash line, then the same eye with a fine permanent eyeliner"
       },
-      "deposit": "standard"
+      "deposit": "standard",
+      "blurb": "Subtle pigment through the lashes for fuller-looking definition."
     },
     {
       "service_id": "5cc0bbba-740e-4c25-bc15-99982c33fd62",
@@ -138,7 +142,8 @@
         "height": 1200,
         "alt": "Before and after: a bare upper lash line, then the same eye with a fine permanent eyeliner"
       },
-      "deposit": "standard"
+      "deposit": "standard",
+      "blurb": "A softly balanced lower line with a refined finish."
     },
     {
       "service_id": "87dc8e16-ab13-4284-a6c1-deaaf096ca65",
@@ -146,7 +151,8 @@
       "group": "permanent-makeup",
       "order": 60,
       "photo": null,
-      "deposit": "standard"
+      "deposit": "standard",
+      "blurb": "A lighter visit to return color, shape and definition."
     },
     {
       "service_id": "c9abc91f-d087-46d6-95bc-bb2c11c5d40f",
@@ -154,7 +160,8 @@
       "group": "permanent-makeup",
       "order": 70,
       "photo": null,
-      "deposit": "standard"
+      "deposit": "standard",
+      "blurb": "A lighter visit to return color, shape and definition."
     },
     {
       "service_id": "2d3741ac-237a-47ec-918e-7fa48ca8fa7a",
@@ -162,7 +169,8 @@
       "group": "permanent-makeup",
       "order": 80,
       "photo": null,
-      "deposit": "standard"
+      "deposit": "standard",
+      "blurb": "A lighter visit to return color, shape and definition."
     },
     {
       "service_id": "1bc8a84c-2444-480e-9ab5-0bbf4b61606b",
@@ -170,7 +178,8 @@
       "group": "permanent-makeup",
       "order": 90,
       "photo": null,
-      "deposit": "standard"
+      "deposit": "standard",
+      "blurb": "A lighter visit to return color, shape and definition."
     },
     {
       "service_id": "82644c5f-5c73-439f-8967-8022adc38541",
@@ -178,7 +187,8 @@
       "group": "permanent-makeup",
       "order": 100,
       "photo": null,
-      "deposit": "standard"
+      "deposit": "standard",
+      "blurb": "A lighter visit to return color, shape and definition."
     },
     {
       "service_id": "cede126c-2553-4357-9916-6762843f0121",
@@ -186,7 +196,8 @@
       "group": "lash-extensions",
       "order": 10,
       "photo": null,
-      "deposit": "standard"
+      "deposit": "standard",
+      "blurb": "One extension per natural lash for a clean, individual finish. From 150 lashes per eye."
     },
     {
       "service_id": "007cb9ee-0439-457e-9365-76806f45544b",
@@ -194,7 +205,8 @@
       "group": "lash-extensions",
       "order": 20,
       "photo": null,
-      "deposit": "standard"
+      "deposit": "standard",
+      "blurb": "Individual extensions blended with light fans, soft and airy. From 150 lashes per eye."
     },
     {
       "service_id": "829d9ffc-254e-4e8e-800d-f7e58dcf70b7",
@@ -202,7 +214,8 @@
       "group": "lash-extensions",
       "order": 30,
       "photo": null,
-      "deposit": "standard"
+      "deposit": "standard",
+      "blurb": "Fine fans for a fuller, fluffy lash line. From 150 lashes per eye."
     },
     {
       "service_id": "8fef1003-d90e-4a6f-bcfa-afc168a499c8",
@@ -210,7 +223,8 @@
       "group": "lash-extensions",
       "order": 40,
       "photo": null,
-      "deposit": "standard"
+      "deposit": "standard",
+      "blurb": "Denser fans for the boldest, high-impact finish. From 150 lashes per eye."
     },
     {
       "service_id": "67a291cd-2f4c-4aad-98a9-1ab28b36b818",
@@ -218,7 +232,8 @@
       "group": "lash-extensions",
       "order": 50,
       "photo": null,
-      "deposit": "standard"
+      "deposit": "standard",
+      "blurb": "Defined, piecey finish with striking separation. From 150 lashes per eye."
     },
     {
       "service_id": "a74fa0e6-5e61-44f4-847c-627ab9f5b26b",
@@ -234,7 +249,8 @@
       "group": "wispy-lashes",
       "order": 10,
       "photo": null,
-      "deposit": "standard"
+      "deposit": "standard",
+      "blurb": "Classic with longer accents and added texture. From 150 lashes per eye."
     },
     {
       "service_id": "97e5ce4c-4dd7-486b-9b8e-bd15d0250718",
@@ -242,7 +258,8 @@
       "group": "wispy-lashes",
       "order": 20,
       "photo": null,
-      "deposit": "standard"
+      "deposit": "standard",
+      "blurb": "Hybrid with longer accents and added texture. From 150 lashes per eye."
     },
     {
       "service_id": "af3e8143-6476-448f-9837-e19b477e61c4",
@@ -250,7 +267,8 @@
       "group": "wispy-lashes",
       "order": 30,
       "photo": null,
-      "deposit": "standard"
+      "deposit": "standard",
+      "blurb": "Volume with longer accents and added texture. From 150 lashes per eye."
     },
     {
       "service_id": "d036bbc1-8fdf-4a23-879e-10c9b2c7b698",
@@ -258,7 +276,8 @@
       "group": "lash-lift",
       "order": 10,
       "photo": null,
-      "deposit": "standard"
+      "deposit": "standard",
+      "blurb": "A custom lash lift finished with tint for darker, defined lashes."
     },
     {
       "service_id": "8181342c-622a-43e1-88b4-21dcac151319",
@@ -266,7 +285,8 @@
       "group": "lash-lift",
       "order": 20,
       "photo": null,
-      "deposit": "standard"
+      "deposit": "standard",
+      "blurb": "Lifts and shapes your natural lashes for a more open look."
     },
     {
       "service_id": "c067d607-c3fd-48bc-9651-0da6d75c7f0e",
@@ -274,7 +294,8 @@
       "group": "brows",
       "order": 10,
       "photo": null,
-      "deposit": "standard"
+      "deposit": "standard",
+      "blurb": "Lifts, shapes and enhances brows with custom tint and finishing."
     },
     {
       "service_id": "72d87bc4-1f63-4a0b-869b-4619e76c861a",
@@ -282,7 +303,8 @@
       "group": "brows",
       "order": 20,
       "photo": null,
-      "deposit": "standard"
+      "deposit": "standard",
+      "blurb": "Smooths and redirects brow hairs for a fuller, polished shape."
     },
     {
       "service_id": "10bfffe1-ca8f-49d2-a3ff-f5ed6a1126e9",
@@ -290,7 +312,8 @@
       "group": "brows",
       "order": 30,
       "photo": null,
-      "deposit": "standard"
+      "deposit": "standard",
+      "blurb": "Custom color and shaping for defined, balanced brows."
     },
     {
       "service_id": "956582ea-b82b-4ef8-9d65-e10f4e3dae2c",
@@ -298,7 +321,8 @@
       "group": "brows",
       "order": 40,
       "photo": null,
-      "deposit": "none"
+      "deposit": "none",
+      "blurb": "Precise shaping designed around your natural brows."
     },
     {
       "service_id": "e0bf5b63-d4ef-4e6d-9f11-e6baec0a60b1",
@@ -306,7 +330,8 @@
       "group": "lash-refills",
       "order": 10,
       "photo": null,
-      "deposit": "standard"
+      "deposit": "standard",
+      "blurb": "Refill for your Classic set."
     },
     {
       "service_id": "075f687e-ed0c-4762-90b3-d8912e99b60d",
@@ -314,7 +339,8 @@
       "group": "lash-refills",
       "order": 20,
       "photo": null,
-      "deposit": "standard"
+      "deposit": "standard",
+      "blurb": "Refill for your Classic set."
     },
     {
       "service_id": "5899c776-3cab-434c-9112-0412a56425ae",
@@ -322,7 +348,8 @@
       "group": "lash-refills",
       "order": 30,
       "photo": null,
-      "deposit": "standard"
+      "deposit": "standard",
+      "blurb": "Refill for your Hybrid set."
     },
     {
       "service_id": "76d1a2d0-6d86-451a-8b7b-e46bf5819e78",
@@ -330,7 +357,8 @@
       "group": "lash-refills",
       "order": 40,
       "photo": null,
-      "deposit": "standard"
+      "deposit": "standard",
+      "blurb": "Refill for your Hybrid set."
     },
     {
       "service_id": "3560ab47-a878-4ead-8ace-e2963c47ea2a",
@@ -338,7 +366,8 @@
       "group": "lash-refills",
       "order": 50,
       "photo": null,
-      "deposit": "standard"
+      "deposit": "standard",
+      "blurb": "Refill for your Volume set."
     },
     {
       "service_id": "494e3e94-9de5-4fae-b86f-ea8312136ffb",
@@ -346,7 +375,8 @@
       "group": "lash-refills",
       "order": 60,
       "photo": null,
-      "deposit": "standard"
+      "deposit": "standard",
+      "blurb": "Refill for your Volume set."
     },
     {
       "service_id": "dba2f869-8b32-4f39-afab-b3758c4d0a35",
@@ -354,7 +384,8 @@
       "group": "lash-refills",
       "order": 70,
       "photo": null,
-      "deposit": "standard"
+      "deposit": "standard",
+      "blurb": "Refill for your Mega Volume set."
     },
     {
       "service_id": "ab623266-ec89-4cdb-812f-5ff22db1c377",
@@ -362,7 +393,8 @@
       "group": "lash-refills",
       "order": 80,
       "photo": null,
-      "deposit": "standard"
+      "deposit": "standard",
+      "blurb": "Refill for your Mega Volume set."
     },
     {
       "service_id": "a42fb71f-fbd1-4b49-951c-e0218d49c28f",
@@ -370,7 +402,8 @@
       "group": "lash-refills",
       "order": 90,
       "photo": null,
-      "deposit": "standard"
+      "deposit": "standard",
+      "blurb": "Refill for your Wet Effect set."
     },
     {
       "service_id": "dffc5e26-2114-46ab-a1de-906af11f1dae",
@@ -378,7 +411,8 @@
       "group": "lash-refills",
       "order": 100,
       "photo": null,
-      "deposit": "standard"
+      "deposit": "standard",
+      "blurb": "Refill for your Wet Effect set."
     },
     {
       "service_id": "81c0efe8-4235-40d9-8602-69f2cb29d0a3",
@@ -386,7 +420,8 @@
       "group": "lash-refills",
       "order": 110,
       "photo": null,
-      "deposit": "standard"
+      "deposit": "standard",
+      "blurb": "Refill for your Classic wispy set."
     },
     {
       "service_id": "1778dfdf-66ca-4a95-a040-fa2f6f6954cb",
@@ -394,7 +429,8 @@
       "group": "lash-refills",
       "order": 120,
       "photo": null,
-      "deposit": "standard"
+      "deposit": "standard",
+      "blurb": "Refill for your Classic wispy set."
     },
     {
       "service_id": "e177e39a-5a7c-48af-803b-b35b2b7e2aa5",
@@ -402,7 +438,8 @@
       "group": "lash-refills",
       "order": 130,
       "photo": null,
-      "deposit": "standard"
+      "deposit": "standard",
+      "blurb": "Refill for your Hybrid wispy set."
     },
     {
       "service_id": "b284a64f-588e-4b35-b3b4-a37768388c71",
@@ -410,7 +447,8 @@
       "group": "lash-refills",
       "order": 140,
       "photo": null,
-      "deposit": "standard"
+      "deposit": "standard",
+      "blurb": "Refill for your Hybrid wispy set."
     },
     {
       "service_id": "eda39224-6d3d-4a35-9e1c-3247f0aaf554",
@@ -418,7 +456,8 @@
       "group": "lash-refills",
       "order": 150,
       "photo": null,
-      "deposit": "standard"
+      "deposit": "standard",
+      "blurb": "Refill for your Volume wispy set."
     },
     {
       "service_id": "f143e8a4-b4be-48f3-9b90-9d93339b1ea7",
@@ -426,7 +465,8 @@
       "group": "lash-refills",
       "order": 160,
       "photo": null,
-      "deposit": "standard"
+      "deposit": "standard",
+      "blurb": "Refill for your Volume wispy set."
     },
     {
       "service_id": "dd463770-7f81-4a2d-84c7-9c5fc0eb98bc",
@@ -434,7 +474,8 @@
       "group": "lash-refills",
       "order": 170,
       "photo": null,
-      "deposit": "standard"
+      "deposit": "standard",
+      "blurb": "Refill for your Mega Volume wispy set."
     },
     {
       "service_id": "754ca23b-98ad-4c5f-888f-de380535297a",
@@ -442,7 +483,8 @@
       "group": "lash-refills",
       "order": 180,
       "photo": null,
-      "deposit": "standard"
+      "deposit": "standard",
+      "blurb": "Refill for your Mega Volume wispy set."
     }
   ]
 }

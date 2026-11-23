@@ -255,3 +255,15 @@ test('metaForMock swaps in the mock ids without touching the source meta', () =>
   assert.equal(mock.services[0].service_id, 'svc_a');
   assert.equal(meta.services[0].service_id, 'real-1');
 });
+
+test('every non-removal/shaping service has a short site-based blurb; full sets say "from 150 lashes per eye"', async () => {
+  const { readFileSync } = await import('node:fs');
+  const meta = JSON.parse(readFileSync(new URL('../../worker/config/services-meta.json', import.meta.url), 'utf8'));
+  const without = meta.services.filter((s) => !s.blurb).map((s) => s.mock_id);
+  assert.deepEqual(without, ['svc_lash_removal']);
+  for (const s of meta.services) {
+    if (s.blurb) assert.ok(s.blurb.length <= 120, `${s.mock_id} blurb too long`);
+    const fullSet = ['lash-extensions', 'wispy-lashes'].includes(s.group) && s.mock_id !== 'svc_lash_removal';
+    assert.equal(/from 150 lashes per eye/i.test(s.blurb ?? ''), fullSet, s.mock_id);
+  }
+});

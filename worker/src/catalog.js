@@ -62,7 +62,7 @@ export function validateMeta(meta) {
     if (service.display_name !== undefined && (typeof service.display_name !== 'string' || !service.display_name.trim())) {
       throw invalidMeta(`display_name of ${id}`);
     }
-    if (service.blurb !== undefined && (typeof service.blurb !== 'string' || service.blurb.length > 60)) throw invalidMeta(`blurb of ${id}`);
+    if (service.blurb !== undefined && (typeof service.blurb !== 'string' || service.blurb.length > 120)) throw invalidMeta(`blurb of ${id}`);
     if (service.photo !== undefined && service.photo !== null) checkPhoto(service.photo, id);
   }
 }
