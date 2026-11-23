@@ -232,3 +232,14 @@ test('Variant C: booking.css lays out the monolith, full-width steps, 2-column s
   assert.doesNotMatch(mobile, /(^|[,\s])\.bk-actions\.bk-cinema-bar\s*\{[^}]*display:\s*none/);
   assert.doesNotMatch(mobile, /\[data-action="back"\][^{]*\{[^}]*display:\s*none/);
 });
+
+test('the header stack sits above every booking layer so the phone menu is not overlapped', () => {
+  // .header-shell is a stacking context and the fixed phone menu lives inside it,
+  // so its z-index must beat the highest booking layer (.bk-bar, z-index 40).
+  const css = read('css/booking.css');
+  const shell = css.match(/\.book-page \.header-shell\s*\{[^}]*\}/)?.[0] ?? '';
+  const shellZ = Number(shell.match(/z-index:\s*(\d+)/)?.[1] ?? 1);
+  const layers = [...css.matchAll(/z-index:\s*(\d+)/g)].map((m) => Number(m[1]));
+  const bookingTop = Math.max(...layers.filter((z) => z !== shellZ));
+  assert.ok(shellZ > bookingTop, `header z-index ${shellZ} must exceed ${bookingTop}`);
+});

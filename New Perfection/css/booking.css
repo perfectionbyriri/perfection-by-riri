@@ -41,6 +41,9 @@
 }
 
 .book-page .header-shell {
+  /* The header is a stacking context holding the fixed phone menu; it must
+     beat the hero layers (z-index 2) and the sticky bar (40) or they show through. */
+  z-index: 50;
   background: var(--bk-bg-deep);
   border-bottom: 1px solid rgba(212, 187, 150, .12);
 }
