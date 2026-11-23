@@ -1274,6 +1274,11 @@ button:disabled {
 .dialog-open {
   overflow:hidden
 }
+/* Lock the root too: older iOS Safari keeps scrolling the page under an open
+   dialog when only <body> has overflow:hidden. */
+html:has(> body.dialog-open) {
+  overflow:hidden
+}
 
 .noscript-message {
   text-align:center;
@@ -3227,7 +3232,7 @@ html[data-input=pointer] .detail-dialog button:focus-visible { outline:none; }
     max-height:92dvh
   }
   .dialog--results p.result-progress {
-    margin-bottom:20px
+    margin-bottom:16px
   }
   .result-layout {
     grid-template-columns:minmax(0,1fr);
@@ -3247,13 +3252,36 @@ html[data-input=pointer] .detail-dialog button:focus-visible { outline:none; }
     font-size:36px
   }
   .result-pager {
-    margin-top:26px
+    margin-top:22px
   }
   .result-more-actions {
     margin-top:26px
   }
   .result-socials {
     grid-template-columns:1fr
+  }
+  /* Phones: thumbnails sit right under the photo they switch, so the strip is
+     never left half-cut at the bottom edge of the dialog. */
+  .dialog--results #dialog-content {
+    display:flex;
+    flex-direction:column
+  }
+  .dialog--results .result-layout {
+    display:contents
+  }
+  .dialog--results .result-stage {
+    order:1
+  }
+  .dialog--results .result-more {
+    order:2;
+    margin-top:10px
+  }
+  .dialog--results .result-thumbs {
+    margin-top:0
+  }
+  .dialog--results .result-info {
+    order:3;
+    margin-top:20px
   }
   .result-thumbs {
     overflow-x:auto;
