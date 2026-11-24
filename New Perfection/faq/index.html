@@ -12,7 +12,7 @@
   <script src="../js/analytics.js" defer></script>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#f5f2ef">
+  <meta name="theme-color" content="#151514">
   <meta name="description" content="Answers to common questions about lash extensions, lash lifts, brow lamination, and permanent makeup — including safety, preparation, aftercare, and when to contact a healthcare professional. Perfection by Riri, Lynnwood, WA.">
   <title>Frequently Asked Questions | Perfection by Riri</title>
   <meta name="robots" content="index,follow">
@@ -38,7 +38,7 @@
           "@id": "https://perfectionbyriri.com/#business",
           "url": "https://perfectionbyriri.com/",
           "name": "Perfection by Riri",
-          "telephone": "(425) 845-0045",
+          "telephone": "+1-425-845-0045",
           "address": {
             "@type": "PostalAddress",
             "streetAddress": "18205 Alderwood Mall Pkwy A, Suite 918",
@@ -62,7 +62,7 @@
           "founder": { "@id": "https://perfectionbyriri.com/#owner" },
           "contactPoint": {
             "@type": "ContactPoint",
-            "telephone": "(425) 845-0045",
+            "telephone": "+1-425-845-0045",
             "contactType": "customer service",
             "availableLanguage": ["English", "Russian", "Ukrainian"]
           }
@@ -316,6 +316,7 @@
       ]
     }
   </script>
+  <link rel="preload" href="../images/hero/faq-hero.webp" as="image" fetchpriority="high">
   <link rel="preload" href="../images/branding/bodoni-moda.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="../images/branding/jost.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="../css/styles.css">
@@ -323,6 +324,18 @@
   <link rel="stylesheet" href="../css/motion.css">
   <link rel="stylesheet" href="../css/type-case.css">
   <script>
+    /* Enter the enhanced (JS) navigation state before first paint. Adding the
+       class later, from a deferred script, rendered the mobile menu open in the
+       document flow and then collapsed it, shifting the whole page (CLS). If the
+       page script never runs, the class is dropped on load so the no-JS
+       navigation stays usable. */
+    (function () {
+      var root = document.documentElement;
+      root.classList.add('enhanced');
+      window.addEventListener('load', function () {
+        if (!window.__perfectionEnhancedReady) root.classList.remove('enhanced');
+      });
+    })();
     /* Arm the faq-page reveal motion before first paint so enhanced content
        never flashes into place: it starts hidden, then js/faq.js reveals it.
        No-JS and reduced-motion visitors skip the class and render fully. The
@@ -350,7 +363,7 @@
     <symbol id="icon-instagram" viewBox="0 0 24 24"><rect stroke="url(#icon-instagram-gradient)" x="3" y="3" width="18" height="18" rx="5"/><circle stroke="url(#icon-instagram-gradient)" cx="12" cy="12" r="4"/><path stroke="url(#icon-instagram-gradient)" d="M17.5 6.5h.01"/></symbol>
   </defs></svg>
 
-  <div class="announcement">PERFECTION BY RIRI <span aria-hidden="true">·</span> CLIENT GUIDE IN LYNNWOOD, WA</div>
+  <div class="announcement">PERFECTION BY RIRI <span aria-hidden="true">·</span> CLIENT GUIDE IN LYNNWOOD,&nbsp;WA</div>
   <div class="header-shell">
     <header class="site-header container">
       <a class="brand" href="../index.html#home" aria-label="Perfection by Riri, home"><span class="brand-name">PERFECTION</span><span class="brand-by">BY RIRI</span><span class="brand-tagline">LASH · BROW · PMU</span></a>
@@ -401,7 +414,7 @@
         <div class="faq-services-head">
           <p class="faq-eyebrow">Service questions</p>
           <h2 class="faq-services-title" id="faq-services-title">Before you book</h2>
-          <p class="faq-services-note">Select a question to read the answer.</p>
+          <p class="faq-services-note">Choose a topic and a question to read the answer.</p>
         </div>
 
         <div class="faq-columns">
@@ -647,9 +660,10 @@
                 <div class="faq-answer"><p>Yes — appointments can be conducted in English, Russian or Ukrainian.</p></div>
               </details>
             </div>
-            <p class="faq-disclaimer">FAQ information is provided for general client education and does not replace individualized medical advice, diagnosis or treatment. If you have a medical concern or are unsure whether a service is appropriate for you, please speak with a qualified healthcare professional.</p>
           </div>
         </div>
+        <!-- Outside the collapsible Safety body so it is always visible. -->
+        <p class="faq-disclaimer">FAQ information is provided for general client education and does not replace individualized medical advice, diagnosis or treatment. If you have a medical concern or are unsure whether a service is appropriate for you, please speak with a qualified healthcare professional.</p>
       </div>
     </section>
 
@@ -671,10 +685,10 @@
   <footer class="site-footer section-light" id="contact">
     <div class="container">
       <div class="footer-grid">
-        <div class="footer-brand"><a class="brand" href="../index.html#home" aria-label="Perfection by Riri, home"><span class="brand-name">PERFECTION</span><span class="brand-by">BY RIRI</span><span class="brand-tagline">LASH · BROW · PMU</span></a><p>Elevating beauty with artistry,<br>precision, and luxury.</p><a class="social-coming" href="https://www.instagram.com/perfection.byriri?stkn=eHcyYW1jODF5bXNi" target="_blank" rel="noopener noreferrer" aria-label="Perfection by Riri on Instagram"><svg class="icon" aria-hidden="true" focusable="false"><use href="#icon-instagram"/></svg> INSTAGRAM</a></div>
+        <div class="footer-brand"><a class="brand" href="../index.html#home" aria-label="Perfection by Riri, home"><span class="brand-name">PERFECTION</span><span class="brand-by">BY RIRI</span><span class="brand-tagline">LASH · BROW · PMU</span></a><p>Elevating beauty with artistry,<br>precision, and luxury.</p><a class="social-coming" href="https://www.instagram.com/perfection.byriri" target="_blank" rel="noopener noreferrer" aria-label="Perfection by Riri on Instagram"><svg class="icon" aria-hidden="true" focusable="false"><use href="#icon-instagram"/></svg> INSTAGRAM</a></div>
         <div><h2 class="footer-heading">Quick links</h2><ul><li><a href="../index.html#about">About</a></li><li><a href="../index.html#services">Services</a></li><li><a href="../index.html#gallery">Gallery</a></li><li><a href="../index.html#reviews">Reviews</a></li><li><a href="index.html" aria-current="page">FAQ</a></li><li><a href="../contact/index.html">Contact</a></li><li><a href="/book/" data-booking-url="/book/">Book appointment</a></li></ul></div>
         <div><h2 class="footer-heading">Services</h2><ul><li><a href="../services/lash-extensions/index.html">Lash extensions</a></li><li><a href="../services/lash-lift/index.html">Lash lift</a></li><li><a href="../services/brow-lamination-tint/index.html">Brow lamination &amp; tint</a></li><li><a href="../services/permanent-makeup/index.html">Permanent makeup</a></li></ul></div>
-        <div><h2 class="footer-heading">Contact</h2><address><a href="https://maps.app.goo.gl/2zzJp92GvUAGifaV8?g_st=ic" target="_blank" rel="noopener noreferrer" aria-label="Open Perfection by Riri location in Google Maps">18205 Alderwood Mall Pkwy A<br>Suite 918<br>Lynnwood, WA 98037</a><br><a href="tel:+14258450045">(425) 845 0045</a></address></div>
+        <div><h2 class="footer-heading">Contact</h2><address><a href="https://maps.app.goo.gl/2zzJp92GvUAGifaV8" target="_blank" rel="noopener noreferrer" aria-label="Open Perfection by Riri location in Google Maps">18205 Alderwood Mall Pkwy&nbsp;A<br>Suite 918<br>Lynnwood, WA 98037</a><br><a href="tel:+14258450045">(425) 845 0045</a></address></div>
         <div><h2 class="footer-heading">Hours</h2><p class="footer-hours">Mon–Sat&nbsp;&nbsp;10 AM–5 PM<br>Sun&nbsp;&nbsp;Closed</p></div>
       </div>
       <div class="footer-bottom"><p>© <span id="year">2026</span> Perfection by Riri. All rights reserved.</p><div><button type="button" data-privacy>Privacy policy</button><button type="button" data-terms>Terms &amp; conditions</button></div></div>

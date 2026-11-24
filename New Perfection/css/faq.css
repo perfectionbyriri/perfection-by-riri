@@ -253,6 +253,8 @@
   margin-top: 30px;
   padding: 18px 20px 6px;
   background: #ece4d8;
+  /* Darker muted tone keeps body copy at AA on this deeper beige. */
+  --muted: #625f58;
   border-left: 2px solid var(--gold)
 }
 .faq-subsection-title {
@@ -323,7 +325,6 @@
    -------------------------------------------------------------------------- */
 html.motion-armed .faq-page .site-header,
 html.motion-armed .faq-hero-copy,
-html.motion-armed .faq-hero-media,
 html.motion-armed .faq-services-head,
 html.motion-armed .faq-columns,
 html.motion-armed .faq-cta-inner { opacity: 0 }

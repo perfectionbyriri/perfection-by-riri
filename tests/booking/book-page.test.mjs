@@ -172,7 +172,7 @@ test('book pages link with root paths, so links survive the move to /book/confir
 
 test('the footer keeps "Pkwy A" together and links Instagram without a tracking parameter', () => {
   assert.match(html, /18205 Alderwood Mall Pkwy&nbsp;A<br>/);
-  assert.match(html, /href="https:\/\/www\.instagram\.com\/perfection\.byriri\/"/);
+  assert.match(html, /href="https:\/\/www\.instagram\.com\/perfection\.byriri"/);
   assert.doesNotMatch(html, /stkn=/);
 });
 

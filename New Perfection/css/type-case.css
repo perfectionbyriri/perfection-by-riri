@@ -47,6 +47,11 @@
 .le-result-badge,
 .le-style-link small,
 .le-prices dt,
+.le-process dt,
+.ll-option small,
+.ll-prices dt,
+.le-mobile-hint,
+.svc-pmu .pmu-standard-list strong,
 .le-service-foot strong,
 .ll-profile-top,
 .ll-result-caption,
@@ -93,6 +98,7 @@ h2,
 .pmu-price-copy strong,
 .le-profile h3,
 .le-style-link > span:first-child,
+.ll-option > span:first-child,
 #ll-profile-natural-title,
 #ll-profile-tint-title,
 .svc-pmu h3,
@@ -215,3 +221,12 @@ h1, h2 { letter-spacing: .01em !important; }
 
 /* Footer link lists read as titles: every word starts with a capital. */
 .footer-grid ul a { text-transform: capitalize; }
+
+/* Bodoni Moda's "+" is a hairline that vanishes at display sizes; set it in
+   the sans so combined service names keep a visible join. */
+.serif-plus {
+  font-family: var(--sans);
+  font-weight: 400;
+  font-size: .78em;
+  vertical-align: .08em;
+}

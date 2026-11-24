@@ -154,6 +154,15 @@
   line-height: 1.55
 }
 .contact-info-note { margin-top: 10px; font-size: 10.5px; letter-spacing: 1.6px }
+/* The languages line is a sentence, not a label: it stays sentence case and
+   stays visible on every breakpoint (only the duplicate action links hide). */
+.contact-info-languages {
+  margin-top: 12px;
+  font-size: 14px;
+  line-height: 1.55;
+  letter-spacing: .005em;
+  color: var(--muted)
+}
 .contact-textlink {
   display: inline-block;
   padding-block: 3px;
@@ -232,6 +241,8 @@ html.motion-armed .contact-cta-inner { opacity: 0 }
   .contact-column:first-child,
   .contact-column:last-child { padding: 0 0 26px; border-left: 0 }
   .contact-column + .contact-column { border-top: 1px solid var(--line); padding-top: 30px }
+  /* Air between the section hairline and the first column title. */
+  .contact-column:first-child { padding-top: 30px }
   .contact-column-title { font-size: 24px }
 
   /* Mobile rows · compact two-part structure: the small tracked label on the
@@ -244,6 +255,7 @@ html.motion-armed .contact-cta-inner { opacity: 0 }
     display: flex;
     justify-content: space-between;
     align-items: first baseline;
+    flex-wrap: wrap;
     column-gap: 24px;
     position: relative;
     padding: 18px 0
@@ -256,13 +268,33 @@ html.motion-armed .contact-cta-inner { opacity: 0 }
     text-align: right
   }
   .contact-info-value-numeric { font-size: 15px; letter-spacing: .8px; line-height: 1.7 }
-  .contact-info-value a { display: inline; padding-block: 0; position: static }
+  .contact-info-value a {
+    display: inline;
+    padding-block: 0;
+    position: static;
+    /* With the action links hidden, a fine gold underline marks the value
+       itself as the tappable link. */
+    text-decoration: underline;
+    text-decoration-color: #c4b295;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 4px
+  }
   .contact-info-value a:after {
     content: '';
     position: absolute;
     inset: 0
   }
   .contact-info-note { display: none }
+  /* Full-width line under the phone row; it sits above the stretched link so
+     reading it never starts a call. */
+  .contact-info-languages {
+    flex: 0 0 100%;
+    position: relative;
+    z-index: 1;
+    margin-top: 8px;
+    font-size: 13px;
+    text-align: right
+  }
 
   .contact-cta { padding: 62px 0 }
   .contact-cta-title { font-size: 36px }
