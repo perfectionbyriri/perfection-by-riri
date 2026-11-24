@@ -385,3 +385,11 @@ test('the announcement sits in a labelled landmark, keeps "Lynnwood, WA" togethe
   const main = html.match(/<main[\s\S]*?<\/main>/)[0];
   assert.doesNotMatch(main, /<aside\b/);
 });
+
+test('Step 1 service names, category titles and sub-tabs are uppercase', () => {
+  const typeCase = read('css/type-case.css');
+  const group = /\.bk-cinema-col-title,\s*\n([\s\S]*?)\{\s*text-transform:\s*uppercase;/.exec(typeCase);
+  assert.ok(group, 'uppercase display-title group');
+  for (const name of ['.bk-card-name', '.bk-cat-title']) assert.ok(group[0].includes(name), name);
+  assert.match(read('css/booking.css'), /\.bk-subtab \{[^}]*text-transform: uppercase;/);
+});

@@ -322,3 +322,15 @@ test('refills and removal have no notice, full sets and lash lift do', () => {
   for (const service of byName(/refill|removal/i)) assert.equal(service.notice, null, service.name);
   for (const service of byName(/full extension|wispy$|^lash lift/i).filter((item) => !/refill/i.test(item.name))) assert.ok(service.notice, service.name);
 });
+
+test('a hyphenated part of a service name never breaks across lines (2D-3D, Touch-Up)', () => {
+  const html = renderServices({ groups: GROUPS });
+  assert.match(html, /<span class="bk-card-name">Hybrid Full Extension <span class="bk-nowrap">2D-3D<\/span><\/span>/);
+  assert.match(html, /<span class="bk-nowrap">Touch-Up<\/span>/);
+});
+
+test('a number stays with its unit and "+" with the next word (2 Weeks, + Shaping)', () => {
+  const html = renderServices({ groups: GROUPS });
+  assert.match(html, /Classic Refill 2&nbsp;Weeks</);
+  assert.match(html, /Eyebrow Lamination \+&nbsp;Tinting \+&nbsp;Shaping</);
+});

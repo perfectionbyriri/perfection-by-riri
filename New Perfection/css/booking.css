@@ -2461,3 +2461,6 @@ html:not(.bk-js) .bk-monolith-progress { display: none; }
   .bk-confirmed-body { padding: 32px 0 56px; }
   .bk-confirmed-list div { grid-template-columns: 1fr; gap: 4px; }
 }
+
+/* A hyphenated part of a service name stays on one line (render-services.js nameHtml). */
+.bk-nowrap { white-space: nowrap; }
