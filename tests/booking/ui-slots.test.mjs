@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { defaultDay, groupSlots, renderSlotsError, renderSlotsLoading, renderWeek } from '../../New Perfection/js/booking/render-slots.js';
+import { defaultDay, groupSlots, renderSlotsError, renderSlotsLoading, renderWeek, slotsErrorText } from '../../New Perfection/js/booking/render-slots.js';
 
 const slot = (date, hhmm, label) => ({ start_at: `${date}T${hhmm}:00-08:00`, label });
 
@@ -128,12 +128,22 @@ test('the loading state is a busy skeleton with a polite status text', () => {
 
 test('a busy calendar offers Try again; other failures offer the phone', () => {
   const busy = renderSlotsError({ code: 'UPSTREAM_BUSY' });
-  assert.match(busy, /Our booking calendar is busy right now\. Please try again in a minute, or call \(425\) 845 0045\./);
+  assert.match(busy, /Our booking calendar is busy right now\. Please try again in a minute, or call <a href="tel:\+14258450045">\(425\) 845 0045<\/a>\./);
   assert.match(busy, /<button type="button" class="button button-outline" data-action="retry-week">Try again<\/button>/);
   const down = renderSlotsError({ code: 'UPSTREAM_UNAVAILABLE' });
   assert.match(down, /Online booking is taking a short break/);
   assert.match(down, /href="tel:\+14258450045"/);
   assert.match(renderSlotsError({ code: 'NETWORK' }), /data-action="retry-week"/);
+});
+
+test('a lost connection says so instead of calling the calendar busy, in the banner and the live region', () => {
+  const network = renderSlotsError({ code: 'NETWORK' });
+  assert.match(network, /check your connection/);
+  assert.doesNotMatch(network, /busy/);
+  assert.match(slotsErrorText({ code: 'NETWORK' }), /^We could not reach the booking calendar\./);
+  assert.match(slotsErrorText({ code: 'RATE_LIMITED' }), /busy right now/);
+  assert.match(renderSlotsError({ code: 'SERVER_ERROR' }), /data-action="retry-week"/);
+  assert.doesNotMatch(slotsErrorText({ code: 'NETWORK' }), /</);
 });
 
 test('Variant C: Morning and Afternoon sit side by side and name the chosen day', () => {

@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <script>
+    /* Enter the enhanced (JS) state before first paint. Adding the class later,
+       from a deferred script, rendered the mobile menu open in the document flow
+       and then collapsed it, shifting the whole page (CLS). bk-js hides the
+       booking app for visitors without JavaScript, who get the noscript
+       message instead. If the page scripts never run, enhanced is dropped on
+       load so the no-JS navigation stays usable. */
+    (function () {
+      var root = document.documentElement;
+      root.classList.add('enhanced', 'bk-js');
+      window.addEventListener('load', function () {
+        if (!window.__perfectionEnhancedReady) root.classList.remove('enhanced');
+      });
+    })();
+  </script>
+  <!-- Google Analytics: hits are sent from the live domain only, so local and
+       preview runs never reach the production property. -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-9T26E3J0XS"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    if (location.hostname === 'perfectionbyriri.com') {
+      gtag('js', new Date());
+      gtag('config', 'G-9T26E3J0XS');
+    }
+  </script>
+  <script src="/js/analytics.js" defer></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f5f2ef">
+    <title>Your booking | Perfection by Riri, Lynnwood, WA</title>
+  <meta name="robots" content="noindex,nofollow">
+  <link rel="icon" href="/images/branding/favicon-192.png" type="image/png" sizes="192x192">
+  <link rel="preload" href="/images/branding/bodoni-moda.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/images/branding/jost.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="stylesheet" href="/css/motion.css">
+  <link rel="stylesheet" href="/css/type-case.css">
+  <link rel="stylesheet" href="/css/booking.css">
+  <script src="/js/service-nav.js" defer></script>
+  <script src="/js/contact.js" defer></script>
+  <script src="/js/ui.js" defer></script>
+  <script type="module" src="/js/booking/confirmed.js"></script>
+</head>
+<body class="book-page">
+  <a class="skip-link" href="#content">Skip to content</a>
+  <svg class="icon-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>
+    <symbol id="icon-chevron" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></symbol>
+    <linearGradient id="icon-instagram-gradient" gradientUnits="userSpaceOnUse" x1="3" y1="3" x2="21" y2="21"><stop offset="0" stop-color="#7B2FF7"/><stop offset="0.25" stop-color="#C13584"/><stop offset="0.5" stop-color="#E1306C"/><stop offset="0.75" stop-color="#F77737"/><stop offset="1" stop-color="#FCAF45"/></linearGradient>
+    <symbol id="icon-instagram" viewBox="0 0 24 24"><rect stroke="url(#icon-instagram-gradient)" x="3" y="3" width="18" height="18" rx="5"/><circle stroke="url(#icon-instagram-gradient)" cx="12" cy="12" r="4"/><path stroke="url(#icon-instagram-gradient)" d="M17.5 6.5h.01"/></symbol>
+  </defs></svg>
+
+
+  <aside class="announcement" aria-label="Studio announcement">PERFECTION BY RIRI <span aria-hidden="true">·</span> ONLINE BOOKING IN LYNNWOOD,&nbsp;WA</aside>
+  <div class="header-shell">
+    <header class="site-header container">
+      <a class="brand" href="/index.html#home" aria-label="Perfection by Riri, home"><span class="brand-name">PERFECTION</span><span class="brand-by">BY RIRI</span><span class="brand-tagline">LASH · BROW · PMU</span></a>
+      <button class="menu-toggle" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="main-navigation"><span></span><span></span></button>
+      <nav class="main-navigation" id="main-navigation" aria-label="Main navigation">
+        <a href="/index.html#about">About</a>
+        <div class="nav-services" data-service-nav>
+          <button type="button" class="nav-trigger" aria-expanded="false" aria-controls="services-submenu" data-service-group>SERVICES<svg class="nav-trigger-chevron" aria-hidden="true" focusable="false"><use href="#icon-chevron"/></svg></button>
+          <div class="nav-accordion-clip">
+          <ul id="services-submenu" class="nav-dropdown-panel nav-accordion-panel">
+            <li><a class="nav-dropdown-item" data-service-link href="/services/lash-extensions/index.html"><span class="nav-dropdown-content"><span class="nav-dropdown-label">LASH EXTENSIONS</span><span class="nav-dropdown-desc">CUSTOM LASH DESIGN</span></span><svg class="nav-dropdown-arrow" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/></svg></a></li>
+            <li><a class="nav-dropdown-item" data-service-link href="/services/permanent-makeup/index.html"><span class="nav-dropdown-content"><span class="nav-dropdown-label">PERMANENT MAKEUP</span><span class="nav-dropdown-desc">BROWS · LIPS · EYELINER</span></span><svg class="nav-dropdown-arrow" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/></svg></a></li>
+            <li><a class="nav-dropdown-item" data-service-link href="/services/lash-lift/index.html"><span class="nav-dropdown-content"><span class="nav-dropdown-label">LASH LIFT</span><span class="nav-dropdown-desc">NATURAL LIFT &amp; DEFINITION</span></span><svg class="nav-dropdown-arrow" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/></svg></a></li>
+            <li><a class="nav-dropdown-item" data-service-link href="/services/brow-lamination-tint/index.html"><span class="nav-dropdown-content"><span class="nav-dropdown-label">BROW LAMINATION &amp; TINT</span><span class="nav-dropdown-desc">SHAPE · LAMINATE · DEFINE</span></span><svg class="nav-dropdown-arrow" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/></svg></a></li>
+          </ul>
+          </div>
+        </div>
+        <a href="/index.html#gallery">Gallery</a><a href="/index.html#reviews">Reviews</a><a href="/faq/index.html">FAQ</a><a href="/contact/index.html">Contact</a>
+      </nav>
+      <a class="button button-gold header-cta" href="/book/">BOOK APPOINTMENT</a>
+    </header>
+  </div>
+
+
+  <main id="main" class="bk">
+    <!-- Booking confirmation (audit 2026-11-24). After a booking, /book/ moves
+         the URL here without a page load. On a reload, js/booking/confirmed.js
+         shows the booking kept in this tab (sessionStorage); otherwise the page
+         explains where the details are and how to change an appointment. -->
+    <section class="bk-shell bk-confirmed-page container" id="content" tabindex="-1" aria-labelledby="bk-title">
+      <header class="bk-head bk-monolith">
+        <img class="bk-monolith-photo" src="/images/booking/lash-tools-1536.webp" srcset="/images/booking/lash-tools-768.webp 768w, /images/booking/lash-tools-1536.webp 1536w" sizes="100vw" width="1536" height="1024" alt="Precision lash tweezers resting in an organizer tray of extensions" fetchpriority="high" decoding="async">
+        <div class="bk-monolith-inner">
+          <div class="bk-monolith-lead">
+            <p class="bk-eyebrow">Online booking</p>
+            <h1 class="bk-title" id="bk-title">Your <em>booking.</em></h1>
+          </div>
+          <p class="bk-cinema-caption">Personal by design.<br>Perfection in the details.</p>
+        </div>
+      </header>
+      <div class="bk-confirmed-body" data-confirmed>
+        <p class="bk-confirmed-lead" data-confirmed-lead>Your booking details appear here right after you book, in the same browser tab.</p>
+        <dl class="bk-confirmed-list" data-confirmed-list hidden></dl>
+        <p class="bk-confirmed-help">Need to check, change or cancel an appointment? Call <a href="tel:+14258450045">(425) 845 0045</a>.</p>
+        <p class="bk-confirmed-actions"><a class="button button-outline" href="/book/">Book another appointment</a></p>
+      </div>
+    </section>
+  </main>
+
+
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand"><a class="brand" href="/index.html#home" aria-label="Perfection by Riri, home"><span class="brand-name">PERFECTION</span><span class="brand-by">BY RIRI</span><span class="brand-tagline">LASH · BROW · PMU</span></a><p>Elevating beauty with artistry,<br>precision, and luxury.</p><a class="social-coming" href="https://www.instagram.com/perfection.byriri/" target="_blank" rel="noopener noreferrer" aria-label="Perfection by Riri on Instagram"><svg class="icon" aria-hidden="true" focusable="false"><use href="#icon-instagram"/></svg> INSTAGRAM</a></div>
+        <div><h2 class="footer-heading">Quick links</h2><ul><li><a href="/index.html#about">About</a></li><li><a href="/index.html#services">Services</a></li><li><a href="/index.html#gallery">Gallery</a></li><li><a href="/index.html#reviews">Reviews</a></li><li><a href="/faq/index.html">FAQ</a></li><li><a href="/contact/index.html">Contact</a></li><li><a href="/book/">Book appointment</a></li></ul></div>
+        <div><h2 class="footer-heading">Services</h2><ul><li><a href="/services/lash-extensions/index.html">Lash extensions</a></li><li><a href="/services/lash-lift/index.html">Lash lift</a></li><li><a href="/services/brow-lamination-tint/index.html">Brow lamination &amp; tint</a></li><li><a href="/services/permanent-makeup/index.html">Permanent makeup</a></li></ul></div>
+        <div><h2 class="footer-heading">Contact</h2><address><a href="https://maps.app.goo.gl/2zzJp92GvUAGifaV8?g_st=ic" target="_blank" rel="noopener noreferrer" aria-label="Open Perfection by Riri location in Google Maps">18205 Alderwood Mall Pkwy&nbsp;A<br>Suite 918<br>Lynnwood, WA 98037</a><br><a href="tel:+14258450045">(425) 845 0045</a></address></div>
+        <div><h2 class="footer-heading">Hours</h2><p class="footer-hours">Mon–Sat&nbsp;&nbsp;10 AM–5 PM<br>Sun&nbsp;&nbsp;Closed</p></div>
+      </div>
+      <div class="footer-bottom"><p>© <span id="year">2026</span> Perfection by Riri. All rights reserved.</p><div><button type="button" data-privacy>Privacy policy</button><button type="button" data-terms>Terms &amp; conditions</button></div></div>
+    </div>
+  </footer>
+
+  <dialog class="detail-dialog" id="contact-dialog" aria-labelledby="contact-dialog-title"><div class="dialog-toolbar"><button class="dialog-close" type="button" aria-label="Close dialog"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/></svg></button></div><div id="contact-dialog-content"></div></dialog>
+</body>
+</html>

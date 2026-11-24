@@ -76,7 +76,11 @@ export function formatDuration(minutes) {
   return rest ? `${hours} hr ${rest} min` : `${hours} hr`;
 }
 
-function minPriceCents(services) {
+// The category's "From" price leaves out lash removal: it is not a
+// treatment price and would read as the cheapest set (from $30).
+function minPriceCents(allServices) {
+  const priced = allServices.filter((service) => !/removal/i.test(service.name ?? ''));
+  const services = priced.length ? priced : allServices;
   let min = Infinity;
   for (const service of services) {
     if (typeof service.price_cents === 'number' && service.price_cents < min) {
@@ -324,7 +328,16 @@ export function renderServices({ groups, selectedId = null, focusGroup = null, o
     + `<div class="bk-accordion">${sections}</div>`;
 }
 
-export function renderCatalogUnavailable() {
-  return '<p>Online booking is taking a short break. Please call (425) 845 0045 and we&rsquo;ll book you in.</p>'
-    + '<a class="button button-gold" href="tel:+14258450045">Call (425) 845 0045</a>';
+// A busy calendar, a lost connection or a server hiccup can pass, so those
+// offer Try again next to the phone number; anything else offers the phone.
+const CATALOG_RETRY_CODES = new Set(['UPSTREAM_BUSY', 'RATE_LIMITED', 'NETWORK', 'SERVER_ERROR']);
+
+export function renderCatalogUnavailable(error = null) {
+  const call = '<a class="button button-gold" href="tel:+14258450045">Call (425) 845 0045</a>';
+  if (CATALOG_RETRY_CODES.has(error?.code)) {
+    return '<p>We couldn&rsquo;t load our services just now. Please try again, or call (425) 845 0045 and we&rsquo;ll book you in.</p>'
+      + '<button type="button" class="button button-outline" data-action="retry-catalog">Try again</button>'
+      + call;
+  }
+  return '<p>Online booking is taking a short break. Please call (425) 845 0045 and we&rsquo;ll book you in.</p>' + call;
 }

@@ -206,13 +206,32 @@ test('createAppointment posts JSON and keeps extra error fields such as refreshe
   assert.deepEqual(result, { ok: false, status: 409, error: body.error, data: body });
 });
 
-test('a network failure or a non-JSON reply becomes a NETWORK error', async () => {
+test('a network failure becomes NETWORK; a non-JSON error reply becomes SERVER_ERROR', async () => {
   const offline = await createApi({ fetch: async () => { throw new TypeError('Failed to fetch'); } }).fetchCatalog();
   assert.equal(offline.ok, false);
   assert.equal(offline.error.code, 'NETWORK');
   const html = await createApi({ fetch: async () => new Response('<html>', { status: 502 }) }).fetchCatalog();
   assert.equal(html.ok, false);
-  assert.equal(html.error.code, 'NETWORK');
+  assert.equal(html.status, 502);
+  assert.equal(html.error.code, 'SERVER_ERROR');
+  const bare = await createApi({ fetch: async () => new Response('{}', { status: 500 }) }).fetchCatalog();
+  assert.equal(bare.error.code, 'SERVER_ERROR');
+});
+
+test('the Lash Extensions "From" price leaves out lash removal', () => {
+  const html = renderServices({ groups: GROUPS });
+  const meta = /data-group="lash-extensions"[\s\S]*?<span class="bk-cat-meta">([^<]+)<\/span>/.exec(html)[1];
+  assert.doesNotMatch(meta, /From \$30\b/);
+});
+
+test('a passing catalog failure offers Try again next to the phone; others offer the phone', () => {
+  for (const code of ['UPSTREAM_BUSY', 'RATE_LIMITED', 'NETWORK', 'SERVER_ERROR']) {
+    const html = renderCatalogUnavailable({ code });
+    assert.match(html, /data-action="retry-catalog"/, code);
+    assert.match(html, /href="tel:\+14258450045"/, code);
+  }
+  assert.doesNotMatch(renderCatalogUnavailable({ code: 'UPSTREAM_UNAVAILABLE' }), /retry-catalog/);
+  assert.doesNotMatch(renderCatalogUnavailable(), /retry-catalog/);
 });
 
 // Lip Blushing carries the FAQ notice (worker/config/services-meta.json).

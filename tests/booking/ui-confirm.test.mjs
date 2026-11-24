@@ -132,7 +132,8 @@ test('the confirmation view follows D§4 step 5', () => {
   assert.match(html, /Studio location<\/h3><\/div><p class="bk-confirm-line bk-cinema-info-title">18205 Alderwood Mall Pkwy A, Suite&nbsp;918<\/p><span class="bk-cinema-sub">Lynnwood, WA 98037<\/span>/);
   assert.doesNotMatch(html, /Perfection by Riri · Lynnwood, WA/);
   assert.match(html, /href="https:\/\/maps\.app\.goo\.gl\/2zzJp92GvUAGifaV8\?g_st=ic"[^>]*>Directions<\/a>/);
-  assert.match(html, /Deposit paid \$50\.00 · Receipt from Square sent to anna@…/);
+  assert.match(html, /Deposit paid \$50\.00 · Receipt from Square sent to <span class="bk-confirm-email">anna@…<\/span>/);
+  assert.match(html, /<p class="bk-fine bk-confirm-ref">Booking reference: <span class="bk-confirm-ref-id">[^<]+<\/span><\/p>/);
   assert.match(html, /data-action="add-to-calendar"[^>]*>Add to calendar</);
   assert.match(html, /Need to change or cancel\?[\s\S]*Call <a href="tel:\+14258450045">\(425\) 845 0045<\/a>\./);
   assert.match(html, /Cancellations made on the same day as your appointment will result in the forfeiture of your \$50 deposit\./);

@@ -12,11 +12,12 @@ import {
 import { renderActionBar } from './action-bar.js';
 import { buildIcs, confirmedPath, fireConfirmation, renderConfirmation, trackFunnel } from './confirm.js';
 import { renderCatalogUnavailable, renderServices } from './render-services.js';
-import { defaultDay, renderSlotsError, renderSlotsLoading, renderWeek } from './render-slots.js';
+import { defaultDay, renderSlotsError, renderSlotsLoading, renderWeek, slotsErrorText } from './render-slots.js';
 import { renderDetails, renderErrorSummary } from './render-details.js';
 import { continueBlocked, createState, parseDeepLink, resolveDeepLink, ribbonValues, stepFromHistory, summaryLine } from './state.js';
 import { FIELD_ORDER, formatPhone, validateDetails } from './validate.js';
 import { swipeDirection } from './swipe.js';
+import { STORAGE_KEY as CONFIRMED_STORAGE_KEY } from './confirmed.js';
 import { preventMultiClickSelection } from './selection.js';
 
 const STEP_NAMES = ['Service', 'Date & time', 'Your details', 'Deposit & confirm'];
@@ -444,7 +445,9 @@ if (app) {
 
   // Banner buttons live outside #bk-step, so their actions are handled here.
   elements.banner.addEventListener('click', (event) => {
-    if (event.target.closest('[data-action="retry-submit"]')) {
+    if (event.target.closest('[data-action="retry-catalog"]')) {
+      start();
+    } else if (event.target.closest('[data-action="retry-submit"]')) {
       elements.step.querySelector('#bk-checkout')?.requestSubmit();
     } else if (event.target.closest('[data-action="retry-week"]') && state.get().step === 2) {
       loadWeek(failedWeekStart ?? state.get().weekStart);
@@ -503,14 +506,18 @@ if (app) {
     return new Promise((resolve) => { setTimeout(resolve, 140); });
   }
 
-  // The week a failed request asked for (Try again repeats it) and the one in flight.
+  // The week a failed request asked for (Try again repeats it) and the one in
+  // flight, keyed by service and week: a double click asks once, but a switch
+  // to another service while a week is loading must ask again.
   let failedWeekStart = null;
   let loadingWeek;
+  let weekErrorShown = false;
 
   async function loadWeek(weekStart, { focusSelector = null } = {}) {
-    if (loadingWeek !== undefined && loadingWeek === (weekStart ?? null)) return; // A double click asks once.
-    loadingWeek = weekStart ?? null;
     const { serviceId, weekStart: from, week: previousWeek } = state.get();
+    const key = `${serviceId}|${weekStart ?? ''}`;
+    if (loadingWeek === key) return;
+    loadingWeek = key;
     const direction = weekStart && from && weekStart !== from ? (weekStart > from ? 'next' : 'prev') : null;
     const request = api.fetchWeek(serviceId, weekStart ?? undefined);
     await slideOutWeek(direction);
@@ -518,7 +525,7 @@ if (app) {
     refreshWeek();
     announce('Loading available times…');
     const result = await request;
-    if (loadingWeek === (weekStart ?? null)) loadingWeek = undefined;
+    if (loadingWeek === key) loadingWeek = undefined;
     if (state.get().serviceId !== serviceId || state.get().step !== 2) return;
     if (!result.ok) {
       // Keep the last good week (and its arrows) on screen; Try again repeats the failed week.
@@ -531,10 +538,14 @@ if (app) {
         elements.step.querySelector('.bk-week').innerHTML = '';
       }
       showBanner(renderSlotsError(result.error));
+      announce(slotsErrorText(result.error));
+      weekErrorShown = true;
       return;
     }
     failedWeekStart = null;
-    hideBanner();
+    // Clear only a week error: a slot-taken message must stay while the fresh week loads.
+    if (weekErrorShown) hideBanner();
+    weekErrorShown = false;
     const week = result.data;
     const keepDate = week.days.some((day) => day.date === state.get().selectedDate && day.slots.length);
     state.set({ week, weekStart: week.week_start, selectedDate: keepDate ? state.get().selectedDate : defaultDay(week) });
@@ -834,31 +845,36 @@ if (app) {
       const week = mapped.refreshedWeek;
       state.set({ startAt: null, startLabel: null, ...(week ? { week, weekStart: week.week_start, selectedDate: defaultDay(week) } : { week: null }) });
       unmountWidgets();
-      goTo(2);
-      updateSummary();
-      showBanner(`<p>${mapped.message}</p>`);
+      goTo(2, { after: () => { updateSummary(); showBanner(`<p>${mapped.message}</p>`); } });
       return;
     }
     if (mapped.step === 1) {
       unmountWidgets();
       state.set({ faqAcknowledged: false });
-      goTo(1);
-      showBanner(`<p>${mapped.message}</p>`);
+      goTo(1, { after: () => showBanner(`<p>${mapped.message}</p>`) });
       return;
     }
     if (mapped.step === 3) {
       unmountWidgets();
-      goTo(3);
-      for (const [name, message] of Object.entries(mapped.fieldErrors ?? {})) setFieldError(name, message);
-      elements.step.querySelector('.bk-error-slot').innerHTML = renderErrorSummary(mapped.fieldErrors ?? {});
-      elements.alert.textContent = mapped.message;
-      elements.step.querySelector(`#bk-${FIELD_ORDER.find((name) => mapped.fieldErrors?.[name])}`)?.focus();
+      goTo(3, {
+        after: () => {
+          for (const [name, message] of Object.entries(mapped.fieldErrors ?? {})) setFieldError(name, message);
+          const slot = elements.step.querySelector('.bk-error-slot');
+          if (slot) slot.innerHTML = renderErrorSummary(mapped.fieldErrors ?? {});
+          elements.alert.textContent = mapped.message;
+          elements.step.querySelector(`#bk-${FIELD_ORDER.find((name) => mapped.fieldErrors?.[name])}`)?.focus();
+        }
+      });
       return;
     }
     if (mapped.inline) {
       showCardError(mapped.message);
       elements.alert.textContent = mapped.message;
-      try { widgets.card?.focus?.('cardNumber'); } catch { /* the iframe keeps its own focus */ }
+      // Square's card iframe takes focus when it can; otherwise the message
+      // does, so focus never falls back to the page body.
+      let focused = false;
+      try { focused = widgets.card?.focus?.('cardNumber') === true; } catch { /* the iframe keeps its own focus */ }
+      if (!focused) elements.step.querySelector('#bk-card-error')?.focus();
       return;
     }
     const retry = mapped.retry ? '<button type="button" class="button button-outline" data-action="retry-submit">Try again</button>' : '';
@@ -902,6 +918,10 @@ if (app) {
     }
     focusTitle();
     try { window.history.replaceState({ step: 5 }, '', confirmedPath(result.booking.id)); } catch { /* the view is already shown */ }
+    // /book/confirmed/ shows this booking again on a reload in this tab (js/booking/confirmed.js). No contact details.
+    try {
+      sessionStore()?.setItem(CONFIRMED_STORAGE_KEY, JSON.stringify({ id: result.booking.id, service: result.booking.service_name, when: timeLabel }));
+    } catch { /* storage unavailable: a reload shows the general text */ }
     window.dataLayer = window.dataLayer || [];
     fireConfirmation(result, {
       gtag: typeof window.gtag === 'function' ? window.gtag : undefined,
@@ -971,7 +991,10 @@ if (app) {
 
   // Each step pushes `{ step }` onto history so the browser's back button
   // walks the steps. `push: false` is used when history already moved.
-  function goTo(step, { push = true } = {}) {
+  // `after` runs once the new step is in the DOM. With a view transition the
+  // render is asynchronous, so anything that touches the new step (field
+  // errors, a banner that takes focus) goes there instead of after goTo().
+  function goTo(step, { push = true, after = null } = {}) {
     if (step < 1 || step > 4 || guard.busy) return;
     const prevStep = state.get().step;
     const direction = step < prevStep ? 'backward' : 'forward';
@@ -994,6 +1017,7 @@ if (app) {
       if (head && head.getBoundingClientRect().top < 0) {
         head.scrollIntoView({ behavior: prefersReducedMotion() ? 'auto' : 'smooth', block: 'start' });
       }
+      after?.();
     };
     const render = () => {
       if (step === 1) {
@@ -1022,6 +1046,10 @@ if (app) {
     const root = document.documentElement;
     root.dataset.bkDir = direction;
     const transition = document.startViewTransition(render);
+    // A newer transition skips this one and rejects its promises; the step
+    // still renders, so the rejections are expected and handled here.
+    transition.ready.catch(() => {});
+    transition.updateCallbackDone.catch(() => {});
     transition.finished.catch(() => {}).finally(() => { delete root.dataset.bkDir; });
   }
 
@@ -1040,12 +1068,18 @@ if (app) {
     goTo(step, { push: false });
   });
 
+  let catalogLoading = false;
   async function start() {
+    if (catalogLoading) return; // A double click on Try again asks once.
+    catalogLoading = true;
+    elements.step.setAttribute('aria-busy', 'true');
     const result = await api.fetchCatalog();
+    catalogLoading = false;
     if (!result.ok) {
       elements.step.setAttribute('aria-busy', 'false');
       elements.step.innerHTML = '<h2 class="bk-step-title" tabindex="-1">Choose a service</h2>';
-      showBanner(renderCatalogUnavailable());
+      showBanner(renderCatalogUnavailable(result.error));
+      announce('Online booking could not load.');
       return;
     }
     hideBanner();

@@ -35,10 +35,10 @@ test('the page has exactly one h1', () => {
 
 test('css/booking.css loads after css/type-case.css', () => {
   const sheets = [...html.matchAll(/<link rel="stylesheet" href="([^"]+)"/g)].map((match) => match[1]);
-  const typeCase = sheets.indexOf('../css/type-case.css');
-  const booking = sheets.indexOf('../css/booking.css');
+  const typeCase = sheets.indexOf('/css/type-case.css');
+  const booking = sheets.indexOf('/css/booking.css');
   assert.ok(typeCase >= 0 && booking > typeCase, sheets.join(', '));
-  assert.ok(sheets.indexOf('../css/styles.css') < typeCase);
+  assert.ok(sheets.indexOf('/css/styles.css') < typeCase);
 });
 
 test('the progress is an ordered list of 4 steps with the first marked current', () => {
@@ -58,7 +58,7 @@ test('a noscript block offers the phone number and the Setmore page', () => {
 });
 
 test('the booking app loads as a module and has polite and assertive live regions', () => {
-  assert.match(html, /<script type="module" src="\.\.\/js\/booking\/main\.js"><\/script>/);
+  assert.match(html, /<script type="module" src="\/js\/booking\/main\.js"><\/script>/);
   assert.match(html, /role="status"[^>]*aria-live="polite"|aria-live="polite"[^>]*role="status"/);
   assert.match(html, /role="alert"/);
 });
@@ -127,6 +127,65 @@ test('every inline script on the page is allowed by a CSP hash', () => {
   }
 });
 
+// Audit 2026-11-24.
+test('the head enters the enhanced and bk-js states before first paint, and charset comes first', () => {
+  const head = /<head>([\s\S]*?)<\/head>/.exec(html)[1];
+  assert.match(head, /^\s*<meta charset="utf-8">/);
+  const first = /<script>([\s\S]*?)<\/script>/.exec(head)[1];
+  assert.match(first, /classList\.add\('enhanced', 'bk-js'\)/);
+  assert.match(first, /__perfectionEnhancedReady/);
+  assert.match(read('js/contact.js'), /window\.__perfectionEnhancedReady = true;/);
+  assert.match(read('css/booking.css'), /html:not\(\.bk-js\) \.bk-app/);
+});
+
+test('the Google tag is configured only on the live domain', () => {
+  const snippet = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map((match) => match[1]).find((body) => body.includes('gtag('));
+  assert.match(snippet, /if \(location\.hostname === 'perfectionbyriri\.com'\) \{\s*gtag\('js', new Date\(\)\);\s*gtag\('config', 'G-9T26E3J0XS'\);/);
+});
+
+test('/book/confirmed/ exists for a reload of the confirmation, is noindex and loads confirmed.js', () => {
+  const page = read('book/confirmed/index.html');
+  assert.match(page, /<meta name="robots" content="noindex,nofollow">/);
+  assert.match(page, /<script type="module" src="\/js\/booking\/confirmed\.js"><\/script>/);
+  assert.match(page, /href="tel:\+14258450045"/);
+  assert.equal((page.match(/<h1[\s>]/g) ?? []).length, 1);
+  assert.doesNotMatch(page, /<link rel="canonical"/);
+  assert.doesNotMatch(read('sitemap.xml'), /book\/confirmed/);
+  const csp = cspDirectives(headersFor('/book/*')['content-security-policy']);
+  for (const [, body] of page.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/g)) {
+    assert.ok(csp['script-src'].includes(`'sha256-${createHash('sha256').update(body, 'utf8').digest('base64')}'`), 'confirmed page inline script hash');
+  }
+});
+
+test('/book/* sends a Permissions-Policy that turns off unused device features', () => {
+  const policy = headersFor('/book/*')['permissions-policy'];
+  for (const feature of ['camera=()', 'microphone=()', 'geolocation=()']) assert.ok(policy.includes(feature), feature);
+});
+
+test('book pages link with root paths, so links survive the move to /book/confirmed/', () => {
+  for (const file of ['book/index.html', 'book/confirmed/index.html']) {
+    const page = read(file);
+    assert.doesNotMatch(page, /(?:href|src|srcset)="\.\.?\//, file);
+    assert.doesNotMatch(page, /href="index\.html"/, file);
+  }
+});
+
+test('the footer keeps "Pkwy A" together and links Instagram without a tracking parameter', () => {
+  assert.match(html, /18205 Alderwood Mall Pkwy&nbsp;A<br>/);
+  assert.match(html, /href="https:\/\/www\.instagram\.com\/perfection\.byriri\/"/);
+  assert.doesNotMatch(html, /stkn=/);
+});
+
+test('main.js applies post-step work after the view transition and keys week loads by service', () => {
+  const js = read('js/booking/main.js');
+  assert.match(js, /function goTo\(step, \{ push = true, after = null \} = \{\}\)/);
+  assert.match(js, /goTo\(3, \{\s*after: \(\) => \{/);
+  assert.match(js, /const key = `\$\{serviceId\}\|\$\{weekStart \?\? ''\}`;/);
+  assert.match(js, /transition\.ready\.catch\(\(\) => \{\}\);/);
+  assert.match(js, /transition\.updateCallbackDone\.catch\(\(\) => \{\}\);/);
+  assert.match(js, /data-action="retry-catalog"/);
+});
+
 test('the sitemap lists /book/', () => {
   assert.match(read('sitemap.xml'), /<loc>https:\/\/perfectionbyriri\.com\/book\/<\/loc>/);
 });
@@ -182,7 +241,7 @@ test('main.js findService carries the group key that picks the Step 4/5 hero pho
 test('Variant C: the head is a monolith hero with the studio photo, one h1 and the progress inside', () => {
   const head = /<header class="bk-head bk-monolith"[^>]*>([\s\S]*?)<\/header>/.exec(html);
   assert.ok(head, 'monolith head');
-  assert.match(head[1], /<img class="bk-monolith-photo" src="\.\.\/images\/booking\/lash-tools\.jpg" width="1536" height="1024" alt="Precision lash tweezers resting in an organizer tray of extensions"/);
+  assert.match(head[1], /<img class="bk-monolith-photo" src="\/images\/booking\/lash-tools-1536\.webp" srcset="\/images\/booking\/lash-tools-768\.webp 768w, \/images\/booking\/lash-tools-1536\.webp 1536w" sizes="100vw" width="1536" height="1024" alt="Precision lash tweezers resting in an organizer tray of extensions"/);
   assert.match(head[1], /<h1 class="bk-title" id="bk-title">Book your<br><em>appointment\.<\/em><\/h1>/);
   assert.match(head[1], /<p class="bk-monolith-display" aria-hidden="true" hidden><\/p>/);
   assert.match(head[1], /<p class="bk-monolith-kicker" hidden><\/p>/);
