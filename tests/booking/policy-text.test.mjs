@@ -58,3 +58,13 @@ test('terms mention Setmore and Square and carry the deposit policy verbatim', (
 test('the policy strings stay valid inside single-quoted JavaScript', () => {
   for (const file of FILES) assert.doesNotMatch(`${privacy[file]}${terms[file]}`, /(^|[^\\])'/);
 });
+
+test('privacy names Google Ads conversion tracking and the Meta Pixel', () => {
+  assert.match(privacy.main, /Google Ads/);
+  assert.match(privacy.main, /Meta Pixel/);
+  assert.match(privacy.main, /hashed/);
+});
+
+test('the booking paragraph no longer says the details are used only for Setmore', () => {
+  assert.doesNotMatch(privacy.main, /only to create and manage your appointment/);
+});
