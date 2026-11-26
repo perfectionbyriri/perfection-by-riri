@@ -925,6 +925,8 @@ if (app) {
     window.dataLayer = window.dataLayer || [];
     fireConfirmation(result, {
       gtag: typeof window.gtag === 'function' ? window.gtag : undefined,
+      fbq: typeof window.fbq === 'function' ? window.fbq : undefined,
+      contact: { email: state.get().details.email, phone: state.get().details.phone },
       dataLayer: window.dataLayer,
       dispatch: (event) => window.dispatchEvent(event),
       storage: sessionStore()

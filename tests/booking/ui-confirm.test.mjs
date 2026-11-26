@@ -15,13 +15,16 @@ function result(overrides = {}) {
 
 function sinks() {
   const gtagCalls = [];
+  const fbqCalls = [];
   const dataLayer = [];
   const events = [];
   const store = new Map();
   return {
-    gtagCalls, dataLayer, events, store,
+    gtagCalls, fbqCalls, dataLayer, events, store,
     deps: {
       gtag: (...args) => gtagCalls.push(args),
+      fbq: (...args) => fbqCalls.push(args),
+      contact: { email: 'a@b.co', phone: '4258450045' },
       dataLayer,
       dispatch: (event) => events.push(event),
       storage: { getItem: (key) => (store.has(key) ? store.get(key) : null), setItem: (key, value) => store.set(key, String(value)) }
@@ -38,7 +41,8 @@ test('fires purchase and booking_confirmed once per booking id', () => {
   const sink = sinks();
   assert.equal(fireConfirmation(result(), sink.deps), true);
   assert.equal(fireConfirmation(result(), sink.deps), false);
-  assert.equal(sink.gtagCalls.length, 1);
+  assert.equal(sink.gtagCalls.length, 3, 'purchase, set user_data, conversion');
+  assert.equal(sink.fbqCalls.length, 1, 'Schedule');
   assert.equal(sink.dataLayer.length, 1);
   assert.equal(sink.events.length, 1);
   assert.equal(sink.store.get('purchase_sent:bk_123'), '1');
@@ -74,7 +78,7 @@ test('does not fire when deposit.status is pending_capture', () => {
   const sink = sinks();
   assert.equal(fireConfirmation(result({ deposit: { status: 'pending_capture', payment_id: 'sq', total_cents: 5000 } }), sink.deps), false);
   assert.equal(fireConfirmation(result({ booking: { ...result().booking, status: 'PENDING' } }), sink.deps), false);
-  assert.equal(sink.gtagCalls.length + sink.dataLayer.length + sink.events.length, 0);
+  assert.equal(sink.gtagCalls.length + sink.fbqCalls.length + sink.dataLayer.length + sink.events.length, 0);
 });
 
 test('fires even when storage throws (private mode), and still only once per page', () => {
@@ -84,6 +88,40 @@ test('fires even when storage throws (private mode), and still only once per pag
   assert.equal(fireConfirmation(result(), deps), true);
   assert.equal(fireConfirmation(result(), deps), false);
   assert.equal(sink.dataLayer.length, 1);
+});
+
+test('pending_capture fires no Ads conversion and no Schedule', () => {
+  const sink = sinks();
+  fireConfirmation(result({ deposit: { status: 'pending_capture', payment_id: 'sq', total_cents: 5000 } }), sink.deps);
+  assert.equal(sink.fbqCalls.length, 0);
+  assert.ok(!sink.gtagCalls.some((call) => call[1] === 'conversion'));
+});
+
+test('a no-deposit booking sends conversion and Schedule with value 0', () => {
+  const sink = sinks();
+  fireConfirmation(result({ deposit: { status: 'none', payment_id: null, total_cents: 0, receipt_url: null } }), sink.deps);
+  const conversion = sink.gtagCalls.find((call) => call[1] === 'conversion');
+  assert.equal(conversion[2].value, 0);
+  assert.equal(conversion[2].transaction_id, 'bk_123');
+  assert.equal(sink.fbqCalls[0][1], 'Schedule');
+  assert.equal(sink.fbqCalls[0][2].value, 0);
+});
+
+test('dataLayer and the CustomEvent carry no email or phone', () => {
+  const sink = sinks();
+  fireConfirmation(result(), sink.deps);
+  for (const sent of [JSON.stringify(sink.dataLayer), JSON.stringify(sink.events[0].detail)]) {
+    assert.doesNotMatch(sent, /a@b\.co/);
+    assert.doesNotMatch(sent, /4258450045/);
+  }
+});
+
+test('a throwing fbq still returns true and pushes dataLayer', () => {
+  const sink = sinks();
+  const deps = { ...sink.deps, fbq: () => { throw new Error('blocked'); } };
+  assert.equal(fireConfirmation(result(), deps), true);
+  assert.equal(sink.dataLayer.length, 1);
+  assert.ok(sink.gtagCalls.some((call) => call[1] === 'conversion'));
 });
 
 test('buildIcs uses TZID America/Los_Angeles and the booking start/end', () => {

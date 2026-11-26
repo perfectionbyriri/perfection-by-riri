@@ -6,6 +6,7 @@
 // service id only: never a name, email or phone.
 
 import { escapeHtml } from './html.js';
+import { sendAdConversions } from './ad-tags.js';
 import { formatMoney, heroPhotoFor, splitTimeLabel } from './checkout.js';
 import { POLICY_TEXT } from './render-details.js';
 import { formatDuration } from './render-services.js';
@@ -36,7 +37,7 @@ export function isConversion(result) {
 const firedOnPage = new WeakMap();
 const NO_STORAGE = {};
 
-export function fireConfirmation(result, { gtag, dataLayer, dispatch, storage } = {}) {
+export function fireConfirmation(result, { gtag, fbq, dataLayer, dispatch, storage, contact } = {}) {
   if (!isConversion(result)) return false;
   const bookingId = String(result.booking.id);
   const flag = `purchase_sent:${bookingId}`;
@@ -66,6 +67,7 @@ export function fireConfirmation(result, { gtag, dataLayer, dispatch, storage } 
       items: [{ item_id: detail.service_id, item_name: detail.service_name }]
     });
   } catch { /* analytics must never break the confirmation */ }
+  sendAdConversions(detail, { gtag, fbq, contact });
   try { dataLayer?.push({ event: 'booking_confirmed', ...detail }); } catch { /* same */ }
   try { dispatch?.(new CustomEvent('pbr:booking-confirmed', { detail })); } catch { /* same */ }
   return true;
