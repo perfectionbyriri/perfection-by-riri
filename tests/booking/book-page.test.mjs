@@ -117,6 +117,18 @@ test('the CSP lets the existing Google Analytics and Google Ads tags send their 
   assert.ok(allows('script-src', 'googleads.g.doubleclick.net'), 'script-src googleads.g.doubleclick.net (Ads view-through)');
 });
 
+test('CSP allows the Meta Pixel hosts and nothing broader', () => {
+  const csp = cspDirectives(headersFor('/book/*')['content-security-policy']);
+  assert.ok(csp['script-src'].includes('https://connect.facebook.net'), 'script-src connect.facebook.net');
+  assert.ok(csp['img-src'].includes('https://www.facebook.com'), 'img-src www.facebook.com');
+  assert.ok(csp['connect-src'].includes('https://www.facebook.com'), 'connect-src www.facebook.com');
+  for (const [name, sources] of Object.entries(csp)) {
+    assert.ok(!sources.some((source) => source.includes('*.facebook.com') || source.includes('*.facebook.net')), `${name} has no Meta wildcard`);
+    assert.ok(!sources.includes("'unsafe-eval'"), `${name} has no unsafe-eval`);
+  }
+  assert.ok(!csp['script-src'].includes("'unsafe-inline'"), 'no unsafe-inline scripts');
+});
+
 test('every inline script on the page is allowed by a CSP hash', () => {
   const csp = cspDirectives(headersFor('/book/*')['content-security-policy']);
   const inline = [...html.matchAll(/<script(?![^>]*\bsrc=)(?![^>]*type="application\/ld\+json")[^>]*>([\s\S]*?)<\/script>/g)].map((match) => match[1]);
