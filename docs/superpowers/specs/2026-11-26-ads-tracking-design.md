@@ -10,7 +10,7 @@ Bookings are moving from Setmore to `perfectionbyriri.com/book/`. Google Ads and
 
 - The existing Google Ads conversion action `Setmore - Confirmed Paid Booking` (conversion type ID `7882529756`, source Website, Google tag manual event) fires from the booking confirmation view. History and the R2 campaign goal stay unchanged.
 - Enhanced conversions: the Google tag receives the customer's email and phone at conversion time (Google hashes them; the site stores nothing new).
-- Meta Pixel dataset `1864195751687018`: `PageView` on every site page, `Purchase` on the booking confirmation view.
+- Meta Pixel dataset `1864195751687018`: `PageView` on every site page, `Schedule` on the booking confirmation view. `Schedule` is the event the owner's Meta ads already use as the paid-booking conversion (owner, 2026-11-26), so no Meta settings change.
 - A failure of any ad tag never breaks the booking, payment or confirmation view.
 
 ## Non-goals
@@ -52,13 +52,13 @@ The owner picked B after asking which option is most reliable and whether GTM is
    - `gtag('event', 'conversion', { send_to: 'AW-16731910684/qZuaCNy3164dEJzksqo-', value, currency: 'USD', transaction_id: <booking id> })`.
    - The contact data comes from the form state passed into `fireConfirmation` by `main.js`; it is not added to `dataLayer`, the `pbr:booking-confirmed` event, or logs.
 3. **Meta Pixel.** New `New Perfection/js/meta-pixel.js`, included with `defer` on all 9 pages next to `analytics.js`: the standard `fbq` stub, loads `https://connect.facebook.net/en_US/fbevents.js`, `fbq('init', '1864195751687018')`, `fbq('track', 'PageView')`.
-4. **Meta Purchase.** In `fireConfirmation`: `fbq('track', 'Purchase', { value, currency: 'USD', content_ids: [service_id], content_type: 'product' }, { eventID: <booking id> })`. `main.js` passes `window.fbq` the same way it passes `window.gtag`.
+4. **Meta Schedule.** In `fireConfirmation`: `fbq('track', 'Schedule', { value, currency: 'USD', content_ids: [service_id] }, { eventID: <booking id> })`. One `Schedule` per booking id; the once-per-booking guard also covers the earlier unexplained case of two browser `Schedule` events for one payment. `main.js` passes `window.fbq` the same way it passes `window.gtag`.
 5. **CSP for `/book/*`.** Add `https://connect.facebook.net` to `script-src`, and `https://www.facebook.com` to `img-src` and `connect-src`. Nothing else changes.
 6. **Privacy text.** The privacy and terms content updated by the booking work also names Google Ads conversion tracking (with enhanced conversions) and the Meta Pixel; `tests/booking/policy-text.test.mjs` is extended to check this.
 
 ## Verification
 
-- Unit tests (`tests/booking/ui-confirm.test.mjs` and new ones): the conversion, `user_data` and `Purchase` fire once per booking only for a conversion; never for `pending_capture` or a failed booking; a throwing `gtag` or `fbq` does not stop the others or the view; the phone is normalized to E.164; contact data is absent from `dataLayer`.
+- Unit tests (`tests/booking/ui-confirm.test.mjs` and new ones): the conversion, `user_data` and `Schedule` fire once per booking only for a conversion; never for `pending_capture` or a failed booking; a throwing `gtag` or `fbq` does not stop the others or the view; the phone is normalized to E.164; contact data is absent from `dataLayer`.
 - Page tests: each of the 9 pages includes `meta-pixel.js`; the `/book/*` CSP contains the Meta hosts and the unchanged script hash.
 - CI run on the branch, and a local Playwright run in mock mode that records `gtag`/`fbq` calls through a full booking.
 - Live proof only after deploy (Task 23): one real $50 booking shows in GA4, in Google Ads (the conversion's tag status becomes active) and in Meta Events Manager. Until then nothing is claimed as working in production.
@@ -68,4 +68,4 @@ The owner picked B after asking which option is most reliable and whether GTM is
 - Exact helper names and module layout for the ad calls.
 - How the Playwright check stubs the third-party scripts.
 
-Builder calls (owner can override): enhanced conversions included; `content_type: 'product'` for Meta; the pixel loads on every page, not only `/book/`.
+Builder calls (owner can override): enhanced conversions included; the pixel loads on every page, not only `/book/`.
