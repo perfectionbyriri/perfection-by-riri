@@ -1,5 +1,11 @@
 'use strict';
 
+// Google Ads tag for the "Setmore - Confirmed Paid Booking" conversion, which
+// the booking confirmation view sends (js/booking/ad-tags.js).
+try {
+  if (typeof window.gtag === 'function') window.gtag('config', 'AW-16731910684');
+} catch (error) { /* analytics must never break the page */ }
+
 // Measure intent on the site: booking_click fires on links to the /book/ flow.
 document.addEventListener('click', (event) => {
   const link = event.target.closest('a[href]');
