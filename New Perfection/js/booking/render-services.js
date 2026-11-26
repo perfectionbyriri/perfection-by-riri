@@ -76,7 +76,11 @@ export function formatDuration(minutes) {
   return rest ? `${hours} hr ${rest} min` : `${hours} hr`;
 }
 
-function minPriceCents(services) {
+// The category's "From" price leaves out lash removal: it is not a
+// treatment price and would read as the cheapest set (from $30).
+function minPriceCents(allServices) {
+  const priced = allServices.filter((service) => !/removal/i.test(service.name ?? ''));
+  const services = priced.length ? priced : allServices;
   let min = Infinity;
   for (const service of services) {
     if (typeof service.price_cents === 'number' && service.price_cents < min) {
@@ -227,11 +231,21 @@ function buildMenuCategories(groups) {
   return categories;
 }
 
+// Uppercase names run wide on phones: a hyphenated part ("2D-3D",
+// "Touch-Up") stays on one line instead of breaking after the hyphen, a
+// number stays with its unit ("2 Weeks") and "+" with the next word.
+function nameHtml(name) {
+  return escapeHtml(name)
+    .replace(/\S*\w-\w\S*/g, (part) => `<span class="bk-nowrap">${part}</span>`)
+    .replace(/(\d) (Weeks?)\b/g, '$1&nbsp;$2')
+    .replace(/ \+ /g, ' +&nbsp;');
+}
+
 function card(service, selected, index) {
   const blurb = service.blurb ? `<span class="bk-card-blurb">${escapeHtml(service.blurb)}</span>` : '';
   const stagger = Math.min(index, MAX_STAGGER);
   return `<button type="button" class="bk-card" data-service-id="${escapeHtml(service.service_id)}" aria-pressed="${selected ? 'true' : 'false'}" style="--bk-i: ${stagger}">`
-    + `<span class="bk-card-body"><span class="bk-card-name">${escapeHtml(service.name)}</span>${blurb}</span>`
+    + `<span class="bk-card-body"><span class="bk-card-name">${nameHtml(service.name)}</span>${blurb}</span>`
     + `<span class="bk-card-aside"><span class="bk-card-meta">${formatDuration(service.duration_minutes)} · ${formatPrice(service.price_cents)}</span>`
     + '<span class="bk-card-indicator" aria-hidden="true"><svg viewBox="0 0 16 16" width="12" height="12" focusable="false"><path d="M3 8.5 6.4 11.8 13 4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square" stroke-linejoin="miter"/></svg></span></span>'
     + '</button>';
@@ -324,7 +338,16 @@ export function renderServices({ groups, selectedId = null, focusGroup = null, o
     + `<div class="bk-accordion">${sections}</div>`;
 }
 
-export function renderCatalogUnavailable() {
-  return '<p>Online booking is taking a short break. Please call (425) 845 0045 and we&rsquo;ll book you in.</p>'
-    + '<a class="button button-gold" href="tel:+14258450045">Call (425) 845 0045</a>';
+// A busy calendar, a lost connection or a server hiccup can pass, so those
+// offer Try again next to the phone number; anything else offers the phone.
+const CATALOG_RETRY_CODES = new Set(['UPSTREAM_BUSY', 'RATE_LIMITED', 'NETWORK', 'SERVER_ERROR']);
+
+export function renderCatalogUnavailable(error = null) {
+  const call = '<a class="button button-gold" href="tel:+14258450045">Call (425) 845 0045</a>';
+  if (CATALOG_RETRY_CODES.has(error?.code)) {
+    return '<p>We couldn&rsquo;t load our services just now. Please try again, or call (425) 845 0045 and we&rsquo;ll book you in.</p>'
+      + '<button type="button" class="button button-outline" data-action="retry-catalog">Try again</button>'
+      + call;
+  }
+  return '<p>Online booking is taking a short break. Please call (425) 845 0045 and we&rsquo;ll book you in.</p>' + call;
 }

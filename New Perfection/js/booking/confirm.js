@@ -150,7 +150,7 @@ export function renderConfirmation({ result, service = null, firstName = '', ema
   let depositLine = '';
   if (deposit?.status === 'captured') {
     const masked = maskEmail(email);
-    depositLine = `<span class="bk-cinema-sub">Deposit paid ${formatMoney(deposit.total_cents)}${masked ? ` · Receipt from Square sent to ${escapeHtml(masked)}` : ''}</span>`;
+    depositLine = `<span class="bk-cinema-sub">Deposit paid ${formatMoney(deposit.total_cents)}${masked ? ` · Receipt from Square sent to <span class="bk-confirm-email">${escapeHtml(masked)}</span>` : ''}</span>`;
   } else if (deposit?.status === 'pending_capture') {
     depositLine = '<span class="bk-cinema-sub">Your booking is confirmed. The studio will finalize your deposit shortly.</span>';
   }
@@ -190,6 +190,7 @@ export function renderConfirmation({ result, service = null, firstName = '', ema
     + depositLine
     + '<p class="bk-confirm-line bk-cinema-info-title">Need to change or cancel?</p>'
     + '<span class="bk-cinema-sub">Call <a href="tel:+14258450045">(425) 845 0045</a>.</span>'
+    + (booking.id ? `<p class="bk-fine bk-confirm-ref">Booking reference: <span class="bk-confirm-ref-id">${escapeHtml(booking.id)}</span></p>` : '')
     + '</div>'
     + '</div>'
     + `<p class="bk-fine bk-cinema-policy">Booking policy: ${escapeHtml(policyText || POLICY_TEXT)}</p>`

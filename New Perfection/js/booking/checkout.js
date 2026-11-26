@@ -109,13 +109,18 @@ const COPY = {
   turnstile: 'We could not verify this request. Please try again, or call (425) 845 0045.',
   checkDetails: 'Please check your details and try again.',
   faq: 'Please read the FAQ and confirm it before booking.',
-  cardAgain: 'Please enter your card details again.'
+  cardAgain: 'Please enter your card details again.',
+  forbidden: 'This page could not send your booking. Please refresh the page and try again, or call (425) 845 0045.',
+  attemptEnded: 'This booking attempt has ended and your card was not charged. Please try again.',
+  server: "Something went wrong on our side and we couldn't confirm your booking. Please try again in a moment, or call (425) 845 0045."
 };
 
 // Codes where the server's outcome is unknown or still running: keep the key
 // so a retry is deduplicated. Every other error is a definite failure (the
 // server cancelled any card hold), so the next try is a new attempt.
-const KEEP_KEY = new Set(['NETWORK', 'IN_PROGRESS', 'BOOKING_PENDING_CONFIRMATION']);
+// SERVER_ERROR is a reply that was not the booking API's JSON (for example a
+// platform error page): the booking may or may not exist, as with NETWORK.
+const KEEP_KEY = new Set(['NETWORK', 'SERVER_ERROR', 'IN_PROGRESS', 'BOOKING_PENDING_CONFIRMATION']);
 
 export function mapError(body) {
   const error = body && typeof body.error === 'object' && body.error ? body.error : { code: 'NETWORK' };
@@ -138,6 +143,12 @@ export function mapError(body) {
       return { ...base, message: COPY.turnstile };
     case 'NETWORK':
       return { ...base, message: COPY.network };
+    case 'SERVER_ERROR':
+      return { ...base, message: COPY.server };
+    case 'FORBIDDEN_ORIGIN':
+      return { ...base, message: COPY.forbidden, retry: false };
+    case 'ATTEMPT_ENDED':
+      return { ...base, message: COPY.attemptEnded };
     case 'VALIDATION_FAILED': {
       const fieldErrors = {};
       let cardError = null;
@@ -244,7 +255,7 @@ export function renderReview({ service, details = {}, timeLabel = '', turnstile 
     ? '<div class="bk-review-block bk-cinema-card-wrap">'
       + `<div class="bk-cinema-card-head"><h3 class="bk-review-label">Card deposit &middot; ${formatMoney(deposit.total_cents)}</h3><p class="bk-fine bk-secured">Payment secured by Square.</p></div>`
       + '<div class="bk-card-field" id="bk-card"></div>'
-      + '<p class="bk-field-error" id="bk-card-error" role="alert" hidden></p></div>'
+      + '<p class="bk-field-error" id="bk-card-error" role="alert" tabindex="-1" hidden></p></div>'
     : '';
 
   const contactLines = [email, phone].filter(Boolean).map(escapeHtml).join('<br>');

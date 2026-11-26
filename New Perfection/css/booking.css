@@ -2330,8 +2330,8 @@
   inset: auto 0 0;
   z-index: 40;
   display: grid;
-  gap: 10px;
-  padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+  gap: 6px;
+  padding: 8px 16px calc(8px + env(safe-area-inset-bottom));
   background: var(--bk-bg-deep);
   border-top: 1px solid var(--bk-line);
 }
@@ -2357,7 +2357,7 @@
   cursor: pointer;
 }
 
-.bk-bar-action { width: 100%; min-height: 54px; }
+.bk-bar-action { width: 100%; min-height: 48px; }
 .bk-bar-action:disabled { cursor: not-allowed; }
 
 /* Disabled bar: a quiet grey plate whose label still reads (it says why, e.g. the security check). */
@@ -2396,7 +2396,7 @@ html.bk-has-bar {
 
 /* Room for the bar, and one primary button instead of two. */
 @media (max-width: 800px) {
-  html.bk-has-bar .book-page { padding-bottom: calc(54px + 24px + 24px + env(safe-area-inset-bottom)); }
+  html.bk-has-bar .book-page { padding-bottom: calc(48px + 24px + 6px + 16px + 1px + env(safe-area-inset-bottom)); }
   html.bk-has-bar .bk-actions .button-gold,
   html.bk-has-bar .bk-pay { display: none; }
 }
@@ -2426,3 +2426,41 @@ html.bk-has-bar {
   font-weight: 550;
   font-variation-settings: "opsz" 9;
 }
+
+/* Audit 2026-11-24. Without JavaScript the booking app cannot work, so only the
+   noscript message (phone and Setmore) shows. bk-js is set in the head. */
+html:not(.bk-js) .bk-app,
+html:not(.bk-js) .bk-monolith-progress { display: none; }
+
+/* WCAG 2.2 target size: footer links and buttons are at least 24px tall. */
+.book-page .footer-grid li a,
+.book-page .footer-grid address a,
+.book-page .footer-bottom button { display: inline-block; min-height: 24px; line-height: 24px; }
+.book-page .footer-grid address a[href^="tel:"] { padding-block: 0; }
+.book-page .social-coming { min-height: 24px; }
+
+/* The masked email keeps its own case inside an uppercase caption. */
+.bk-confirm-email { text-transform: none; letter-spacing: normal; }
+
+/* /book/confirmed/: the page a reload of the confirmation lands on. */
+.bk-confirmed-body { max-width: 720px; padding: 48px 0 72px; }
+.bk-confirmed-lead { margin: 0 0 24px; font-size: 18px; line-height: 1.6; color: var(--bk-ink); }
+.bk-confirmed-list { display: grid; gap: 14px; margin: 0 0 28px; padding: 22px 0; border-block: 1px solid var(--bk-line); }
+.bk-confirmed-list div { display: grid; grid-template-columns: minmax(130px, 180px) 1fr; gap: 16px; }
+.bk-confirmed-list dt { font-size: 11px; letter-spacing: 1.6px; text-transform: uppercase; color: var(--bk-gold-ink, #7d6035); padding-top: 3px; }
+.bk-confirmed-list dd { margin: 0; font-size: 16px; line-height: 1.5; color: var(--bk-ink); overflow-wrap: anywhere; }
+.bk-confirmed-list[hidden] { display: none; }
+.bk-confirmed-help { margin: 0 0 28px; line-height: 1.7; }
+.bk-confirmed-help a { color: inherit; text-decoration: underline; text-decoration-color: var(--bk-gold); text-underline-offset: 4px; }
+/* No progress row under the title on this page, so the hero keeps its own bottom space. */
+.bk-confirmed-page .bk-monolith { padding-bottom: 44px; }
+.bk-confirmed-actions { margin: 0; }
+.bk-confirm-ref { margin: 14px 0 0; }
+.bk-confirm-ref-id { overflow-wrap: anywhere; }
+@media (max-width: 560px) {
+  .bk-confirmed-body { padding: 32px 0 56px; }
+  .bk-confirmed-list div { grid-template-columns: 1fr; gap: 4px; }
+}
+
+/* A hyphenated part of a service name stays on one line (render-services.js nameHtml). */
+.bk-nowrap { white-space: nowrap; }

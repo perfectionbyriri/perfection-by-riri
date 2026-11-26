@@ -54,7 +54,7 @@ export function renderDetails({ values = {}, errors = {}, policyText = POLICY_TE
     + '<div class="bk-details-policy">'
     + consent
     + '<p class="bk-fine bk-privacy">We use these details only to manage your appointment. '
-    + '<button type="button" class="bk-text-button" data-privacy>Privacy Policy</button></p>'
+    + '<button type="button" class="bk-text-button" data-privacy>Privacy policy</button></p>'
     + '</div>'
     + '</form>';
 }

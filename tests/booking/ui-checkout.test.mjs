@@ -249,3 +249,26 @@ test('the card form and Turnstile follow the light page theme', () => {
     for (const value of Object.values(rule)) assert.doesNotMatch(String(value), /^#(141312|f4efe8|0b0b0a)$/i);
   }
 });
+
+// Audit 2026-11-24.
+test('mapError: FORBIDDEN_ORIGIN asks for a refresh without Try again; ATTEMPT_ENDED says the card was not charged', () => {
+  const forbidden = mapError({ error: { code: 'FORBIDDEN_ORIGIN' } });
+  assert.equal(forbidden.retry, false);
+  assert.match(forbidden.message, /refresh the page/);
+  const ended = mapError({ error: { code: 'ATTEMPT_ENDED' } });
+  assert.equal(ended.retry, true);
+  assert.equal(ended.newKey, true);
+  assert.match(ended.message, /card was not charged/);
+});
+
+test('mapError: SERVER_ERROR keeps the idempotency key, as the booking outcome is unknown', () => {
+  const mapped = mapError({ error: { code: 'SERVER_ERROR' } });
+  assert.equal(mapped.newKey, false);
+  assert.equal(mapped.retry, true);
+  assert.doesNotMatch(mapped.message, /connection/);
+});
+
+test('the card error can take focus when Square cannot', () => {
+  const html = renderReview({ service: lashLift, details, timeLabel: 'Thursday, November 27 · 1:00 PM' });
+  assert.match(html, /<p class="bk-field-error" id="bk-card-error" role="alert" tabindex="-1" hidden><\/p>/);
+});

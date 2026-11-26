@@ -87,11 +87,33 @@ export function renderSlotsLoading() {
     + '<p class="sr-only">Loading available times…</p></div>';
 }
 
+const SLOT_ERRORS = {
+  busy: 'Our booking calendar is busy right now. Please try again in a minute, or call (425) 845 0045.',
+  network: 'We could not reach the booking calendar. Please check your connection and try again, or call (425) 845 0045.',
+  server: 'Something went wrong on our side. Please try again in a moment, or call (425) 845 0045.',
+  down: 'Online booking is taking a short break. Please call (425) 845 0045 and we\u2019ll book you in.'
+};
+
+function slotsErrorKind(error) {
+  const code = error?.code;
+  if (code === 'UPSTREAM_BUSY' || code === 'RATE_LIMITED') return 'busy';
+  if (code === 'NETWORK') return 'network';
+  if (code === 'SERVER_ERROR') return 'server';
+  return 'down';
+}
+
+// Plain text for the live region; the same words as the banner.
+export function slotsErrorText(error) {
+  return SLOT_ERRORS[slotsErrorKind(error)];
+}
+
 export function renderSlotsError(error) {
-  if (error?.code === 'UPSTREAM_BUSY' || error?.code === 'RATE_LIMITED' || error?.code === 'NETWORK') {
-    return '<p>Our booking calendar is busy right now. Please try again in a minute, or call (425) 845 0045.</p>'
+  const kind = slotsErrorKind(error);
+  const text = escapeHtml(SLOT_ERRORS[kind]).replace('(425) 845 0045', PHONE_LINK);
+  if (kind !== 'down') {
+    return `<p>${text}</p>`
       + '<button type="button" class="button button-outline" data-action="retry-week">Try again</button>';
   }
-  return '<p>Online booking is taking a short break. Please call (425) 845 0045 and we&rsquo;ll book you in.</p>'
+  return `<p>${text}</p>`
     + '<a class="button button-gold" href="tel:+14258450045">Call (425) 845 0045</a>';
 }

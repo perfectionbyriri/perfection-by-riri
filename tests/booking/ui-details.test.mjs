@@ -41,10 +41,10 @@ test('the consent label quotes the booking policy verbatim', () => {
   assert.match(field(html, 'policy_accepted'), /I agree to the booking policy: Cancellations made on the same day/);
 });
 
-test('the privacy line opens the Privacy Policy dialog', () => {
+test('the privacy line opens the Privacy policy dialog', () => {
   const html = renderDetails({ values: {}, errors: {} });
   assert.match(html, /We use these details only to manage your appointment\./);
-  assert.match(html, /<button type="button" class="bk-text-button" data-privacy>Privacy Policy<\/button>/);
+  assert.match(html, /<button type="button" class="bk-text-button" data-privacy>Privacy policy<\/button>/);
 });
 
 test('the error summary links each problem to its field, in form order', () => {
