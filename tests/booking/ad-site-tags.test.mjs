@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import vm from 'node:vm';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const SITE = path.join(ROOT, 'New Perfection');
@@ -39,7 +40,7 @@ test('meta-pixel.js inits dataset 1864195751687018 and tracks PageView once', ()
 
 test('analytics.js configures AW-16731910684 guarded by typeof window.gtag', () => {
   const source = read('js/analytics.js');
-  assert.match(source, /if \(typeof window\.gtag === 'function'\) window\.gtag\('config', 'AW-16731910684'\)/);
+  assert.match(source, /typeof window\.gtag === 'function'\) window\.gtag\('config', 'AW-16731910684'\)/);
 });
 
 test('book/confirmed/ never calls fireConfirmation', () => {
@@ -54,4 +55,29 @@ test('the inline Google tag in book/index.html is unchanged', () => {
   const googleTag = inline.filter((body) => body.includes("gtag('config', 'G-9T26E3J0XS')"));
   assert.equal(googleTag.length, 1, 'one inline Google tag');
   for (const body of inline) assert.doesNotMatch(body, /AW-|fbq/);
+});
+
+// Review fix: preview hosts and `wrangler dev` must not send events to the live
+// dataset or Ads account. Same rule as the inline GA4 tag in book/index.html.
+function runScript(file, hostname) {
+  const gtagCalls = [];
+  const head = { appendChild() {} };
+  const document = { head, getElementsByTagName: () => [], createElement: () => ({}), addEventListener() {} };
+  const window = { location: { hostname }, gtag: (...args) => gtagCalls.push(args) };
+  const context = vm.createContext({ window, document, location: window.location });
+  vm.runInContext(read(file), context);
+  return { window, gtagCalls };
+}
+
+test('meta-pixel.js runs only on perfectionbyriri.com', () => {
+  for (const host of ['localhost', 'perfection-by-riri-preview.example.workers.dev', 'perfectionbyriri.beauty']) {
+    assert.equal(runScript('js/meta-pixel.js', host).window.fbq, undefined, host);
+  }
+  const live = runScript('js/meta-pixel.js', 'perfectionbyriri.com').window;
+  assert.equal(JSON.stringify(live.fbq.queue.map((args) => Array.from(args))), JSON.stringify([['init', '1864195751687018'], ['track', 'PageView']]));
+});
+
+test('analytics.js configures the Ads tag only on perfectionbyriri.com', () => {
+  assert.equal(runScript('js/analytics.js', 'localhost').gtagCalls.length, 0);
+  assert.equal(JSON.stringify(runScript('js/analytics.js', 'perfectionbyriri.com').gtagCalls), JSON.stringify([['config', 'AW-16731910684']]));
 });

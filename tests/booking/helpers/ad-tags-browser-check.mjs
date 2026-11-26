@@ -1,16 +1,19 @@
 // Manual browser check for the ad conversions (plan 2026-11-26-ads-tracking, Task 5).
 // Not part of `node --test` (the glob is tests/booking/*.test.mjs).
 //
-// Usage: cp .env.example .dev.vars && npx wrangler dev --port 8787
-//        node tests/booking/helpers/ad-tags-browser-check.mjs [base-url] [screenshot-dir]
+// Usage: cp .env.example .dev.vars && sed -i 's|^ALLOWED_ORIGINS=.*|&,http://perfectionbyriri.com|' .dev.vars
+//        npx wrangler dev --port 8787
+//        node tests/booking/helpers/ad-tags-browser-check.mjs [screenshot-dir]
+// The ad tags run only on perfectionbyriri.com, so Chromium maps that host to
+// the local server.
 // Delete .dev.vars afterwards. Google and Meta scripts are stubbed; the page's
 // real gtag/fbq calls are recorded.
 import { createRequire } from 'node:module';
 const { chromium } = createRequire(import.meta.url)('playwright');
 import assert from 'node:assert/strict';
 
-const BASE = process.argv[2] ?? 'http://localhost:8787';
-const SHOTS = process.argv[3] ?? null;
+const BASE = 'http://perfectionbyriri.com';
+const SHOTS = process.argv[2] ?? null;
 const SERVICE = 'svc_eyebrow_lamination_tinting_shaping';
 const SEND_TO = 'AW-16731910684/qZuaCNy3164dEJzksqo-';
 
@@ -18,6 +21,9 @@ const SEND_TO = 'AW-16731910684/qZuaCNy3164dEJzksqo-';
 // window.dataLayer, and js/meta-pixel.js queues fbq calls in fbq.queue while
 // fbevents.js (stubbed empty) never loads. Both are read back as arrays.
 const RECORDER = `
+  // http://perfectionbyriri.com is not a secure context, so randomUUID is missing
+  // in the test only (the live site is https). Same shape as the real one.
+  if (!crypto.randomUUID) crypto.randomUUID = () => ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, (c) => (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16));
   window.__csp = [];
   document.addEventListener('securitypolicyviolation', (e) => window.__csp.push(e.violatedDirective + ' ' + e.blockedURI));
 `;
@@ -32,7 +38,7 @@ const READ_CALLS = () => {
 
 const ok = (label) => console.log(`ok - ${label}`);
 
-const browser = await chromium.launch();
+const browser = await chromium.launch({ args: ['--host-resolver-rules=MAP perfectionbyriri.com 127.0.0.1:8787'] });
 const context = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 1 });
 await context.route(/googletagmanager\.com|connect\.facebook\.net/, (route) => route.fulfill({ status: 200, contentType: 'text/javascript', body: '' }));
 await context.addInitScript(RECORDER);

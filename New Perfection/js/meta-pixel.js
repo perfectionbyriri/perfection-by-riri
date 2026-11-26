@@ -5,7 +5,8 @@
 // js/booking/ad-tags.js. A first-party file, not an inline snippet, so the
 // /book/ Content-Security-Policy needs no new script hash.
 (function (window, document) {
-  if (window.fbq) return;
+  // Live site only: preview hosts and `wrangler dev` must not reach the live dataset.
+  if (window.location.hostname !== 'perfectionbyriri.com' || window.fbq) return;
   var fbq = window.fbq = function () {
     if (fbq.callMethod) fbq.callMethod.apply(fbq, arguments);
     else fbq.queue.push(arguments);

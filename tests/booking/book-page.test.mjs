@@ -122,6 +122,10 @@ test('CSP allows the Meta Pixel hosts and nothing broader', () => {
   assert.ok(csp['script-src'].includes('https://connect.facebook.net'), 'script-src connect.facebook.net');
   assert.ok(csp['img-src'].includes('https://www.facebook.com'), 'img-src www.facebook.com');
   assert.ok(csp['connect-src'].includes('https://www.facebook.com'), 'connect-src www.facebook.com');
+  for (const host of ['https://connect.facebook.net', 'https://www.instagram.com']) {
+    assert.ok(csp['img-src'].includes(host), `img-src ${host}`);
+    assert.ok(csp['connect-src'].includes(host), `connect-src ${host}`);
+  }
   for (const [name, sources] of Object.entries(csp)) {
     assert.ok(!sources.some((source) => source.includes('*.facebook.com') || source.includes('*.facebook.net')), `${name} has no Meta wildcard`);
     assert.ok(!sources.includes("'unsafe-eval'"), `${name} has no unsafe-eval`);
