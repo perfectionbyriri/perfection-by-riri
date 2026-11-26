@@ -77,8 +77,9 @@ try {
   const bookingId = new URL(page.url()).searchParams.get('ref');
   assert.ok(bookingId, 'URL has ?ref=');
 
-  assert.ok(gtag.some((c) => c[0] === 'config' && c[1] === 'AW-16731910684'), 'AW config');
-  ok('gtag config AW-16731910684');
+  // Google Ads loads as a destination of the Google tag G-9T26E3J0XS; the site adds no AW config.
+  assert.ok(!gtag.some((c) => c[0] === 'config' && String(c[1]).startsWith('AW-')), 'no separate AW config');
+  ok('no separate AW config (Ads loads through G-9T26E3J0XS)');
   const conversions = gtag.filter((c) => c[0] === 'event' && c[1] === 'conversion');
   assert.equal(conversions.length, 1, 'one conversion');
   assert.deepEqual(conversions[0][2], { send_to: SEND_TO, value: 50, currency: 'USD', transaction_id: bookingId });

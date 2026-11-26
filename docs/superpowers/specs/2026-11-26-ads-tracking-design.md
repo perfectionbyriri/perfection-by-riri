@@ -46,7 +46,7 @@ The owner picked B after asking which option is most reliable and whether GTM is
 
 ## Design (decided)
 
-1. **Google tag config.** `New Perfection/js/analytics.js` (loaded on all 9 pages, including `/book/confirmed/`) calls `gtag('config', 'AW-16731910684')` when `window.gtag` exists. The inline snippet in `book/index.html` is not changed, so the CSP hash stays valid.
+1. **Google tag config.** No separate `AW-` config. The Google tag `G-9T26E3J0XS` already lists `AW-16731910684` as a destination (Tag Assistant, 2026-11-26; Google tag ID `GT-NNQ76TMQ`), so it loads Google Ads on every page. A second `gtag('config', 'AW-16731910684')` would double the Ads page hits. Owner approved removing it on 2026-11-26.
 2. **Google Ads conversion.** In `fireConfirmation`, after `purchase`:
    - `gtag('set', 'user_data', { email, phone_number })` with the email trimmed and lowercased and the phone in E.164 (`+1XXXXXXXXXX`); a field that is empty or invalid is omitted; no call when both are missing.
    - `gtag('event', 'conversion', { send_to: 'AW-16731910684/qZuaCNy3164dEJzksqo-', value, currency: 'USD', transaction_id: <booking id> })`.

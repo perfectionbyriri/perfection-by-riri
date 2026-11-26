@@ -38,9 +38,12 @@ test('meta-pixel.js inits dataset 1864195751687018 and tracks PageView once', ()
   assert.doesNotMatch(source, /Schedule|Purchase/);
 });
 
-test('analytics.js configures AW-16731910684 guarded by typeof window.gtag', () => {
-  const source = read('js/analytics.js');
-  assert.match(source, /typeof window\.gtag === 'function'\) window\.gtag\('config', 'AW-16731910684'\)/);
+// The Google tag G-9T26E3J0XS already loads Google Ads AW-16731910684 as a
+// destination (Tag Assistant, 2026-11-26). A second config would double the
+// Ads page hits, so the site sends only the conversion event.
+test('analytics.js adds no Google Ads config of its own', () => {
+  assert.doesNotMatch(read('js/analytics.js'), /AW-16731910684|'config'/);
+  assert.equal(runScript('js/analytics.js', 'perfectionbyriri.com').gtagCalls.length, 0);
 });
 
 test('book/confirmed/ never calls fireConfirmation', () => {
@@ -77,7 +80,3 @@ test('meta-pixel.js runs only on perfectionbyriri.com', () => {
   assert.equal(JSON.stringify(live.fbq.queue.map((args) => Array.from(args))), JSON.stringify([['init', '1864195751687018'], ['track', 'PageView']]));
 });
 
-test('analytics.js configures the Ads tag only on perfectionbyriri.com', () => {
-  assert.equal(runScript('js/analytics.js', 'localhost').gtagCalls.length, 0);
-  assert.equal(JSON.stringify(runScript('js/analytics.js', 'perfectionbyriri.com').gtagCalls), JSON.stringify([['config', 'AW-16731910684']]));
-});
