@@ -27,6 +27,8 @@ Bookings are moving from Setmore to `perfectionbyriri.com/book/`. Google Ads and
 
 ## Constraints
 
+- `/book/confirmed/` (added 2026-11-24) is the reload fallback page: it shows the stored booking and fires no conversion. Conversions fire only from the in-page confirmation view of `/book/`.
+
 - Fire under exactly the conditions of the existing GA4 `purchase`: `isConversion(result)` in `New Perfection/js/booking/confirm.js` (`booking.status === 'CONFIRMED'` and `deposit.status` in `captured`, `none`), guarded by the existing once-per-booking memory and `purchase_sent:<id>` sessionStorage flag.
 - Every ad call is wrapped in `try/catch`, like the existing calls in `fireConfirmation`.
 - `/book/*` has a strict CSP in `New Perfection/_headers` with a hash for the one inline Google tag snippet; `tests/booking/book-page.test.mjs` enforces it. No new inline scripts: the pixel loads from a first-party file.
@@ -44,12 +46,12 @@ The owner picked B after asking which option is most reliable and whether GTM is
 
 ## Design (decided)
 
-1. **Google tag config.** `New Perfection/js/analytics.js` (loaded on all 8 pages) calls `gtag('config', 'AW-16731910684')` when `window.gtag` exists. The inline snippet in `book/index.html` is not changed, so the CSP hash stays valid.
+1. **Google tag config.** `New Perfection/js/analytics.js` (loaded on all 9 pages, including `/book/confirmed/`) calls `gtag('config', 'AW-16731910684')` when `window.gtag` exists. The inline snippet in `book/index.html` is not changed, so the CSP hash stays valid.
 2. **Google Ads conversion.** In `fireConfirmation`, after `purchase`:
    - `gtag('set', 'user_data', { email, phone_number })` with the email trimmed and lowercased and the phone in E.164 (`+1XXXXXXXXXX`); a field that is empty or invalid is omitted; no call when both are missing.
    - `gtag('event', 'conversion', { send_to: 'AW-16731910684/qZuaCNy3164dEJzksqo-', value, currency: 'USD', transaction_id: <booking id> })`.
    - The contact data comes from the form state passed into `fireConfirmation` by `main.js`; it is not added to `dataLayer`, the `pbr:booking-confirmed` event, or logs.
-3. **Meta Pixel.** New `New Perfection/js/meta-pixel.js`, included with `defer` on all 8 pages next to `analytics.js`: the standard `fbq` stub, loads `https://connect.facebook.net/en_US/fbevents.js`, `fbq('init', '1864195751687018')`, `fbq('track', 'PageView')`.
+3. **Meta Pixel.** New `New Perfection/js/meta-pixel.js`, included with `defer` on all 9 pages next to `analytics.js`: the standard `fbq` stub, loads `https://connect.facebook.net/en_US/fbevents.js`, `fbq('init', '1864195751687018')`, `fbq('track', 'PageView')`.
 4. **Meta Purchase.** In `fireConfirmation`: `fbq('track', 'Purchase', { value, currency: 'USD', content_ids: [service_id], content_type: 'product' }, { eventID: <booking id> })`. `main.js` passes `window.fbq` the same way it passes `window.gtag`.
 5. **CSP for `/book/*`.** Add `https://connect.facebook.net` to `script-src`, and `https://www.facebook.com` to `img-src` and `connect-src`. Nothing else changes.
 6. **Privacy text.** The privacy and terms content updated by the booking work also names Google Ads conversion tracking (with enhanced conversions) and the Meta Pixel; `tests/booking/policy-text.test.mjs` is extended to check this.
@@ -57,7 +59,7 @@ The owner picked B after asking which option is most reliable and whether GTM is
 ## Verification
 
 - Unit tests (`tests/booking/ui-confirm.test.mjs` and new ones): the conversion, `user_data` and `Purchase` fire once per booking only for a conversion; never for `pending_capture` or a failed booking; a throwing `gtag` or `fbq` does not stop the others or the view; the phone is normalized to E.164; contact data is absent from `dataLayer`.
-- Page tests: each of the 8 pages includes `meta-pixel.js`; the `/book/*` CSP contains the Meta hosts and the unchanged script hash.
+- Page tests: each of the 9 pages includes `meta-pixel.js`; the `/book/*` CSP contains the Meta hosts and the unchanged script hash.
 - CI run on the branch, and a local Playwright run in mock mode that records `gtag`/`fbq` calls through a full booking.
 - Live proof only after deploy (Task 23): one real $50 booking shows in GA4, in Google Ads (the conversion's tag status becomes active) and in Meta Events Manager. Until then nothing is claimed as working in production.
 
